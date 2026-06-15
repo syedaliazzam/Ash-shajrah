@@ -5,6 +5,7 @@ import { useGSAP } from "@/lib/gsap";
 import { scrollReveal } from "@/lib/animations";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { FloatingIcons } from "@/components/ui/FloatingIcons";
+import { OnlineLearningFocusCard } from "@/components/about/OnlineLearningFocusCard";
 
 export function AboutSection() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -49,36 +50,8 @@ export function AboutSection() {
             home.
           </p>
 
-          <div
-            data-about-card
-            className="glass-card glow-emerald relative overflow-hidden p-8 md:p-10"
-          >
-            <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-emerald/10" />
-            <div className="absolute -bottom-8 -left-8 h-32 w-32 rounded-full bg-gold/10" />
-
-            <p className="mb-6 text-xs font-semibold uppercase tracking-widest text-emerald/60">
-              Online Learning Focus
-            </p>
-
-            <div className="relative space-y-6">
-              {[
-                { label: "Delivery", value: "Fully Online" },
-                { label: "Learning", value: "Guided & Values-Based" },
-                { label: "Support", value: "Parents & Educators" },
-              ].map((item) => (
-                <div
-                  key={item.label}
-                  className="flex items-center justify-between border-b border-emerald/10 pb-4 last:border-0 last:pb-0"
-                >
-                  <span className="text-sm font-medium uppercase tracking-wider text-emerald/70">
-                    {item.label}
-                  </span>
-                  <span className="font-display text-lg font-semibold text-emerald-deep">
-                    {item.value}
-                  </span>
-                </div>
-              ))}
-            </div>
+          <div data-about-card>
+            <OnlineLearningFocusCard />
           </div>
         </div>
       </div>

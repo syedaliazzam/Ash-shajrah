@@ -79,7 +79,11 @@ export function VisionSection() {
       </div>
 
       <div className="relative mx-auto max-w-4xl text-center">
-        <SectionHeading title="Learning Today, Leading Tomorrow" align="center" />
+        <SectionHeading
+          title="Learning Today, Leading Tomorrow"
+          align="center"
+          className="[&_h2]:text-white"
+        />
 
         <p data-vision-text className="text-lg leading-relaxed text-cream md:text-xl">
           We believe education should develop both the mind and character — online and at home. At

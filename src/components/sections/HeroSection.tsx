@@ -148,15 +148,6 @@ export function HeroSection() {
           </div>
         </div>
       </div>
-
-      <div className="absolute bottom-6 left-1/2 z-10 -translate-x-1/2 sm:bottom-8">
-        <div className="flex flex-col items-center gap-2 text-cream/45">
-          <span className="text-[10px] uppercase tracking-[0.25em]">Discover</span>
-          <div className="h-9 w-5 rounded-full border-2 border-cream/25 p-1">
-            <div className="h-1.5 w-full animate-bounce rounded-full bg-gold/50" />
-          </div>
-        </div>
-      </div>
     </section>
   );
 }

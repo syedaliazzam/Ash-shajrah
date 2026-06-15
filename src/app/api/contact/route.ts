@@ -6,6 +6,12 @@ import {
   formatContactEmailHtml,
   type ContactFormData,
 } from "@/lib/contact-form";
+import {
+  appendInquiryToGoogleSheet,
+  isGoogleSheetsConfigured,
+} from "@/lib/google-sheets";
+
+const SUCCESS_MESSAGE = "Thank you! Your inquiry has been sent successfully.";
 
 function getSmtpConfig() {
   const host = process.env.SMTP_HOST;
@@ -30,7 +36,7 @@ export async function POST(request: NextRequest) {
     const body = (await request.json()) as ContactFormData;
 
     if (body.website?.trim()) {
-      return NextResponse.json({ success: true });
+      return NextResponse.json({ success: true, message: SUCCESS_MESSAGE });
     }
 
     const formData: ContactFormData = {
@@ -45,12 +51,37 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Validation failed", errors }, { status: 400 });
     }
 
+    if (!isGoogleSheetsConfigured()) {
+      console.error("Google Sheets environment variables are not configured.");
+      return NextResponse.json(
+        { error: "Something went wrong. Please try again." },
+        { status: 503 }
+      );
+    }
+
     const smtpConfig = getSmtpConfig();
     if (!smtpConfig) {
       console.error("SMTP environment variables are not configured.");
       return NextResponse.json(
         { error: "Something went wrong. Please try again." },
         { status: 503 }
+      );
+    }
+
+    const inquiry = {
+      name: formData.name.trim(),
+      whatsapp: formData.whatsapp.trim(),
+      email: formData.email.trim(),
+      message: formData.message.trim(),
+    };
+
+    try {
+      await appendInquiryToGoogleSheet(inquiry);
+    } catch (sheetError) {
+      console.error("Google Sheets append failed:", sheetError);
+      return NextResponse.json(
+        { error: "Something went wrong. Please try again." },
+        { status: 500 }
       );
     }
 
@@ -62,18 +93,26 @@ export async function POST(request: NextRequest) {
       timeZone: "Asia/Karachi",
     });
 
-    const transporter = nodemailer.createTransport(smtpConfig);
+    try {
+      const transporter = nodemailer.createTransport(smtpConfig);
 
-    await transporter.sendMail({
-      from: `"Ash-Shajrah Learning Hub" <${fromEmail}>`,
-      to: toEmail,
-      replyTo: formData.email.trim(),
-      subject: "New Inquiry — Ash-Shajrah Learning Hub",
-      text: formatContactEmailText(formData, submittedAt),
-      html: formatContactEmailHtml(formData, submittedAt),
-    });
+      await transporter.sendMail({
+        from: `"Ash-Shajrah Learning Hub" <${fromEmail}>`,
+        to: toEmail,
+        replyTo: inquiry.email,
+        subject: "New Inquiry — Ash-Shajrah Learning Hub",
+        text: formatContactEmailText(formData, submittedAt),
+        html: formatContactEmailHtml(formData, submittedAt),
+      });
+    } catch (emailError) {
+      console.error("Contact email send failed:", emailError);
+      return NextResponse.json(
+        { error: "Something went wrong. Please try again." },
+        { status: 500 }
+      );
+    }
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, message: SUCCESS_MESSAGE });
   } catch (error) {
     console.error("Contact API error:", error);
     return NextResponse.json(

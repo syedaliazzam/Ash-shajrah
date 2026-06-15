@@ -12,7 +12,11 @@ type BrandLogoProps = {
 
 const sizes = {
   header: { width: 200, height: 120, className: "h-14 w-auto sm:h-16 md:h-[4.25rem]" },
-  footer: { width: 240, height: 144, className: "h-[5.5rem] w-auto sm:h-24" },
+  footer: {
+    width: 400,
+    height: 240,
+    className: "h-auto w-[100px] sm:w-[115px] md:w-[125px] lg:w-[150px] xl:w-[160px]",
+  },
 };
 
 export function BrandLogo({
@@ -29,7 +33,7 @@ export function BrandLogo({
       width={width}
       height={height}
       priority={priority}
-      className={`object-contain object-left ${sizeClass} ${className}`}
+      className={`object-contain ${variant === "footer" ? "object-center" : "object-left"} ${sizeClass} ${className}`}
     />
   );
 }

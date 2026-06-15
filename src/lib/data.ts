@@ -5,13 +5,17 @@ export const SITE = {
   heroIntro:
     "A nurturing online learning experience designed to help children grow through knowledge, character, creativity, discipline, confidence, and leadership.",
   footerPhrase: "Learning • Character • Leadership",
+  footerSupport: "Online learning rooted in values and growth.",
   intro:
     "A fully online learning hub focused on early years learning, Montessori-inspired guidance, character development, creativity, confidence, leadership habits, and parent-friendly learning support.",
   contact: {
-    phone: "+92 XXX XXXXXXX",
-    whatsapp: "https://wa.me/92XXXXXXXXXX",
-    email: "info@ashshajrah.com",
+    phone: "+92 311 7263544",
+    whatsappDisplay: "0311-7263544",
+    whatsapp:
+      "https://wa.me/923117263544?text=Assalamualaikum%2C%20I%20want%20to%20know%20more%20about%20Ash-Shajrah%20Learning%20Hub%20online%20programs.",
+    email: "admission.ashshajrah@gmail.com",
     admissionEmail: "admission.ashshajrah@gmail.com",
+    adminOffice: "304, Altura Arcade, Block F Markaz, B-17, Islamabad",
   },
 } as const;
 

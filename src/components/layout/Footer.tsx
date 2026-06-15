@@ -1,33 +1,131 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { SITE } from "@/lib/data";
 import { BrandLogo } from "@/components/ui/BrandLogo";
 
-export function Footer() {
+function ContactRow({
+  label,
+  children,
+}: {
+  label: string;
+  children: ReactNode;
+}) {
   return (
-    <footer className="relative border-t border-emerald/10 bg-emerald-deep px-6 py-16 text-cream lg:px-8">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(45,138,106,0.15),transparent_60%)]" />
+    <li>
+      <span className="text-[11px] font-semibold uppercase tracking-wider text-gold-soft/75">
+        {label}
+      </span>
+      <div className="mt-1 text-sm font-medium leading-snug text-cream">{children}</div>
+    </li>
+  );
+}
+
+export function Footer() {
+  const year = new Date().getFullYear();
+
+  return (
+    <footer className="relative overflow-hidden border-t border-emerald/10 bg-emerald-deep px-5 py-10 text-cream sm:px-6 lg:px-8 lg:py-12">
+      {/* Background accents */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_15%_30%,rgba(45,138,106,0.2),transparent_55%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_85%_60%,rgba(201,162,39,0.1),transparent_50%)]" />
+      <div
+        className="absolute inset-0 opacity-[0.03]"
+        style={{
+          backgroundImage:
+            "linear-gradient(#faf7f0 1px, transparent 1px), linear-gradient(90deg, #faf7f0 1px, transparent 1px)",
+          backgroundSize: "40px 40px",
+        }}
+      />
+      <div
+        className="pointer-events-none absolute right-8 top-1/2 hidden h-40 w-40 -translate-y-1/2 opacity-[0.04] lg:block"
+        aria-hidden
+      >
+        <svg viewBox="0 0 480 520" className="h-full w-full" fill="none">
+          <g stroke="#faf7f0" strokeWidth="1.5" strokeLinecap="round">
+            <path d="M228 400 L228 290 Q240 280 252 290 L252 400" />
+            <ellipse cx="240" cy="200" rx="90" ry="78" />
+            <path d="M80 400 Q240 420 400 400 L390 435 Q240 418 90 435 Z" />
+          </g>
+        </svg>
+      </div>
 
       <div className="relative mx-auto max-w-7xl">
-        <div className="flex flex-col items-center gap-8 md:flex-row md:justify-between">
-          <div className="flex flex-col items-center gap-4 md:items-start">
-            <div className="rounded-2xl bg-white px-4 py-3 shadow-lg shadow-black/10">
+        <div className="grid gap-8 md:grid-cols-2 md:gap-x-10 lg:grid-cols-[1.1fr_1fr_1fr] lg:gap-x-0">
+          {/* Left — logo & tagline */}
+          <div className="flex flex-col items-center text-center md:items-start md:text-left lg:pr-8">
+            <a
+              href="#"
+              className="footer-logo-shell shrink-0 transition-transform duration-300 hover:scale-[1.02]"
+            >
               <BrandLogo variant="footer" />
-            </div>
-            <p className="max-w-xs text-center text-sm text-cream/70 md:text-left">
+            </a>
+            <p className="mt-4 max-w-[240px] text-sm leading-relaxed text-cream/75">
               {SITE.tagline}
             </p>
           </div>
 
-          <p className="font-display text-lg tracking-widest text-gold-soft">
-            {SITE.footerPhrase}
-          </p>
+          {/* Middle — contact */}
+          <div className="border-cream/10 md:border-t-0 lg:border-l lg:pl-8 lg:pr-8">
+            <p className="mb-3 text-center text-[11px] font-semibold uppercase tracking-widest text-gold-soft/80 md:text-left">
+              Contact
+            </p>
+            <ul className="flex flex-col gap-3.5">
+              <ContactRow label="WhatsApp">
+                <a
+                  href={SITE.contact.whatsapp}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="transition-colors hover:text-gold-soft"
+                >
+                  {SITE.contact.whatsappDisplay}
+                </a>
+              </ContactRow>
+              <ContactRow label="Email">
+                <a
+                  href={`mailto:${SITE.contact.admissionEmail}`}
+                  className="break-all transition-colors hover:text-gold-soft"
+                >
+                  {SITE.contact.admissionEmail}
+                </a>
+              </ContactRow>
+              <ContactRow label="Admin Office">
+                <span className="text-cream/90">{SITE.contact.adminOffice}</span>
+              </ContactRow>
+            </ul>
+          </div>
+
+          {/* Right — brand phrase & CTA */}
+          <div className="flex flex-col items-center border-cream/10 text-center md:col-span-2 md:items-center lg:col-span-1 lg:border-l lg:items-start lg:pl-8 lg:text-left">
+            <div className="relative">
+              <div
+                className="pointer-events-none absolute -inset-6 rounded-full bg-gold/10 blur-2xl"
+                aria-hidden
+              />
+              <p className="relative font-display text-xl tracking-wide text-gold-soft sm:text-[1.35rem]">
+                {SITE.footerPhrase}
+              </p>
+            </div>
+            <p className="mt-2 max-w-xs text-sm leading-relaxed text-cream/70">
+              {SITE.footerSupport}
+            </p>
+            <a
+              href={SITE.contact.whatsapp}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-5 inline-flex items-center justify-center rounded-full border border-gold/35 bg-gold/15 px-5 py-2.5 text-sm font-semibold text-cream transition-all duration-300 hover:border-gold/55 hover:bg-gold/25 hover:text-gold-soft"
+            >
+              Message Us on WhatsApp
+            </a>
+          </div>
         </div>
 
-        <div className="mt-12 border-t border-cream/10 pt-8 text-center text-sm text-cream/50">
+        {/* Bottom bar */}
+        <div className="mt-8 flex flex-col items-center justify-between gap-2 border-t border-cream/10 pt-5 text-xs text-cream/45 sm:flex-row sm:gap-4">
           <p>
-            &copy; {new Date().getFullYear()} {SITE.name}. All rights reserved.
+            &copy; {year} {SITE.name}
           </p>
+          <p>All rights reserved.</p>
         </div>
       </div>
     </footer>
