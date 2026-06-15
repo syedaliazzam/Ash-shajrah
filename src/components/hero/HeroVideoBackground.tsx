@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { OnlineLearningBackdrop } from "./OnlineLearningBackdrop";
 
-const VIDEO_SRC = "/videos/online-learning-hero.mp4";
+const VIDEO_SRC = "/videos/montessori-children-learning.mp4";
 
 export function HeroVideoBackground() {
   const videoRef = useRef<HTMLVideoElement>(null);

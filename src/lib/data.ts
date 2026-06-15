@@ -11,7 +11,7 @@ export const SITE = {
     phone: "+92 XXX XXXXXXX",
     whatsapp: "https://wa.me/92XXXXXXXXXX",
     email: "info@ashshajrah.com",
-    consultationAnchor: "#contact",
+    admissionEmail: "admission.ashshajrah@gmail.com",
   },
 } as const;
 
@@ -84,7 +84,7 @@ export const ONLINE_STEPS = [
     step: "01",
     title: "Connect Online",
     description:
-      "Parents connect with Ash-Shajrah Learning Hub through consultation or WhatsApp.",
+      "Parents enroll with Ash-Shajrah Learning Hub online or via WhatsApp.",
     icon: "connect",
   },
   {

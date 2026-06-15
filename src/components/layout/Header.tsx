@@ -90,7 +90,7 @@ export function Header() {
 
         >
 
-          Book Consultation
+          Enroll
 
         </a>
 
@@ -168,7 +168,7 @@ export function Header() {
 
             >
 
-              Book Consultation
+              Enroll
 
             </a>
 

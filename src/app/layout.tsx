@@ -21,8 +21,11 @@ export const metadata: Metadata = {
   description:
     "A fully online learning hub for children, parents, and educators — focused on early years learning, Montessori-inspired guidance, character, creativity, confidence, and leadership.",
   icons: {
-    icon: [{ url: "/ash-shajrah.png", type: "image/png" }],
-    apple: [{ url: "/ash-shajrah.png", type: "image/png" }],
+    icon: [
+      { url: "/favicon-32.png", sizes: "32x32", type: "image/png" },
+      { url: "/ash-shajrah-favicon.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [{ url: "/ash-shajrah-favicon.png", type: "image/png" }],
   },
 };
 

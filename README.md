@@ -28,11 +28,28 @@ Update contact details in `src/lib/data.ts`:
 
 - Phone number
 - WhatsApp link
-- Email
+- General email
+
+## Admission Form Email (required for production)
+
+Copy `.env.example` to `.env.local` and configure SMTP:
+
+```bash
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your-smtp-email@gmail.com
+SMTP_PASS=your-app-password
+SMTP_FROM=your-smtp-email@gmail.com
+CONTACT_TO_EMAIL=admission.ashshajrah@gmail.com
+```
+
+On Vercel, add the same variables in **Project Settings → Environment Variables**.
+
+Inquiries are sent to `admission.ashshajrah@gmail.com` via `/api/contact`.
 
 ## Hero Video
 
-Place your hero MP4 at `public/videos/online-learning-hero.mp4`.
+Place your hero MP4 at `public/videos/montessori-children-learning.mp4`.
 
 ## Build
 

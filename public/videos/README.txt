@@ -1,1 +1,1 @@
-Place online-learning-hero.mp4 here — home-based / digital learning scenes (no text, logos, or watermarks).
+Place hero MP4 files here — e.g. montessori-children-learning.mp4 (no text, logos, or watermarks).

@@ -125,7 +125,7 @@ export function HeroSection() {
             </div>
             <div data-hero-cta>
               <Button href="#contact" variant="secondary">
-                Book a Consultation
+                Enroll
               </Button>
             </div>
             <div data-hero-cta>

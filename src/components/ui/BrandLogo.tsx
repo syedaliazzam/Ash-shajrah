@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { SITE } from "@/lib/data";
 
-/** Official Ash-Shajrah logo (white background lockup) */
+/** Official Ash-Shajrah logo — transparent PNG */
 export const LOGO_SRC = "/ash-shajrah-logo.png";
 
 type BrandLogoProps = {
@@ -11,8 +11,8 @@ type BrandLogoProps = {
 };
 
 const sizes = {
-  header: { width: 180, height: 72, className: "h-12 w-auto sm:h-14 md:h-[3.75rem]" },
-  footer: { width: 220, height: 88, className: "h-[4.5rem] w-auto sm:h-20" },
+  header: { width: 200, height: 120, className: "h-14 w-auto sm:h-16 md:h-[4.25rem]" },
+  footer: { width: 240, height: 144, className: "h-[5.5rem] w-auto sm:h-24" },
 };
 
 export function BrandLogo({
