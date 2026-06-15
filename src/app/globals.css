@@ -1,0 +1,57 @@
+@import "tailwindcss";
+
+@theme {
+  --color-emerald-deep: #0d3b2e;
+  --color-emerald: #1a5c45;
+  --color-emerald-light: #2d8a6a;
+  --color-gold: #c9a227;
+  --color-gold-soft: #e8d5a3;
+  --color-cream: #faf7f0;
+  --color-cream-dark: #f0ebe0;
+  --color-warm-brown: #5c4a32;
+  --font-display: "Cormorant Garamond", Georgia, serif;
+  --font-body: "Outfit", system-ui, sans-serif;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-cream text-emerald-deep antialiased;
+    font-family: var(--font-body), system-ui, sans-serif;
+  }
+
+  ::selection {
+    @apply bg-emerald-light/30 text-emerald-deep;
+  }
+}
+
+@layer utilities {
+  .font-display {
+    font-family: var(--font-display), Georgia, "Times New Roman", serif;
+  }
+
+  .glass-card {
+    @apply rounded-2xl border border-emerald/10 bg-white/90 shadow-xl shadow-emerald-deep/5;
+  }
+
+  .text-gradient-gold {
+    @apply bg-gradient-to-r from-gold via-gold-soft to-gold bg-clip-text text-transparent;
+  }
+
+  .glow-gold {
+    box-shadow: 0 0 40px rgba(201, 162, 39, 0.25);
+  }
+
+  .glow-emerald {
+    box-shadow: 0 0 60px rgba(45, 138, 106, 0.2);
+  }
+
+  .hero-glass-card {
+    box-shadow:
+      0 8px 32px rgba(13, 59, 46, 0.18),
+      inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  }
+}
