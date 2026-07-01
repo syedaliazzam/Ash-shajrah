@@ -2,14 +2,16 @@ import { NextRequest, NextResponse } from "next/server";
 import nodemailer from "nodemailer";
 import {
   validateRegistrationForm,
-  formatRegistrationEmailText,
-  formatRegistrationEmailHtml,
+  formatRegistrationConfirmationText,
+  formatRegistrationConfirmationHtml,
+  formatRegistrationCoordinatorText,
+  formatRegistrationCoordinatorHtml,
   type RegistrationFormData,
 } from "@/lib/register-form";
 import {
-  appendRegistrationToGoogleSheet,
-  isGoogleSheetsConfigured,
-} from "@/lib/google-sheets";
+  getActiveCoordinatorEmails,
+  insertInterestedStudent,
+} from "@/lib/postgres";
 
 const SUCCESS_MESSAGE =
   "Thank you! Your registration has been submitted successfully. Our admissions team will contact you soon.";
@@ -30,11 +32,19 @@ function getSmtpConfig() {
   };
 }
 
+function getCoordinatorEmail() {
+  return (
+    process.env.COORDINATOR_EMAIL ||
+    process.env.REGISTRATION_TO_EMAIL ||
+    process.env.CONTACT_TO_EMAIL ||
+    "admission.ashshajrah@gmail.com"
+  );
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = (await request.json()) as RegistrationFormData;
 
-    // Honeypot check
     if (body.website?.trim()) {
       return NextResponse.json({ success: true, message: SUCCESS_MESSAGE });
     }
@@ -55,14 +65,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Validation failed", errors }, { status: 400 });
     }
 
-    if (!isGoogleSheetsConfigured()) {
-      console.error("Google Sheets environment variables are not configured.");
-      return NextResponse.json(
-        { error: "Something went wrong. Please try again or contact us on WhatsApp." },
-        { status: 503 }
-      );
-    }
-
     const smtpConfig = getSmtpConfig();
     if (!smtpConfig) {
       console.error("SMTP environment variables are not configured.");
@@ -72,33 +74,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const registration = {
-      parentName: formData.parentName.trim(),
-      whatsapp: formData.whatsapp.trim(),
-      email: formData.email.trim(),
-      childName: formData.childName.trim(),
-      childAge: formData.childAge.trim(),
-      level: formData.level.trim(),
-      cityCountry: formData.cityCountry.trim(),
-      message: formData.message.trim(),
-    };
-
-    // Save to Google Sheets — Registrations tab
-    try {
-      await appendRegistrationToGoogleSheet(registration);
-    } catch (sheetError) {
-      console.error("Google Sheets (Registrations) append failed:", sheetError);
-      return NextResponse.json(
-        { error: "Something went wrong. Please try again or contact us on WhatsApp." },
-        { status: 500 }
-      );
-    }
-
-    // Send email notification
-    const toEmail =
-      process.env.REGISTRATION_TO_EMAIL ||
-      process.env.CONTACT_TO_EMAIL ||
-      "admission.ashshajrah@gmail.com";
     const fromEmail = process.env.SMTP_FROM || smtpConfig.auth.user;
     const submittedAt = new Date().toLocaleString("en-PK", {
       dateStyle: "full",
@@ -106,24 +81,38 @@ export async function POST(request: NextRequest) {
       timeZone: "Asia/Karachi",
     });
 
-    try {
-      const transporter = nodemailer.createTransport(smtpConfig);
+    await insertInterestedStudent({
+      parentName: formData.parentName.trim(),
+      phone: formData.whatsapp.trim(),
+      email: formData.email.trim(),
+      childName: formData.childName.trim(),
+      childAge: formData.childAge.trim(),
+      level: formData.level.trim(),
+      cityCountry: formData.cityCountry.trim(),
+      message: formData.message.trim(),
+    });
 
-      await transporter.sendMail({
-        from: `"Ash-Shajrah Learning Hub" <${fromEmail}>`,
-        to: toEmail,
-        replyTo: registration.email,
-        subject: "New Registration — Ash-Shajrah Learning Hub",
-        text: formatRegistrationEmailText(formData, submittedAt),
-        html: formatRegistrationEmailHtml(formData, submittedAt),
-      });
-    } catch (emailError) {
-      console.error("Registration email send failed:", emailError);
-      return NextResponse.json(
-        { error: "Something went wrong. Please try again or contact us on WhatsApp." },
-        { status: 500 }
-      );
-    }
+    const transporter = nodemailer.createTransport(smtpConfig);
+    const coordinatorEmails = await getActiveCoordinatorEmails();
+    const coordinatorRecipients = coordinatorEmails.length > 0 ? coordinatorEmails : [getCoordinatorEmail()];
+
+    await transporter.sendMail({
+      from: `"Ash-Shajrah Learning Hub" <${fromEmail}>`,
+      to: formData.email.trim(),
+      replyTo: coordinatorRecipients[0],
+      subject: "Registration Confirmed - Ash-Shajrah Learning Hub",
+      text: formatRegistrationConfirmationText(formData, submittedAt),
+      html: formatRegistrationConfirmationHtml(formData, submittedAt),
+    });
+
+    await transporter.sendMail({
+      from: `"Ash-Shajrah Learning Hub" <${fromEmail}>`,
+      to: coordinatorRecipients,
+      replyTo: formData.email.trim(),
+      subject: "New Student Registration - Ash-Shajrah Learning Hub",
+      text: formatRegistrationCoordinatorText(formData, submittedAt),
+      html: formatRegistrationCoordinatorHtml(formData, submittedAt),
+    });
 
     return NextResponse.json({ success: true, message: SUCCESS_MESSAGE });
   } catch (error) {
