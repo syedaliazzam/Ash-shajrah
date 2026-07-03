@@ -154,7 +154,7 @@ export function ProgramsSection() {
         <div data-programs-cta className="mt-16 flex justify-center">
           <a
             href="/register"
-            className="rounded-full bg-emerald px-8 py-3.5 text-sm font-semibold tracking-wide text-cream shadow-lg shadow-emerald/20 transition-all duration-300 hover:bg-emerald-light hover:shadow-emerald/35"
+            className="rounded-full bg-emerald px-8 py-3.5 text-sm font-semibold tracking-wide text-cream shadow-lg shadow-emerald/20 transition-all duration-300 hover:bg-emerald-light hover:shadow-emerald/35 hover:scale-105 active:scale-95"
           >
             Enroll in a Program / رجسٹریشن کروائیں
           </a>

@@ -1,4 +1,7 @@
+"use client";
+
 import { ReactNode } from "react";
+import Link from "next/link";
 
 type ButtonVariant = "primary" | "secondary" | "outline" | "light";
 
@@ -28,13 +31,13 @@ export function Button({
   className = "",
   onClick,
 }: ButtonProps) {
-  const classes = `inline-flex items-center justify-center rounded-full px-7 py-3.5 text-sm font-semibold tracking-wide transition-all duration-300 hover:-translate-y-0.5 ${variants[variant]} ${className}`;
+  const classes = `inline-flex items-center justify-center rounded-full px-7 py-3.5 text-sm font-semibold tracking-wide transition-all duration-300 hover:-translate-y-0.5 hover:scale-105 active:scale-95 ${variants[variant]} ${className}`;
 
   if (href) {
     return (
-      <a href={href} className={classes}>
+      <Link href={href} className={classes}>
         {children}
-      </a>
+      </Link>
     );
   }
 
