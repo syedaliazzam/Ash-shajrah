@@ -97,19 +97,21 @@ export function HeroSection() {
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-12">
 
             {/* LEFT — English */}
-            <div data-hero-en dir="ltr" lang="en" className="text-left">
-              <h1 className="font-display text-4xl font-bold leading-tight text-cream sm:text-5xl lg:text-6xl xl:text-[4rem]">
-                {SITE.name}
-              </h1>
-              <p className="mt-4 font-display text-xl font-semibold leading-snug text-gold sm:text-2xl">
-                {SITE.heroTagline}
-              </p>
-              <p className="mt-4 text-base leading-relaxed text-cream/80 sm:text-lg">
-                {SITE.heroIntro}
-              </p>
+            <div data-hero-en dir="ltr" lang="en" className="text-left flex flex-col">
+              <div>
+                <h1 className="font-display text-4xl font-bold leading-tight text-cream sm:text-5xl lg:text-6xl xl:text-[4rem]">
+                  {SITE.name}
+                </h1>
+                <p className="mt-4 font-display text-xl font-semibold leading-snug text-gold sm:text-2xl">
+                  {SITE.heroTagline}
+                </p>
+                <p className="mt-4 text-base leading-relaxed text-cream/80 sm:text-lg">
+                  {SITE.heroIntro}
+                </p>
+              </div>
 
               {/* English CTA */}
-              <div className="mt-6 flex flex-col items-start gap-3 sm:flex-row sm:flex-wrap sm:gap-3">
+              <div className="mt-auto pt-6 flex flex-col items-start gap-3 sm:flex-row sm:flex-wrap sm:gap-3">
                 <div data-hero-cta>
                   <Button href="/register" variant="primary">
                     Enroll Now
@@ -129,19 +131,21 @@ export function HeroSection() {
             </div>
 
             {/* RIGHT — Urdu */}
-            <div data-hero-urdu dir="rtl" lang="ur" className="text-right font-urdu">
-              <h1 className="font-urdu text-4xl font-bold leading-[1.6] text-cream sm:text-5xl lg:text-6xl xl:text-[4rem]">
-                الشجرہ لرننگ ہب
-              </h1>
-              <p className="font-urdu mt-4 text-xl font-semibold leading-[2] text-gold sm:text-2xl">
-                {SITE.heroUrduTagline}
-              </p>
-              <p className="font-urdu mt-4 text-base leading-[2.1] text-cream/80 sm:text-lg sm:leading-[2.2]">
-                {SITE.heroUrduIntro}
-              </p>
+            <div data-hero-urdu dir="rtl" lang="ur" className="text-right font-urdu flex flex-col">
+              <div>
+                <h1 className="font-urdu text-4xl font-bold leading-[1.6] text-cream sm:text-5xl lg:text-6xl xl:text-[4rem]">
+                  الشجرہ لرننگ ہب
+                </h1>
+                <p className="font-urdu mt-4 text-xl font-semibold leading-[2] text-gold sm:text-2xl">
+                  {SITE.heroUrduTagline}
+                </p>
+                <p className="font-urdu mt-4 text-base leading-[2.1] text-cream/80 sm:text-lg sm:leading-[2.2]">
+                  {SITE.heroUrduIntro}
+                </p>
+              </div>
 
               {/* Urdu CTA */}
-              <div className="mt-6 flex flex-col items-end gap-3 sm:flex-row sm:items-center sm:justify-end sm:gap-3">
+              <div className="mt-auto pt-6 flex flex-col items-end gap-3 sm:flex-row sm:items-center sm:justify-end sm:gap-3">
                 <a
                   href="/register"
                   className="rounded-full bg-gold px-6 py-3 text-sm font-semibold text-emerald-deep shadow-lg shadow-gold/30 transition-all hover:bg-gold-soft hover:shadow-gold/45"

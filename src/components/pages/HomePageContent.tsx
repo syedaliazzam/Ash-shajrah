@@ -13,7 +13,7 @@ import { LearningSection } from "@/components/sections/LearningSection";
 import { OnlineLearningSection } from "@/components/sections/OnlineLearningSection";
 import { LeadershipSection } from "@/components/sections/LeadershipSection";
 import { VisionSection } from "@/components/sections/VisionSection";
-import { ContactSection } from "@/components/sections/ContactSection";
+import { CurriculumSection } from "@/components/sections/CurriculumSection";
 
 export function HomePageContent() {
   useEffect(() => {
@@ -32,10 +32,10 @@ export function HomePageContent() {
         <ProgramsSection />
         <ValuesSection />
         <LearningSection />
+        <CurriculumSection />
         <OnlineLearningSection />
         <LeadershipSection />
         <VisionSection />
-        <ContactSection />
       </main>
       <Footer />
     </ReducedMotionProvider>
