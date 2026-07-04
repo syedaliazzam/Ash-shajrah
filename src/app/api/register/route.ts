@@ -24,6 +24,11 @@ function getSmtpConfig() {
 
   if (!host || !user || !pass) return null;
 
+  if (host === "base" || host.includes("localhost")) {
+    console.error("Invalid SMTP_HOST configured:", host);
+    return null;
+  }
+
   return {
     host,
     port: Number(port || 587),
