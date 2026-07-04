@@ -3,7 +3,12 @@ import { Pool } from "pg";
 let pool: Pool | null = null;
 
 function getDatabaseUrl() {
-  return process.env.DATABASE_URL || process.env.DIRECT_URL || null;
+  const url = process.env.DATABASE_URL || process.env.DIRECT_URL || null;
+  if (url === "base" || (url && !url.startsWith("postgres"))) {
+    console.error("Invalid DATABASE_URL configured:", url);
+    return null;
+  }
+  return url;
 }
 
 export function getPgPool(): Pool {
