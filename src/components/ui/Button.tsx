@@ -5,7 +5,7 @@ import Link from "next/link";
 
 type ButtonVariant = "primary" | "secondary" | "outline" | "light";
 
-interface ButtonProps {
+interface ButtonProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
   children: ReactNode;
   href?: string;
   variant?: ButtonVariant;
@@ -30,19 +30,27 @@ export function Button({
   variant = "primary",
   className = "",
   onClick,
+  ...rest
 }: ButtonProps) {
-  const classes = `inline-flex items-center justify-center rounded-full px-7 py-3.5 text-sm font-semibold tracking-wide transition-all duration-300 hover:-translate-y-0.5 hover:scale-105 active:scale-95 ${variants[variant]} ${className}`;
+  const classes = `inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full px-7 py-3.5 text-sm font-semibold tracking-wide transition-all duration-300 hover:-translate-y-0.5 hover:scale-105 active:scale-95 ${variants[variant]} ${className}`;
 
   if (href) {
+    if (href.startsWith("http")) {
+      return (
+        <a href={href} className={classes} {...rest}>
+          {children}
+        </a>
+      );
+    }
     return (
-      <Link href={href} className={classes}>
+      <Link href={href} className={classes} {...rest}>
         {children}
       </Link>
     );
   }
 
   return (
-    <button type="button" onClick={onClick} className={classes}>
+    <button type="button" onClick={onClick} className={classes} {...(rest as any)}>
       {children}
     </button>
   );

@@ -8,6 +8,7 @@ export type RegistrationFormData = {
   cityCountry: string;
   message: string;
   website?: string; // honeypot
+  preferredLanguage?: string;
 };
 
 export type RegistrationFormErrors = Partial<Record<keyof RegistrationFormData, string>>;

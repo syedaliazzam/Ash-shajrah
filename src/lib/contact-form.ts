@@ -4,6 +4,7 @@ export type ContactFormData = {
   email: string;
   message: string;
   website?: string; // honeypot
+  preferredLanguage?: string;
 };
 
 export type ContactFormErrors = Partial<Record<keyof ContactFormData, string>>;

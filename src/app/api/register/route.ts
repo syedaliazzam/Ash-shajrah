@@ -12,6 +12,7 @@ import {
   getActiveCoordinatorEmails,
   insertInterestedStudent,
 } from "@/lib/postgres";
+import { appendRegistrationToGoogleSheet } from "@/lib/google-sheets";
 
 const SUCCESS_MESSAGE =
   "Thank you! Your registration has been submitted successfully. Our admissions team will contact you soon.";
@@ -54,6 +55,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true, message: SUCCESS_MESSAGE });
     }
 
+    const preferredLanguage = (body as { preferredLanguage?: string }).preferredLanguage;
+
     const formData: RegistrationFormData = {
       parentName: body.parentName ?? "",
       whatsapp: body.whatsapp ?? "",
@@ -63,6 +66,7 @@ export async function POST(request: NextRequest) {
       level: body.level ?? "",
       cityCountry: body.cityCountry ?? "",
       message: body.message ?? "",
+      preferredLanguage: preferredLanguage?.trim()
     };
 
     const errors = validateRegistrationForm(formData);
@@ -96,6 +100,22 @@ export async function POST(request: NextRequest) {
       cityCountry: formData.cityCountry.trim(),
       message: formData.message.trim(),
     });
+
+    try {
+      await appendRegistrationToGoogleSheet({
+        parentName: formData.parentName.trim(),
+        whatsapp: formData.whatsapp.trim(),
+        email: formData.email.trim(),
+        childName: formData.childName.trim(),
+        childAge: formData.childAge.trim(),
+        level: formData.level.trim(),
+        cityCountry: formData.cityCountry.trim(),
+        message: formData.message.trim(),
+        preferredLanguage: formData.preferredLanguage,
+      });
+    } catch (sheetError) {
+      console.error("Google Sheets append failed:", sheetError);
+    }
 
     const transporter = nodemailer.createTransport(smtpConfig);
     const coordinatorEmails = await getActiveCoordinatorEmails();

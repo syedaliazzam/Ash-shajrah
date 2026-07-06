@@ -4,23 +4,20 @@ import { useRef } from "react";
 import { gsap, useGSAP } from "@/lib/gsap";
 import { scrollReveal } from "@/lib/animations";
 import { LearningIcon } from "@/components/ui/LearningIcon";
-import { LEARNING_PILLARS } from "@/lib/data";
-import { BilingualSectionHeader } from "@/components/ui/BilingualLayout";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 function PillarCard({
   title,
   description,
-  urduTitle,
-  urduDescription,
   icon,
   index,
+  language,
 }: {
   title: string;
   description: string;
-  urduTitle: string;
-  urduDescription: string;
   icon: string;
   index: number;
+  language: string;
 }) {
   const cardRef = useRef<HTMLElement>(null);
 
@@ -57,25 +54,12 @@ function PillarCard({
           </span>
         </div>
 
-        {/* Urdu — top */}
-        <div dir="rtl" lang="ur" className="mb-3 text-right">
-          <h3 className="font-urdu text-lg font-bold leading-[1.9] text-emerald-deep">
-            {urduTitle}
-          </h3>
-          <p className="font-urdu mt-1 text-sm leading-[2] text-emerald/70">
-            {urduDescription}
-          </p>
-        </div>
-
-        {/* Divider */}
-        <div className="my-3 h-px w-full bg-gradient-to-r from-gold/20 via-emerald/12 to-transparent" />
-
-        {/* English — bottom */}
-        <div dir="ltr" lang="en" className="text-left">
-          <h3 className="font-display text-base font-semibold leading-snug text-emerald-deep">
+        {/* Title and Description */}
+        <div className={`mt-2 text-left ${language === 'ur' ? 'text-right font-urdu' : 'text-left font-display'}`}>
+          <h3 className={`${language === 'ur' ? 'text-lg font-bold leading-[1.9]' : 'text-base font-semibold leading-snug'} text-emerald-deep`}>
             {title}
           </h3>
-          <p className="mt-1.5 flex-1 text-sm leading-relaxed text-emerald/75">{description}</p>
+          <p className={`mt-1.5 flex-1 text-emerald/75 ${language === 'ur' ? 'text-sm leading-[2]' : 'text-sm leading-relaxed'}`}>{description}</p>
         </div>
 
         <div className="mt-5 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-emerald/50 transition-colors group-hover:text-gold">
@@ -88,6 +72,7 @@ function PillarCard({
 }
 
 export function LearningSection() {
+  const { t, language } = useLanguage();
   const sectionRef = useRef<HTMLElement>(null);
 
   useGSAP(
@@ -150,24 +135,27 @@ export function LearningSection() {
       ))}
 
       <div className="relative mx-auto max-w-7xl">
-        <BilingualSectionHeader
-          urduTitle="ایک متوازن آن لائن تعلیمی تجربہ"
-          urduSubtitle="ابتدائی بچپن کی نشوونما، اسلامی اقدار، تخلیقی صلاحیت، اعتماد، کردار سازی اور گھر پر والدین کی معاونت کے ساتھ ایک بامقصد آن لائن تعلیمی ماڈل۔"
-          englishTitle="Learning Approach"
-          englishSubtitle="A purposeful online learning model designed for early childhood development, Islamic values, creativity, confidence, character, and parent-supported learning from home."
-          badge="Learning Approach"
-        />
+        <div className={`text-center ${language === 'ur' ? 'font-urdu' : ''}`}>
+          <span className="mb-4 inline-block rounded-full border border-emerald/20 bg-emerald/5 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-emerald">
+            {language === 'ur' ? 'سیکھنے کا طریقہ کار' : 'Learning Approach'}
+          </span>
+          <h2 className={`mb-4 text-3xl font-bold text-emerald-deep sm:text-4xl ${language === 'ur' ? 'leading-[1.8]' : 'font-display'}`}>
+            {t.learning.title}
+          </h2>
+          <p className={`mx-auto max-w-3xl text-emerald-deep/80 sm:text-lg ${language === 'ur' ? 'leading-[2.2]' : 'leading-relaxed'}`}>
+            {t.learning.subtitle}
+          </p>
+        </div>
 
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4 lg:gap-6">
-          {LEARNING_PILLARS.map((pillar, i) => (
+        <div className="mt-16 grid gap-5 sm:grid-cols-2 lg:grid-cols-4 lg:gap-6">
+          {t.learning.pillars.map((pillar, i) => (
             <PillarCard
               key={pillar.title}
               title={pillar.title}
               description={pillar.description}
-              urduTitle={pillar.urduTitle}
-              urduDescription={pillar.urduDescription}
               icon={pillar.icon}
               index={i}
+              language={language}
             />
           ))}
         </div>

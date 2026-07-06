@@ -3,8 +3,8 @@
 import { useCallback, useEffect, useState } from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import Autoplay from "embla-carousel-autoplay";
-import { VALUES } from "@/lib/data";
 import { ValueCard } from "@/components/values/ValueCard";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 function CarouselArrow({
   direction,
@@ -48,6 +48,7 @@ function CarouselArrow({
 }
 
 export function CoreValuesCarousel() {
+  const { t, language } = useLanguage();
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [scrollSnaps, setScrollSnaps] = useState<number[]>([]);
   const [canScrollPrev, setCanScrollPrev] = useState(false);
@@ -108,6 +109,7 @@ export function CoreValuesCarousel() {
       role="region"
       aria-roledescription="carousel"
       aria-label="Our core values"
+      dir="ltr"
     >
       {/* Radial spotlight behind track */}
       <div
@@ -126,18 +128,17 @@ export function CoreValuesCarousel() {
           onKeyDown={handleKeyDown}
         >
           <div className="flex touch-pan-y py-3 sm:py-4">
-            {VALUES.map((value, index) => (
+            {t.values.items.map((value: { title: string; description: string; }, index: number) => (
               <div
                 key={value.title}
-                className="values-carousel-slide min-w-0 flex-[0_0_88%] pl-4 sm:flex-[0_0_85%] sm:pl-5 md:flex-[0_0_320px] lg:flex-[0_0_380px] xl:flex-[0_0_400px]"
+                className={`values-carousel-slide min-w-0 flex-[0_0_88%] px-2 sm:flex-[0_0_85%] md:flex-[0_0_320px] lg:flex-[0_0_380px] xl:flex-[0_0_400px]`}
               >
                 <ValueCard
                   title={value.title}
                   description={value.description}
-                  urduTitle={value.urduTitle}
-                  urduDescription={value.urduDescription}
                   index={index}
                   isActive={index === selectedIndex}
+                  language={language}
                 />
               </div>
             ))}

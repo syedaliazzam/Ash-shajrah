@@ -3,18 +3,16 @@
 import { useRef, useCallback } from "react";
 import { gsap } from "@/lib/gsap";
 import { ValueIcon } from "@/components/values/ValueIcon";
-import { BilingualValueContent } from "@/components/ui/BilingualLayout";
 
 export type ValueCardProps = {
   title: string;
   description: string;
-  urduTitle: string;
-  urduDescription: string;
   index: number;
   isActive: boolean;
+  language: string;
 };
 
-export function ValueCard({ title, description, urduTitle, urduDescription, index, isActive }: ValueCardProps) {
+export function ValueCard({ title, description, index, isActive, language }: ValueCardProps) {
   const cardRef = useRef<HTMLElement>(null);
   const badgeRef = useRef<HTMLDivElement>(null);
 
@@ -123,7 +121,11 @@ export function ValueCard({ title, description, urduTitle, urduDescription, inde
           aria-hidden
         />
 
-        <div className="relative flex flex-1 flex-col px-7 py-7 sm:px-8 sm:py-8">
+        <div 
+          className="relative flex flex-1 flex-col px-7 py-7 sm:px-8 sm:py-8"
+          dir={language === 'ur' ? 'rtl' : 'ltr'}
+          lang={language === 'ur' ? 'ur' : 'en'}
+        >
           {/* Icon row */}
           <div className="mb-5 flex items-start justify-between gap-4">
             <div
@@ -159,18 +161,27 @@ export function ValueCard({ title, description, urduTitle, urduDescription, inde
             </span>
           </div>
 
-          {/* Bilingual content */}
-          <BilingualValueContent
-            urduTitle={urduTitle}
-            urduLine={urduDescription}
-            englishTitle={title}
-            englishLine={description}
-            isActive={isActive}
-          />
+          {/* Content */}
+          <div className={`mt-4 flex flex-1 flex-col ${language === 'ur' ? 'text-right' : 'text-left'}`}>
+            <h3
+              className={`${language === 'ur' ? 'font-urdu text-xl font-bold leading-[1.8]' : 'font-display text-lg font-bold leading-tight'} transition-colors duration-500 ${
+                isActive ? "text-emerald-deep" : "text-emerald-deep/80 group-hover:text-emerald-deep"
+              }`}
+            >
+              {title}
+            </h3>
+            <p
+              className={`${language === 'ur' ? 'font-urdu mt-2 text-base leading-[2]' : 'mt-2.5 text-sm leading-relaxed'} transition-colors duration-500 ${
+                isActive ? "text-emerald-deep/85" : "text-emerald/65 group-hover:text-emerald-deep/75"
+              }`}
+            >
+              {description}
+            </p>
+          </div>
 
           {/* Bottom accent line */}
           <div
-            className={`mt-5 h-px w-full origin-left transition-transform duration-700 ${
+            className={`mt-5 h-px w-full transition-transform duration-700 ${language === 'ur' ? 'origin-right' : 'origin-left'} ${
               isActive ? "scale-x-100" : "scale-x-[0.35] group-hover:scale-x-75"
             }`}
             style={{

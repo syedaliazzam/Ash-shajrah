@@ -3,33 +3,31 @@
 import type { ReactNode } from "react";
 import { SITE } from "@/lib/data";
 import { BrandLogo } from "@/components/ui/BrandLogo";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 function ContactRow({
-  enLabel,
-  urLabel,
+  label,
   children,
+  language,
 }: {
-  enLabel: string;
-  urLabel: string;
+  label: string;
   children: ReactNode;
+  language: string;
 }) {
   return (
     <li>
-      <div className="flex items-center gap-1.5">
-        <span className="text-[11px] font-semibold uppercase tracking-wider text-gold-soft/75">
-          {enLabel}
-        </span>
-        <span className="text-gold-soft/40">/</span>
-        <span dir="rtl" lang="ur" className="font-urdu text-[11px] leading-[2] text-gold-soft/60">
-          {urLabel}
+      <div className={`flex items-center gap-1.5 ${language === 'ur' ? 'flex-row-reverse' : ''}`}>
+        <span className={`${language === 'ur' ? 'font-urdu' : 'uppercase tracking-wider'} text-[11px] font-semibold text-gold-soft/75`}>
+          {label}
         </span>
       </div>
-      <div className="mt-1 text-sm font-medium leading-snug text-cream">{children}</div>
+      <div className={`mt-1 text-sm font-medium leading-snug text-cream ${language === 'ur' ? 'text-right font-sans' : 'text-left'}`}>{children}</div>
     </li>
   );
 }
 
 export function Footer() {
+  const { t, language } = useLanguage();
   const year = new Date().getFullYear();
 
   return (
@@ -60,8 +58,8 @@ export function Footer() {
 
       <div className="relative mx-auto max-w-7xl">
         <div className="grid gap-8 md:grid-cols-2 md:gap-x-10 lg:grid-cols-[1.1fr_1fr_1fr] lg:gap-x-0">
-          {/* Left — logo & bilingual tagline */}
-          <div className="flex flex-col items-center text-center md:items-start md:text-left lg:pr-8">
+          {/* Left — logo & tagline */}
+          <div className={`flex flex-col items-center text-center ${language === 'ur' ? 'md:items-end md:text-right lg:pl-8' : 'md:items-start md:text-left lg:pr-8'}`}>
             <a
               href="#"
               className="footer-logo-shell shrink-0 transition-transform duration-300 hover:scale-[1.02]"
@@ -69,27 +67,22 @@ export function Footer() {
               <BrandLogo variant="footer" />
             </a>
 
-            {/* Bilingual phrase */}
+            {/* Phrase */}
             <div className="mt-4">
-              <p className="font-display text-base tracking-wide text-gold-soft">
-                {SITE.footerPhrase}
-              </p>
-              <p dir="rtl" lang="ur" className="font-urdu mt-1 text-right text-sm leading-[2] text-gold-soft/75 md:text-left md:text-right">
-                {SITE.footerUrduPhrase}
+              <p className={`${language === 'ur' ? 'font-urdu' : 'font-display tracking-wide'} text-base text-gold-soft`}>
+                {t.footer.phrase}
               </p>
             </div>
 
-            <p className="mt-3 max-w-[240px] text-sm leading-relaxed text-cream/60">
-              {SITE.footerSupport}
+            <p className={`${language === 'ur' ? 'font-urdu leading-[2.1]' : 'leading-relaxed'} mt-3 max-w-[240px] text-sm text-cream/60`}>
+              {t.footer.support}
             </p>
           </div>
 
           {/* Middle — contact */}
-          <div className="border-cream/10 md:border-t-0 lg:border-l lg:pl-8 lg:pr-8">
-            <div className="mb-3 flex items-center gap-2">
-            </div>
+          <div className={`border-cream/10 md:border-t-0 lg:border-l ${language === 'ur' ? 'lg:pr-8 lg:border-r lg:border-l-0' : 'lg:pl-8 lg:pr-8'}`}>
             <ul className="flex flex-col gap-3.5">
-              <ContactRow enLabel="WhatsApp" urLabel="واٹس ایپ">
+              <ContactRow label={t.footer.contact.whatsapp} language={language}>
                 <a
                   href={SITE.contact.whatsapp}
                   target="_blank"
@@ -99,7 +92,7 @@ export function Footer() {
                   {SITE.contact.whatsappDisplay}
                 </a>
               </ContactRow>
-              <ContactRow enLabel="Email" urLabel="ای میل">
+              <ContactRow label={t.footer.contact.email} language={language}>
                 <a
                   href={`mailto:${SITE.contact.admissionEmail}`}
                   className="break-all transition-colors hover:text-gold-soft"
@@ -107,14 +100,14 @@ export function Footer() {
                   {SITE.contact.admissionEmail}
                 </a>
               </ContactRow>
-              <ContactRow enLabel="Admin Office" urLabel="انتظامی دفتر">
+              <ContactRow label={t.footer.contact.office} language={language}>
                 <span className="text-cream/90">{SITE.contact.adminOffice}</span>
               </ContactRow>
             </ul>
           </div>
 
           {/* Right — CTA */}
-          <div className="flex flex-col items-center border-cream/10 text-center md:col-span-2 md:items-center lg:col-span-1 lg:border-l lg:items-start lg:pl-8 lg:text-left">
+          <div className={`flex flex-col items-center border-cream/10 text-center md:col-span-2 md:items-center lg:col-span-1 lg:border-l ${language === 'ur' ? 'lg:border-r lg:border-l-0 lg:pr-8 lg:items-end lg:text-right' : 'lg:items-start lg:pl-8 lg:text-left'}`}>
             <div className="relative">
               <div
                 className="pointer-events-none absolute -inset-6 rounded-full bg-gold/10 blur-2xl"
@@ -124,8 +117,8 @@ export function Footer() {
                 {SITE.name}
               </p>
             </div>
-            <p className="mt-2 max-w-xs text-sm leading-relaxed text-cream/70">
-              Early years learning, character, leadership — all from home.
+            <p className={`${language === 'ur' ? 'font-urdu' : ''} mt-2 max-w-xs text-sm leading-relaxed text-cream/70`}>
+              {t.footer.description}
             </p>
             <a
               href={SITE.contact.whatsapp}
@@ -133,20 +126,17 @@ export function Footer() {
               rel="noopener noreferrer"
               className="mt-5 inline-flex flex-col items-center justify-center rounded-full border border-gold/35 bg-gold/15 px-5 py-2.5 text-sm font-semibold text-cream transition-all duration-300 hover:border-gold/55 hover:bg-gold/25 hover:text-gold-soft"
             >
-              <span>Message Us on WhatsApp</span>
-              <span dir="rtl" lang="ur" className="font-urdu text-xs leading-[2] text-cream/75">
-                واٹس ایپ پر پیغام بھیجیں
-              </span>
+              <span className={`${language === 'ur' ? 'font-urdu' : ''}`}>{t.footer.messageUs}</span>
             </a>
           </div>
         </div>
 
         {/* Bottom bar */}
-        <div className="mt-8 flex flex-col items-center justify-between gap-2 border-t border-cream/10 pt-5 text-xs text-cream/45 sm:flex-row sm:gap-4">
-          <p>
+        <div className={`mt-8 flex flex-col items-center justify-between gap-2 border-t border-cream/10 pt-5 text-xs text-cream/45 sm:flex-row sm:gap-4 ${language === 'ur' ? 'flex-row-reverse font-urdu text-[0.8rem]' : ''}`}>
+          <p className={language === 'ur' ? 'font-sans' : ''}>
             &copy; {year} {SITE.name}
           </p>
-          <p>All rights reserved.</p>
+          <p>{t.footer.rights}</p>
         </div>
       </div>
     </footer>

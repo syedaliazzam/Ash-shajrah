@@ -4,9 +4,10 @@ import { useRef } from "react";
 import { useGSAP } from "@/lib/gsap";
 import { scrollReveal } from "@/lib/animations";
 import { AdmissionForm } from "@/components/sections/AdmissionForm";
-import { BilingualSectionHeader } from "@/components/ui/BilingualLayout";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export function ContactSection() {
+  const { t, language } = useLanguage();
   const sectionRef = useRef<HTMLElement>(null);
 
   useGSAP(
@@ -41,14 +42,16 @@ export function ContactSection() {
       />
 
       <div className="relative mx-auto max-w-4xl">
-        <div data-contact-item>
-          <BilingualSectionHeader
-            urduTitle="اپنا آن لائن تعلیمی سفر شروع کریں"
-            urduSubtitle="نیچے دیا گیا فارم مکمل کریں، ہماری ٹیم جلد آپ سے رابطہ کرے گی۔"
-            englishTitle="Start Your Online Learning Journey"
-            englishSubtitle="Fill out the form below and our team will contact you soon."
-            badge="Contact Us"
-          />
+        <div data-contact-item className={`text-center mb-16 ${language === 'ur' ? 'font-urdu' : ''}`}>
+          <span className="mb-4 inline-block rounded-full border border-emerald/20 bg-emerald/5 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-emerald">
+            {language === 'ur' ? 'رابطہ کریں' : 'Contact Us'}
+          </span>
+          <h2 className={`mb-4 text-3xl font-bold text-emerald-deep sm:text-4xl ${language === 'ur' ? 'leading-[1.8]' : 'font-display'}`}>
+            {t.contact.title}
+          </h2>
+          <p className={`mx-auto max-w-3xl text-emerald-deep/80 sm:text-lg ${language === 'ur' ? 'leading-[2.2]' : 'leading-relaxed'}`}>
+            {t.contact.subtitle}
+          </p>
         </div>
 
 

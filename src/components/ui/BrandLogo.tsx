@@ -29,7 +29,7 @@ export function BrandLogo({
   return (
     <Image
       src={LOGO_SRC}
-      alt={SITE.name}
+      alt={`${SITE.name} logo`}
       width={width}
       height={height}
       priority={priority}

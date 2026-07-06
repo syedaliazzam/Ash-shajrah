@@ -3,43 +3,12 @@
 import { useRef } from "react";
 import { gsap, useGSAP } from "@/lib/gsap";
 import { scrollReveal } from "@/lib/animations";
-import { BilingualSectionHeader } from "@/components/ui/BilingualLayout";
-
-type ProgramCard = {
-  titleEn: string;
-  titleUr: string;
-  descEn: string;
-  descUr: string;
-};
-
-const PROGRAMS: ProgramCard[] = [
-  {
-    titleEn: "Play Group",
-    titleUr: "پلے گروپ",
-    descEn: "A gentle online start for young learners through guided activities, early language, basic numeracy, confidence building, and joyful learning routines.",
-    descUr: "ننھے بچوں کے لیے ایک نرم اور بامقصد آن لائن آغاز، جس میں رہنمائی پر مبنی سرگرمیاں، ابتدائی زبان، بنیادی ریاضی، اعتماد اور خوشگوار سیکھنے کی عادات شامل ہیں۔",
-  },
-  {
-    titleEn: "Prep-I",
-    titleUr: "پری پہلی",
-    descEn: "A structured early learning level focused on literacy readiness, numeracy foundations, Islamic values, creativity, communication, and positive habits.",
-    descUr: "ابتدائی تعلیم کا ایک منظم مرحلہ جس میں زبان و خواندگی کی تیاری، بنیادی ریاضی، اسلامی اقدار، تخلیقی صلاحیت، اظہار اور مثبت عادات پر توجہ دی جاتی ہے۔",
-  },
-  {
-    titleEn: "Prep-II",
-    titleUr: "پری دوئم",
-    descEn: "A stronger preparation level for confident early learners, developing reading readiness, number sense, communication skills, character, discipline, and independent learning habits.",
-    descUr: "اعتماد کے ساتھ آگے بڑھنے والے بچوں کے لیے تیاری کا مضبوط مرحلہ، جس میں پڑھنے کی تیاری، عددی سمجھ، گفتگو کی مہارت، کردار، نظم و ضبط اور خود سیکھنے کی عادات کو فروغ دیا جاتا ہے۔",
-  },
-  {
-    titleEn: "Parent Partnership",
-    titleUr: "والدین کی شراکت",
-    descEn: "Parents are guided as active learning partners through home-based support, progress communication, healthy routines, balanced screen use, and child-development guidance.",
-    descUr: "والدین کو گھر پر معاونت، پیش رفت کی رہنمائی، صحت مند معمولات، اسکرین کے متوازن استعمال اور بچے کی نشوونما سے متعلق رہنمائی کے ذریعے فعال تعلیمی شریک بنایا جاتا ہے۔",
-  },
-];
+import { useLanguage } from "@/contexts/LanguageContext";
+import { REGISTER_URL } from "@/lib/constants";
 
 export function ProgramsSection() {
+  const { t, language } = useLanguage();
+
   const sectionRef = useRef<HTMLElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
 
@@ -82,6 +51,13 @@ export function ProgramsSection() {
     });
   };
 
+  const programsList = [
+    t.programs.playgroup,
+    t.programs.prepI,
+    t.programs.prepII,
+    t.programs.parentPartnership,
+  ];
+
   return (
     <section
       ref={sectionRef}
@@ -95,68 +71,56 @@ export function ProgramsSection() {
       </div>
 
       <div className="relative mx-auto max-w-7xl">
-        <BilingualSectionHeader
-          urduTitle="پروگرامز"
-          urduSubtitle="والدین کی شراکت کے ساتھ منظم آن لائن ابتدائی تعلیم۔"
-          englishTitle="Programs"
-          englishSubtitle="Structured online early-years learning with parent partnership."
-          badge="Our Programs"
-          centered
-        />
+        <div className={`text-center ${language === 'ur' ? 'font-urdu' : ''}`}>
+          <span className="mb-4 inline-block rounded-full border border-emerald/20 bg-emerald/5 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-emerald">
+            {language === 'ur' ? 'ہمارے پروگرامز' : 'Our Programs'}
+          </span>
+          <h2 className={`mb-4 text-3xl font-bold text-emerald-deep sm:text-4xl ${language === 'ur' ? 'leading-[1.8]' : 'font-display'}`}>
+            {t.programs.title}
+          </h2>
+          <p className={`mx-auto max-w-2xl text-emerald-deep/80 sm:text-lg ${language === 'ur' ? 'leading-[2]' : 'leading-relaxed'}`}>
+            {t.programs.subtitle}
+          </p>
+        </div>
 
         {/* 2x2 grid on desktop, 2 columns on tablet, 1 column on mobile */}
         <div
           ref={gridRef}
-          className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:gap-8"
+          className="mt-16 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:gap-8"
         >
-          {PROGRAMS.map((program) => (
+          {programsList.map((program, index) => (
             <article
-              key={program.titleEn}
+              key={index}
               data-program-card
               onMouseEnter={handleEnter}
               onMouseLeave={handleLeave}
-              className="group relative overflow-hidden rounded-3xl border border-emerald/10 bg-white/70 p-6 shadow-md transition-all duration-300 hover:border-gold/30 hover:bg-white hover:shadow-xl hover:shadow-emerald/5 md:p-8"
+              className={`group relative overflow-hidden rounded-3xl border border-emerald/10 bg-white/70 p-6 shadow-md transition-all duration-300 hover:border-gold/30 hover:bg-white hover:shadow-xl hover:shadow-emerald/5 md:p-8 ${language === 'ur' ? 'text-right' : 'text-left'}`}
             >
               {/* Gold/Green accent indicator */}
-              <div className="absolute left-0 top-0 h-full w-1.5 bg-gradient-to-b from-gold to-emerald opacity-80 group-hover:opacity-100" />
+              <div className={`absolute top-0 h-full w-1.5 bg-gradient-to-b from-gold to-emerald opacity-80 group-hover:opacity-100 ${language === 'ur' ? 'right-0' : 'left-0'}`} />
 
-              {/* Bilingual card header */}
-              <div className="mb-4 flex flex-wrap items-baseline justify-between gap-x-4 border-b border-emerald/5 pb-3">
-                <h3 className="font-display text-xl font-bold text-emerald-deep sm:text-2xl">
-                  {program.titleEn}
+              <div className="mb-4 border-b border-emerald/5 pb-3">
+                <h3 className={`${language === 'ur' ? 'font-urdu' : 'font-display'} text-xl font-bold text-emerald-deep sm:text-2xl`}>
+                  {program.title}
                 </h3>
-                <span dir="rtl" lang="ur" className="font-urdu text-lg font-bold text-gold">
-                  {program.titleUr}
-                </span>
               </div>
 
-              {/* Swapped layout text blocks: English Left, Urdu Right */}
-              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-                {/* English Description */}
-                <div dir="ltr" lang="en">
-                  <p className="text-sm leading-relaxed text-emerald-deep/75">
-                    {program.descEn}
-                  </p>
-                </div>
-
-                {/* Urdu Description */}
-                <div dir="rtl" lang="ur" className="text-right">
-                  <p className="font-urdu text-sm leading-[2] text-emerald-deep/80">
-                    {program.descUr}
-                  </p>
-                </div>
+              <div>
+                <p className={`${language === 'ur' ? 'font-urdu leading-[2]' : 'leading-relaxed'} text-sm text-emerald-deep/80`}>
+                  {program.body}
+                </p>
               </div>
             </article>
           ))}
         </div>
 
         {/* Enroll Button below the cards */}
-        <div data-programs-cta className="mt-16 flex justify-center">
+        <div data-programs-cta className="relative z-30 mt-16 flex justify-center pointer-events-auto">
           <a
-            href="/register"
-            className="rounded-full bg-emerald px-8 py-3.5 text-sm font-semibold tracking-wide text-cream shadow-lg shadow-emerald/20 transition-all duration-300 hover:bg-emerald-light hover:shadow-emerald/35 hover:scale-105 active:scale-95"
+            href={REGISTER_URL}
+            className={`inline-flex min-h-[44px] min-w-[44px] items-center justify-center ${language === 'ur' ? 'font-urdu' : ''} rounded-full bg-emerald px-8 py-3.5 text-sm font-semibold tracking-wide text-cream shadow-lg shadow-emerald/20 transition-all duration-300 hover:bg-emerald-light hover:shadow-emerald/35 hover:scale-105 active:scale-95`}
           >
-            Enroll in a Program / رجسٹریشن کروائیں
+            {t.nav.enroll}
           </a>
         </div>
       </div>

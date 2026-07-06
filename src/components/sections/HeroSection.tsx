@@ -3,10 +3,11 @@
 import { useRef, useCallback } from "react";
 import { gsap, useGSAP, ensurePlugins } from "@/lib/gsap";
 import { Button } from "@/components/ui/Button";
-import { SITE } from "@/lib/data";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { HeroVideoBackground } from "@/components/hero/HeroVideoBackground";
 import { HeroParticles } from "@/components/hero/HeroParticles";
 import { HeroWatermark } from "@/components/hero/HeroWatermark";
+import { REGISTER_URL, WHATSAPP_URL } from "@/lib/constants";
 
 export function HeroSection() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -22,12 +23,13 @@ export function HeroSection() {
       const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
 
       tl.from("[data-hero-badge]", { y: 20, opacity: 0, duration: 0.8 })
-        .from("[data-hero-urdu]", { y: 40, opacity: 0, duration: 1.0 }, "-=0.35")
-        .from("[data-hero-en]", { y: 40, opacity: 0, duration: 1.0 }, "-=0.7")
+        .from("[data-hero-content]", { y: 40, opacity: 0, duration: 1.0 }, "-=0.35")
         .from("[data-hero-cta]", { y: 18, opacity: 0, duration: 0.65, stagger: 0.1 }, "-=0.35");
     },
     { scope: sectionRef }
   );
+
+  const { t, language } = useLanguage();
 
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLElement>) => {
     if (!sectionRef.current || !contentRef.current) return;
@@ -75,94 +77,81 @@ export function HeroSection() {
     >
       <HeroVideoBackground />
 
-      <div className="absolute inset-0 z-[1] bg-gradient-to-r from-emerald-deep/95 via-emerald-deep/80 to-emerald-deep/45" />
-      <div className="absolute inset-0 z-[1] bg-gradient-to-t from-emerald-deep/60 via-transparent to-cream/5" />
-      <div className="absolute inset-0 z-[1] bg-[radial-gradient(ellipse_at_15%_40%,rgba(201,162,39,0.12),transparent_55%)]" />
-      <div className="absolute inset-0 z-[1] bg-[radial-gradient(ellipse_at_75%_60%,rgba(45,138,106,0.15),transparent_50%)]" />
+      <div className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-r from-emerald-deep/95 via-emerald-deep/80 to-emerald-deep/45" />
+      <div className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-t from-emerald-deep/60 via-transparent to-cream/5" />
+      <div className="pointer-events-none absolute inset-0 z-[1] bg-[radial-gradient(ellipse_at_15%_40%,rgba(201,162,39,0.12),transparent_55%)]" />
+      <div className="pointer-events-none absolute inset-0 z-[1] bg-[radial-gradient(ellipse_at_75%_60%,rgba(45,138,106,0.15),transparent_50%)]" />
 
       <HeroParticles />
       <HeroWatermark watermarkRef={watermarkRef} />
 
-      <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-7xl items-center px-6 pb-20 pt-28 sm:px-8 sm:pb-24 sm:pt-32 lg:px-10">
-        <div ref={contentRef} className="w-full">
-          {/* Badge */}
-          <span
-            data-hero-badge
-            className="mb-8 inline-block rounded-full border border-cream/25 bg-white/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.22em] text-gold-soft shadow-sm backdrop-blur-sm"
-          >
-            Fully Online Early Childhood Learning Hub
-          </span>
+      <div className="relative z-20 mx-auto flex min-h-screen w-full max-w-7xl items-center px-6 pb-20 pt-28 sm:px-8 sm:pb-24 sm:pt-32 lg:px-10">
+        <div ref={contentRef} className="relative z-30 w-full pointer-events-auto">
 
-          {/* ── Two-column hero: English LEFT | Urdu RIGHT ── */}
-          <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-12">
 
-            {/* LEFT — English */}
-            <div data-hero-en dir="ltr" lang="en" className="text-left flex flex-col">
-              <div>
-                <h1 className="font-display text-4xl font-bold leading-tight text-cream sm:text-5xl lg:text-6xl xl:text-[4rem]">
-                  {SITE.name}
-                </h1>
-                <p className="mt-4 font-display text-xl font-semibold leading-snug text-gold sm:text-2xl">
-                  {SITE.heroTagline}
-                </p>
-                <p className="mt-4 text-base leading-relaxed text-cream/80 sm:text-lg">
-                  {SITE.heroIntro}
-                </p>
-              </div>
-
-              {/* English CTA */}
-              <div className="mt-auto pt-6 flex flex-col items-start gap-3 sm:flex-row sm:flex-wrap sm:gap-3">
-                <div data-hero-cta>
-                  <Button href="/register" variant="primary">
-                    Enroll Now
-                  </Button>
-                </div>
-                <div data-hero-cta>
-                  <Button href="#approach" variant="secondary">
-                    Explore Programs
-                  </Button>
-                </div>
-                <div data-hero-cta>
-                  <Button href={SITE.contact.whatsapp} variant="light">
-                    Contact on WhatsApp
-                  </Button>
-                </div>
-              </div>
+          <div data-hero-content className={`flex flex-col ${language === 'ur' ? 'text-right font-urdu items-end' : 'text-left items-start'}`}>
+            <div className="max-w-3xl">
+              <h1 className={`${language === 'ur' ? 'font-urdu leading-[1.6]' : 'font-display leading-tight'} text-4xl font-bold text-cream sm:text-5xl lg:text-6xl xl:text-[4rem]`}>
+                {t.hero.title}
+              </h1>
+              <p className={`mt-4 ${language === 'ur' ? 'font-urdu leading-[2]' : 'font-display leading-snug'} text-xl font-semibold text-gold sm:text-2xl`}>
+                {t.hero.subtitle}
+              </p>
+              <p className={`mt-4 ${language === 'ur' ? 'font-urdu leading-[2.1] sm:leading-[2.2]' : 'leading-relaxed'} text-base text-cream/80 sm:text-lg`}>
+                {t.hero.description}
+              </p>
             </div>
 
-            {/* RIGHT — Urdu */}
-            <div data-hero-urdu dir="rtl" lang="ur" className="text-right font-urdu flex flex-col">
-              <div>
-                <h1 className="font-urdu text-4xl font-bold leading-[1.6] text-cream sm:text-5xl lg:text-6xl xl:text-[4rem]">
-                  الشجرہ لرننگ ہب
-                </h1>
-                <p className="font-urdu mt-4 text-xl font-semibold leading-[2] text-gold sm:text-2xl">
-                  {SITE.heroUrduTagline}
-                </p>
-                <p className="font-urdu mt-4 text-base leading-[2.1] text-cream/80 sm:text-lg sm:leading-[2.2]">
-                  {SITE.heroUrduIntro}
-                </p>
-              </div>
-
-              {/* Urdu CTA */}
-              <div className="mt-auto pt-6 flex flex-col items-end gap-3 sm:flex-row sm:items-center sm:justify-end sm:gap-3">
-                <a
-                  href="/register"
-                  className="rounded-full bg-gold px-6 py-3 text-sm font-semibold text-emerald-deep shadow-lg shadow-gold/30 transition-all hover:bg-gold-soft hover:shadow-gold/45"
-                >
-                  داخلہ فارم
-                </a>
-                <a
-                  href={SITE.contact.whatsapp}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="rounded-full border border-cream/30 bg-white/10 px-6 py-3 text-sm font-semibold text-cream backdrop-blur-sm transition-all hover:border-cream/50 hover:bg-white/15"
-                >
-                  واٹس ایپ پر رابطہ کریں
-                </a>
-              </div>
+            <div className={`mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:gap-3 ${language === 'ur' ? 'items-end sm:items-center sm:justify-end' : 'items-start'}`}>
+              {language === 'en' ? (
+                <>
+                  <div data-hero-cta className="relative z-30 pointer-events-auto">
+                    <Button href={REGISTER_URL} variant="primary">
+                      {t.hero.primaryCta}
+                    </Button>
+                  </div>
+                  <div data-hero-cta className="relative z-30 pointer-events-auto">
+                    <Button href="#programs" variant="secondary">
+                      {t.hero.secondaryCta}
+                    </Button>
+                  </div>
+                  <div data-hero-cta className="relative z-30 pointer-events-auto">
+                    <Button href={WHATSAPP_URL} variant="light" target="_blank" rel="noopener noreferrer">
+                      {t.hero.contactCta}
+                    </Button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div data-hero-cta className="relative z-30 pointer-events-auto">
+                    <a
+                      href={REGISTER_URL}
+                      className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full bg-gold px-6 py-3 text-sm font-semibold text-emerald-deep shadow-lg shadow-gold/30 transition-all hover:bg-gold-soft hover:shadow-gold/45"
+                    >
+                      {t.hero.primaryCta}
+                    </a>
+                  </div>
+                  <div data-hero-cta className="relative z-30 pointer-events-auto">
+                    <a
+                      href="#programs"
+                      className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border border-cream/30 bg-white/10 px-6 py-3 text-sm font-semibold text-cream backdrop-blur-sm transition-all hover:border-cream/50 hover:bg-white/15"
+                    >
+                      {t.hero.secondaryCta}
+                    </a>
+                  </div>
+                  <div data-hero-cta className="relative z-30 pointer-events-auto">
+                    <a
+                      href={WHATSAPP_URL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border border-cream/30 bg-white/10 px-6 py-3 text-sm font-semibold text-cream backdrop-blur-sm transition-all hover:border-cream/50 hover:bg-white/15"
+                    >
+                      {t.hero.contactCta}
+                    </a>
+                  </div>
+                </>
+              )}
             </div>
-
           </div>
         </div>
       </div>

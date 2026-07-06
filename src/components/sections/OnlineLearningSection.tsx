@@ -5,8 +5,7 @@ import Image from "next/image";
 import { gsap, useGSAP } from "@/lib/gsap";
 import { scrollReveal } from "@/lib/animations";
 import { LearningIcon } from "@/components/ui/LearningIcon";
-import { ONLINE_STEPS } from "@/lib/data";
-import { BilingualSectionHeader } from "@/components/ui/BilingualLayout";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const TEXT = {
   heading: "text-[#063F32]",
@@ -15,25 +14,25 @@ const TEXT = {
   label: "text-[#0D5C48]",
 } as const;
 
-function VideoCallMockup() {
+function VideoCallMockup({ t, language }: { t: { howItWorks: { mockups: { onlineSession: string; live: string; guide: string; activity: string; progress: string } } }; language: string }) {
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-emerald/15 bg-white/85 p-5 shadow-2xl shadow-emerald-deep/10 backdrop-blur-md sm:p-6">
-      <div className="mb-4 flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2.5">
+    <div className={`relative overflow-hidden rounded-2xl border border-emerald/15 bg-white/85 p-5 shadow-2xl shadow-emerald-deep/10 backdrop-blur-md sm:p-6 ${language === 'ur' ? 'dir-rtl' : ''}`}>
+      <div className={`mb-4 flex items-center justify-between gap-3 ${language === 'ur' ? 'flex-row-reverse' : ''}`}>
+        <div className={`flex items-center gap-2.5 ${language === 'ur' ? 'flex-row-reverse' : ''}`}>
           <div className="h-3 w-3 animate-pulse rounded-full bg-emerald-light" />
-          <span className={`text-sm font-semibold uppercase tracking-wider sm:text-[0.9375rem] ${TEXT.label}`}>
-            Online Session
+          <span className={`${language === 'ur' ? 'font-urdu' : 'uppercase tracking-wider'} text-sm font-semibold sm:text-[0.9375rem] ${TEXT.label}`}>
+            {t.howItWorks.mockups.onlineSession}
           </span>
         </div>
-        <span className="rounded-full bg-gold/20 px-3 py-1 text-xs font-semibold text-[#8a6f14] sm:text-sm">
-          Live
+        <span className={`rounded-full bg-gold/20 px-3 py-1 text-xs font-semibold text-[#8a6f14] sm:text-sm ${language === 'ur' ? 'font-urdu' : ''}`}>
+          {t.howItWorks.mockups.live}
         </span>
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div className="relative aspect-video overflow-hidden rounded-xl border border-emerald-100/60 bg-gradient-to-br from-emerald/20 to-emerald-deep/30">
           <Image
             src="/images/online-session-2.png"
-            alt="Online learning session"
+            alt="Online teacher guiding early years students"
             fill
             className="object-cover opacity-90 transition-opacity hover:opacity-100"
             sizes="(max-width: 768px) 100vw, 240px"
@@ -49,11 +48,11 @@ function VideoCallMockup() {
           />
         </div>
       </div>
-      <div className="mt-4 flex flex-wrap gap-2.5">
-        {["Guide / رہنما", "Activity / سرگرمی", "Progress / پیش رفت"].map((tab) => (
+      <div className={`mt-4 flex flex-wrap gap-2.5 ${language === 'ur' ? 'flex-row-reverse' : ''}`}>
+        {[t.howItWorks.mockups.guide, t.howItWorks.mockups.activity, t.howItWorks.mockups.progress].map((tab) => (
           <span
             key={tab}
-            className={`rounded-lg border border-emerald/15 bg-cream px-3 py-1.5 text-xs font-medium sm:text-sm ${TEXT.body}`}
+            className={`rounded-lg border border-emerald/15 bg-cream px-3 py-1.5 text-xs font-medium sm:text-sm ${TEXT.body} ${language === 'ur' ? 'font-urdu' : ''}`}
           >
             {tab}
           </span>
@@ -63,28 +62,24 @@ function VideoCallMockup() {
   );
 }
 
-function ProgressMockup() {
+function ProgressMockup({ t, language }: { t: { howItWorks: { mockups: { weeklyProgress: string; character: string; creativity: string; confidence: string } } }; language: string }) {
   return (
-    <div className="rounded-2xl border border-gold/20 bg-gradient-to-br from-white/95 to-cream/85 p-5 shadow-lg backdrop-blur-sm sm:p-6">
-      <div className="flex items-center justify-between gap-2">
-        <p className={`text-sm font-semibold uppercase tracking-wider sm:text-[0.9375rem] ${TEXT.label}`}>
-          Weekly Progress
-        </p>
-        <p dir="rtl" lang="ur" className={`font-urdu text-sm leading-[2] ${TEXT.label}`}>
-          ہفتہ وار پیش رفت
+    <div className={`rounded-2xl border border-gold/20 bg-gradient-to-br from-white/95 to-cream/85 p-5 shadow-lg backdrop-blur-sm sm:p-6 ${language === 'ur' ? 'dir-rtl' : ''}`}>
+      <div className={`flex items-center justify-between gap-2 ${language === 'ur' ? 'flex-row-reverse' : ''}`}>
+        <p className={`${language === 'ur' ? 'font-urdu' : 'uppercase tracking-wider'} text-sm font-semibold sm:text-[0.9375rem] ${TEXT.label}`}>
+          {t.howItWorks.mockups.weeklyProgress}
         </p>
       </div>
       <div className="mt-4 space-y-3.5">
         {[
-          { en: "Character", ur: "کردار", pct: 85 },
-          { en: "Creativity", ur: "تخلیق", pct: 72 },
-          { en: "Confidence", ur: "اعتماد", pct: 90 },
+          { name: t.howItWorks.mockups.character, pct: 85 },
+          { name: t.howItWorks.mockups.creativity, pct: 72 },
+          { name: t.howItWorks.mockups.confidence, pct: 90 },
         ].map((item) => (
-          <div key={item.en}>
-            <div className={`mb-1.5 flex justify-between text-sm font-medium sm:text-base ${TEXT.title}`}>
-              <span className="font-semibold">{item.en}</span>
-              <span dir="rtl" lang="ur" className="font-urdu leading-[2]">{item.ur}</span>
-              <span className="font-bold text-gold">{item.pct}%</span>
+          <div key={item.name}>
+            <div className={`mb-1.5 flex justify-between text-sm font-medium sm:text-base ${TEXT.title} ${language === 'ur' ? 'flex-row-reverse' : ''}`}>
+              <span className={`${language === 'ur' ? 'font-urdu' : 'font-semibold'}`}>{item.name}</span>
+              <span className={`font-bold text-gold ${language === 'ur' ? 'font-sans' : ''}`}>{item.pct}%</span>
             </div>
             <div className="h-2 overflow-hidden rounded-full bg-emerald/12">
               <div
@@ -100,6 +95,7 @@ function ProgressMockup() {
 }
 
 export function OnlineLearningSection() {
+  const { t, language } = useLanguage();
   const sectionRef = useRef<HTMLElement>(null);
 
   useGSAP(
@@ -157,20 +153,24 @@ export function OnlineLearningSection() {
       />
 
       <div className="relative mx-auto max-w-7xl">
-        <BilingualSectionHeader
-          urduTitle="آن لائن سیکھنے کا عمل"
-          urduSubtitle="پہلے رابطے سے گھر میں مستقل ترقی تک — ایک واضح، رہنمائی یافتہ ڈیجیٹل سفر۔"
-          englishTitle="How Online Learning Works"
-          englishSubtitle="A clear, guided digital journey — from first connection to consistent growth at home."
-          badge="How It Works"
-        />
+        <div className={`text-center ${language === 'ur' ? 'font-urdu' : ''}`}>
+          <span className="mb-4 inline-block rounded-full border border-emerald/20 bg-emerald/5 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-emerald">
+            {language === 'ur' ? 'طریقہ کار' : 'How It Works'}
+          </span>
+          <h2 className={`mb-4 text-3xl font-bold text-emerald-deep sm:text-4xl ${language === 'ur' ? 'leading-[1.8]' : 'font-display'}`}>
+            {t.howItWorks.title}
+          </h2>
+          <p className={`mx-auto max-w-3xl text-emerald-deep/80 sm:text-lg ${language === 'ur' ? 'leading-[2.2]' : 'leading-relaxed'}`}>
+            {t.howItWorks.subtitle}
+          </p>
+        </div>
 
-        <div className="grid items-start gap-12 lg:grid-cols-5 lg:gap-12 xl:gap-14">
+        <div className="mt-16 grid items-start gap-12 lg:grid-cols-5 lg:gap-12 xl:gap-14">
           {/* Steps timeline */}
           <div className="relative space-y-7 lg:col-span-3">
-            {ONLINE_STEPS.map((step, i) => (
+            {t.howItWorks.steps.map((step: { step: string; icon: string; title: string; description: string; }, i: number) => (
               <div key={step.step} className="relative">
-                {i < ONLINE_STEPS.length - 1 && (
+                {i < t.howItWorks.steps.length - 1 && (
                   <div
                     data-connector-line
                     className="absolute left-8 top-[4.75rem] hidden h-px w-[calc(100%-4rem)] bg-gradient-to-r from-emerald/40 via-gold/50 to-emerald/20 lg:block"
@@ -180,34 +180,22 @@ export function OnlineLearningSection() {
 
                 <article
                   data-step-card
-                  className="group relative flex gap-6 rounded-2xl border border-emerald/12 bg-white/80 p-6 shadow-lg shadow-emerald-deep/8 backdrop-blur-md transition-all duration-400 hover:border-gold/30 hover:shadow-xl hover:shadow-emerald/10 sm:gap-7 sm:p-7 lg:p-8"
+                  className={`group relative flex gap-6 rounded-2xl border border-emerald/12 bg-white/80 p-6 shadow-lg shadow-emerald-deep/8 backdrop-blur-md transition-all duration-400 hover:border-gold/30 hover:shadow-xl hover:shadow-emerald/10 sm:gap-7 sm:p-7 lg:p-8 ${language === 'ur' ? 'flex-row-reverse text-right' : 'text-left'}`}
                 >
                   <div className="flex shrink-0 flex-col items-center gap-3 pt-0.5">
                     <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-emerald/18 bg-gradient-to-br from-emerald/12 to-gold/12 text-emerald transition-colors group-hover:border-gold/35 sm:h-16 sm:w-16">
                       <LearningIcon name={step.icon} className="h-7 w-7 sm:h-8 sm:w-8" />
                     </div>
-                    <span className={`text-sm font-bold tracking-wide ${TEXT.label}`}>
+                    <span className={`text-sm font-bold tracking-wide ${TEXT.label} ${language === 'ur' ? 'font-sans' : ''}`}>
                       {step.step}
                     </span>
                   </div>
 
                   <div className="min-w-0 flex-1 py-0.5">
-                    {/* Urdu title */}
-                    <p dir="rtl" lang="ur" className={`font-urdu text-right text-lg font-bold leading-[2] ${TEXT.title}`}>
-                      {step.urduTitle}
-                    </p>
-                    <p dir="rtl" lang="ur" className={`font-urdu mt-1 text-right text-sm leading-[2] ${TEXT.body}`}>
-                      {step.urduDescription}
-                    </p>
-
-                    {/* Divider */}
-                    <div className="my-3 h-px w-full bg-gradient-to-r from-gold/20 via-emerald/10 to-transparent" />
-
-                    {/* English title */}
-                    <h3 className={`text-xl font-semibold leading-snug sm:text-[1.375rem] lg:text-[1.625rem] ${TEXT.title}`}>
+                    <h3 className={`${language === 'ur' ? 'font-urdu' : ''} text-xl font-semibold leading-snug sm:text-[1.375rem] lg:text-[1.625rem] ${TEXT.title}`}>
                       {step.title}
                     </h3>
-                    <p className={`mt-3 text-base font-normal leading-[1.7] sm:mt-3.5 sm:text-[1.0625rem] lg:text-[1.125rem] lg:leading-[1.75] ${TEXT.body}`}>
+                    <p className={`${language === 'ur' ? 'font-urdu leading-[2]' : 'leading-[1.7] lg:leading-[1.75]'} mt-3 text-base font-normal sm:mt-3.5 sm:text-[1.0625rem] lg:text-[1.125rem] ${TEXT.body}`}>
                       {step.description}
                     </p>
                   </div>
@@ -220,20 +208,17 @@ export function OnlineLearningSection() {
           <div data-workflow-panel className="relative space-y-6 lg:col-span-2">
             <div className="absolute -inset-4 rounded-3xl bg-gradient-to-br from-emerald/5 to-gold/5 blur-xl" />
             <div className="relative">
-              <VideoCallMockup />
+              <VideoCallMockup t={t} language={language} />
             </div>
             <div className="relative">
-              <ProgressMockup />
+              <ProgressMockup t={t} language={language} />
             </div>
             <div className="relative rounded-2xl border border-emerald/12 bg-emerald-deep/[0.06] px-5 py-5 text-center sm:px-6 sm:py-6">
-              <p className={`text-sm font-semibold uppercase tracking-widest sm:text-[0.9375rem] ${TEXT.label}`}>
-                Digital Learning Ecosystem
+              <p className={`${language === 'ur' ? 'font-urdu' : 'uppercase tracking-widest'} text-sm font-semibold sm:text-[0.9375rem] ${TEXT.label}`}>
+                {t.howItWorks.mockups.digitalEcosystem}
               </p>
-              <p dir="rtl" lang="ur" className={`font-urdu mt-1 text-sm leading-[2] ${TEXT.body}`}>
-                ڈیجیٹل تعلیمی نظام
-              </p>
-              <p className={`mt-3 text-base font-medium leading-relaxed sm:text-[1.0625rem] lg:text-lg lg:leading-[1.65] ${TEXT.body}`}>
-                Guided sessions • Home practice • Parent updates
+              <p className={`${language === 'ur' ? 'font-urdu leading-[2]' : 'leading-relaxed lg:leading-[1.65]'} mt-3 text-base font-medium sm:text-[1.0625rem] lg:text-lg ${TEXT.body}`}>
+                {t.howItWorks.mockups.ecosystemSubtitle}
               </p>
             </div>
           </div>

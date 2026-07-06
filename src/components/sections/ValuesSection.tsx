@@ -4,9 +4,10 @@ import { useRef } from "react";
 import { gsap, useGSAP } from "@/lib/gsap";
 import { CoreValuesCarousel } from "@/components/values/CoreValuesCarousel";
 import { ValuesBackdrop } from "@/components/values/ValuesBackdrop";
-import { BilingualSectionHeader } from "@/components/ui/BilingualLayout";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export function ValuesSection() {
+  const { t, language } = useLanguage();
   const sectionRef = useRef<HTMLElement>(null);
   const carouselRef = useRef<HTMLDivElement>(null);
 
@@ -56,14 +57,17 @@ export function ValuesSection() {
       <ValuesBackdrop />
 
       <div className="relative mx-auto max-w-[1400px]">
-        <BilingualSectionHeader
-          urduTitle="ہماری بنیادی اقدار"
-          urduSubtitle="ہر قدر ہمارے درخت کا ایک پتہ ہے — کردار، حکمت اور مقصد کی پرورش کرتا ہے۔"
-          englishTitle="Our Core Values"
-          englishSubtitle="Each value is a leaf on our tree — nurturing character, wisdom, and purpose in every child."
-          badge="Values"
-          className="mb-16 sm:mb-20 lg:mb-24"
-        />
+        <div className={`text-center mb-16 sm:mb-20 lg:mb-24 ${language === 'ur' ? 'font-urdu' : ''}`}>
+          <span className="mb-4 inline-block rounded-full border border-emerald/20 bg-emerald/5 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-emerald">
+            {language === 'ur' ? 'اقدار' : 'Values'}
+          </span>
+          <h2 className={`mb-4 text-3xl font-bold text-emerald-deep sm:text-4xl ${language === 'ur' ? 'leading-[1.8]' : 'font-display'}`}>
+            {t.values.title}
+          </h2>
+          <p className={`mx-auto max-w-3xl text-emerald-deep/80 sm:text-lg ${language === 'ur' ? 'leading-[2.2]' : 'leading-relaxed'}`}>
+            {t.values.description}
+          </p>
+        </div>
 
         <div ref={carouselRef}>
           <CoreValuesCarousel />

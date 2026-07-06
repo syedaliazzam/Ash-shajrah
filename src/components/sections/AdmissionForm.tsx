@@ -6,6 +6,7 @@ import {
   type ContactFormData,
   type ContactFormErrors,
 } from "@/lib/contact-form";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const INITIAL: ContactFormData = {
   name: "",
@@ -18,33 +19,31 @@ const INITIAL: ContactFormData = {
 const inputClass =
   "form-input w-full rounded-xl border border-emerald/15 bg-white/90 px-4 py-2.5 text-sm text-emerald-deep outline-none transition-all duration-300 placeholder:text-emerald/35 focus:border-emerald focus:bg-white focus:shadow-[0_0_0_3px_rgba(45,138,106,0.12)]";
 
-function BilingualLabel({
+function FormLabel({
   htmlFor,
-  en,
-  ur,
+  label,
   required,
+  language,
 }: {
   htmlFor: string;
-  en: string;
-  ur: string;
+  label: string;
   required?: boolean;
+  language: string;
 }) {
   return (
     <label
       htmlFor={htmlFor}
-      className="mb-1.5 flex items-baseline justify-between gap-2"
+      className={`mb-1.5 flex items-baseline gap-2 ${language === 'ur' ? 'flex-row-reverse' : ''}`}
     >
-      <span className="text-xs font-semibold uppercase tracking-wider text-emerald/70">
-        {en} {required && <span className="text-gold">*</span>}
-      </span>
-      <span dir="rtl" lang="ur" className="font-urdu text-xs leading-[2] text-emerald/50">
-        {ur}
+      <span className={`${language === 'ur' ? 'font-urdu' : 'uppercase tracking-wider'} text-xs font-semibold text-emerald/70`}>
+        {label} {required && <span className="text-gold">*</span>}
       </span>
     </label>
   );
 }
 
 export function AdmissionForm() {
+  const { t, language } = useLanguage();
   const [form, setForm] = useState<ContactFormData>(INITIAL);
   const [errors, setErrors] = useState<ContactFormErrors>({});
   const [loading, setLoading] = useState(false);
@@ -74,7 +73,10 @@ export function AdmissionForm() {
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({
+          ...form,
+          preferredLanguage: language
+        }),
       });
 
       const data = await res.json();
@@ -97,22 +99,19 @@ export function AdmissionForm() {
 
   if (success) {
     return (
-      <div className="admission-form-card mx-auto max-w-xl rounded-2xl border border-emerald/15 bg-white/85 p-8 text-center shadow-xl shadow-emerald-deep/10 backdrop-blur-md">
+      <div className={`admission-form-card mx-auto max-w-xl rounded-2xl border border-emerald/15 bg-white/85 p-8 text-center shadow-xl shadow-emerald-deep/10 backdrop-blur-md ${language === 'ur' ? 'font-urdu' : ''}`}>
         <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-emerald/10 text-2xl text-emerald">
           ✓
         </div>
-        <p className="font-display text-xl font-semibold leading-relaxed text-emerald-deep">
-          Thank you! Your inquiry has been sent.
-        </p>
-        <p dir="rtl" lang="ur" className="font-urdu mt-2 text-base leading-[2] text-emerald/70">
-          شکریہ! آپ کی درخواست بھیج دی گئی ہے۔
+        <p className={`text-xl font-semibold leading-relaxed text-emerald-deep ${language === 'ur' ? 'leading-[2]' : 'font-display'}`}>
+          {t.contact.form.success}
         </p>
         <button
           type="button"
           onClick={() => setSuccess(false)}
-          className="mt-6 text-sm font-semibold text-gold transition-colors hover:text-emerald"
+          className={`mt-6 text-sm font-semibold text-gold transition-colors hover:text-emerald ${language === 'ur' ? 'font-sans' : ''}`}
         >
-          Send another inquiry
+          {language === 'ur' ? 'مزید پیغام بھیجیں' : 'Send another inquiry'}
         </button>
       </div>
     );
@@ -130,16 +129,13 @@ export function AdmissionForm() {
       <div className="relative">
         {submitError && (
           <div className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3">
-            <p className="text-sm text-red-700">{submitError}</p>
-            <p dir="rtl" lang="ur" className="font-urdu mt-1 text-right text-sm leading-[2] text-red-600">
-              کچھ غلط ہو گیا۔ واٹس ایپ پر رابطہ کریں۔
-            </p>
+            <p className={`text-sm text-red-700 ${language === 'ur' ? 'font-urdu text-right leading-[2]' : ''}`}>{t.contact.form.error}</p>
           </div>
         )}
 
         <div className="grid gap-4 md:grid-cols-2">
-          <div>
-            <BilingualLabel htmlFor="contact-name" en="Name" ur="نام" required />
+          <div className={language === 'ur' ? 'text-right' : 'text-left'}>
+            <FormLabel htmlFor="contact-name" label={t.contact.form.name} language={language} required />
             <input
               id="contact-name"
               type="text"
@@ -152,8 +148,8 @@ export function AdmissionForm() {
             {errors.name && <p className="mt-1 text-xs text-red-600">{errors.name}</p>}
           </div>
 
-          <div>
-            <BilingualLabel htmlFor="contact-whatsapp" en="WhatsApp Number" ur="واٹس ایپ نمبر" required />
+          <div className={language === 'ur' ? 'text-right' : 'text-left'}>
+            <FormLabel htmlFor="contact-whatsapp" label={t.contact.form.whatsapp} language={language} required />
             <input
               id="contact-whatsapp"
               type="tel"
@@ -166,8 +162,8 @@ export function AdmissionForm() {
             {errors.whatsapp && <p className="mt-1 text-xs text-red-600">{errors.whatsapp}</p>}
           </div>
 
-          <div className="md:col-span-2">
-            <BilingualLabel htmlFor="contact-email" en="Email Address" ur="ای میل" required />
+          <div className={`md:col-span-2 ${language === 'ur' ? 'text-right' : 'text-left'}`}>
+            <FormLabel htmlFor="contact-email" label={t.contact.form.email} language={language} required />
             <input
               id="contact-email"
               type="email"
@@ -180,8 +176,8 @@ export function AdmissionForm() {
             {errors.email && <p className="mt-1 text-xs text-red-600">{errors.email}</p>}
           </div>
 
-          <div className="md:col-span-2">
-            <BilingualLabel htmlFor="contact-message" en="Message" ur="پیغام" />
+          <div className={`md:col-span-2 ${language === 'ur' ? 'text-right' : 'text-left'}`}>
+            <FormLabel htmlFor="contact-message" label={t.contact.form.message} language={language} />
             <textarea
               id="contact-message"
               rows={3}
@@ -211,9 +207,9 @@ export function AdmissionForm() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-full bg-emerald px-8 py-3.5 text-sm font-semibold tracking-wide text-cream shadow-lg shadow-emerald/25 transition-all duration-300 hover:bg-emerald-light hover:shadow-emerald/40 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:min-w-[260px]"
+            className={`w-full rounded-full bg-emerald px-8 py-3.5 text-sm font-semibold tracking-wide text-cream shadow-lg shadow-emerald/25 transition-all duration-300 hover:bg-emerald-light hover:shadow-emerald/40 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:min-w-[260px] ${language === 'ur' ? 'font-urdu' : ''}`}
           >
-            {loading ? "Sending..." : "Send Inquiry / پیغام بھیجیں"}
+            {loading ? (language === 'ur' ? "بھیج رہا ہے..." : "Sending...") : t.contact.form.submit}
           </button>
         </div>
       </div>

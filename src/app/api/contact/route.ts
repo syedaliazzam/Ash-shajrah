@@ -39,6 +39,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true, message: SUCCESS_MESSAGE });
     }
 
+    const preferredLanguage = (body as { preferredLanguage?: string }).preferredLanguage;
+
     const formData: ContactFormData = {
       name: body.name ?? "",
       whatsapp: body.whatsapp ?? "",
@@ -73,6 +75,7 @@ export async function POST(request: NextRequest) {
       whatsapp: formData.whatsapp.trim(),
       email: formData.email.trim(),
       message: formData.message.trim(),
+      preferredLanguage: preferredLanguage?.trim()
     };
 
     try {

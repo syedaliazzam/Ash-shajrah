@@ -3,7 +3,13 @@ import { Pool } from "pg";
 let pool: Pool | null = null;
 
 function getDatabaseUrl() {
-  const url = process.env.DATABASE_URL || process.env.DIRECT_URL || null;
+  let url = process.env.DATABASE_URL || process.env.DIRECT_URL || null;
+  
+  // Strip surrounding quotes if the user accidentally pasted them into Vercel
+  if (url && (url.startsWith('"') || url.startsWith("'"))) {
+    url = url.replace(/^['"]|['"]$/g, '');
+  }
+
   if (url === "base" || (url && !url.startsWith("postgres"))) {
     console.error("Invalid DATABASE_URL configured:", url);
     return null;

@@ -3,7 +3,7 @@
 import { useRef } from "react";
 import { gsap, useGSAP } from "@/lib/gsap";
 import { scrollReveal } from "@/lib/animations";
-import { BilingualSectionHeader, BilingualTextBlock } from "@/components/ui/BilingualLayout";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const LEAVES = Array.from({ length: 14 }, (_, i) => ({
   id: i,
@@ -12,6 +12,7 @@ const LEAVES = Array.from({ length: 14 }, (_, i) => ({
 }));
 
 export function VisionSection() {
+  const { t, language } = useLanguage();
   const sectionRef = useRef<HTMLElement>(null);
   const leavesRef = useRef<HTMLDivElement>(null);
 
@@ -82,17 +83,19 @@ export function VisionSection() {
       <div className="relative mx-auto max-w-7xl">
         {/* ── Mission ── */}
         <div data-vision-content className="mb-16 lg:mb-20">
-          <BilingualSectionHeader
-            urduTitle="ہمارا مشن"
-            englishTitle="Our Mission"
-            badge="Mission"
-            lightMode
-          />
-          <BilingualTextBlock
-            urduText="الشجرہ کا مقصد ایک متوازن اور بامقصد آن لائن تعلیمی و تربیتی ماحول فراہم کرنا ہے جو بچوں میں علم، عملی مہارتوں، اعلیٰ اقدار اور مثبت رویوں کی نشوونما کرے۔"
-            englishText="Our mission is to provide a balanced and purposeful online educational and developmental environment that nurtures knowledge, practical skills, strong values, and positive attitudes in children."
-            lightMode
-          />
+          <div className={`text-center mb-16 ${language === 'ur' ? 'font-urdu' : ''}`}>
+            <span className="mb-4 inline-block rounded-full border border-gold/40 bg-gold/10 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-gold">
+              {language === 'ur' ? 'مشن' : 'Mission'}
+            </span>
+            <h2 className={`mb-4 text-3xl font-bold text-cream sm:text-4xl ${language === 'ur' ? 'leading-[1.8]' : 'font-display'}`}>
+              {t.about.missionTitle}
+            </h2>
+          </div>
+          <div className="relative mx-auto max-w-4xl text-center">
+            <p className={`text-cream/90 sm:text-lg lg:text-xl ${language === 'ur' ? 'font-urdu leading-[2.2]' : 'leading-relaxed'}`}>
+              {t.about.missionBody}
+            </p>
+          </div>
         </div>
 
         {/* Gold divider */}
@@ -103,17 +106,19 @@ export function VisionSection() {
 
         {/* ── Vision ── */}
         <div data-vision-content>
-          <BilingualSectionHeader
-            urduTitle="ہمارا نصب العین"
-            englishTitle="Our Vision"
-            badge="Vision"
-            lightMode
-          />
-          <BilingualTextBlock
-            urduText="الشجرہ ایک ایسے مستقبل کا خواب دیکھتا ہے جہاں بچے علم، کردار، قیادت اور اپنے خالق سے مضبوط تعلق کے ساتھ اپنے خاندان، معاشرے اور انسانیت کے لیے خیر کا ذریعہ بنیں۔"
-            englishText="Ash-Shajrah envisions a future where children, grounded in knowledge, character, leadership, and connection with their Creator, become a source of goodness for their families, society, and humanity."
-            lightMode
-          />
+          <div className={`text-center mb-16 ${language === 'ur' ? 'font-urdu' : ''}`}>
+            <span className="mb-4 inline-block rounded-full border border-gold/40 bg-gold/10 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-gold">
+              {language === 'ur' ? 'نصب العین' : 'Vision'}
+            </span>
+            <h2 className={`mb-4 text-3xl font-bold text-cream sm:text-4xl ${language === 'ur' ? 'leading-[1.8]' : 'font-display'}`}>
+              {t.about.visionTitle}
+            </h2>
+          </div>
+          <div className="relative mx-auto max-w-4xl text-center">
+            <p className={`text-cream/90 sm:text-lg lg:text-xl ${language === 'ur' ? 'font-urdu leading-[2.2]' : 'leading-relaxed'}`}>
+              {t.about.visionBody}
+            </p>
+          </div>
         </div>
       </div>
     </section>

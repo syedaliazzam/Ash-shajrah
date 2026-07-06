@@ -44,9 +44,9 @@ export function RegistrationPageContent() {
 
             {/* Urdu — right */}
             <div dir="rtl" lang="ur" className="text-right">
-              <h1 className="font-urdu text-3xl font-bold leading-[1.7] text-cream sm:text-4xl">
+              <h2 className="font-urdu text-3xl font-bold leading-[1.7] text-cream sm:text-4xl">
                 الشجرہ لرننگ ہب میں رجسٹریشن
-              </h1>
+              </h2>
               <p className="font-urdu mt-3 text-base leading-[2.1] text-cream/75">
                 نیچے دیا گیا فارم مکمل کریں، ہماری داخلہ ٹیم جلد آپ سے رابطہ کرے گی۔
               </p>

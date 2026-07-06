@@ -1,8 +1,10 @@
 "use client";
 
 import { useId, useState } from "react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export function TechnologyAdvisorySection() {
+  const { t, language } = useLanguage();
   const [expanded, setExpanded] = useState(false);
   const panelId = useId();
 
@@ -20,9 +22,9 @@ export function TechnologyAdvisorySection() {
 
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
             <div className="min-w-0 flex-1 pl-2 sm:pl-3">
-              {/* Bilingual header */}
-              <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-                <div className="flex items-center gap-2">
+              {/* Header */}
+              <div className={`flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-4 ${language === 'ur' ? 'sm:flex-row-reverse sm:justify-end' : 'sm:justify-between'}`}>
+                <div className={`flex items-center gap-2 ${language === 'ur' ? 'flex-row-reverse' : ''}`}>
                   <span
                     className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-emerald/12 bg-emerald/[0.06] text-emerald"
                     aria-hidden
@@ -36,28 +38,17 @@ export function TechnologyAdvisorySection() {
                       />
                     </svg>
                   </span>
-                  <h2 className="text-sm font-semibold tracking-wide text-[#063F32] sm:text-[0.9375rem]">
-                    Technology Advisory Partner
+                  <h2 className={`${language === 'ur' ? 'font-urdu' : 'tracking-wide'} text-sm font-semibold text-[#063F32] sm:text-[0.9375rem]`}>
+                    {t.techAdvisory.title}
                   </h2>
                 </div>
-                <p dir="rtl" lang="ur" className="font-urdu text-right text-xs leading-[2] text-[#245C4F] sm:text-sm">
-                  ٹیکنالوجی ایڈوائزری پارٹنر
-                </p>
               </div>
 
-              {/* Bilingual body */}
-              <div className="mt-2.5 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
-                <div dir="ltr" lang="en">
-                  <p className="text-sm leading-relaxed text-[#245C4F] sm:text-[0.9375rem] sm:leading-[1.65]">
-                    Ash-Shajrah Learning Hub is supported by Paramount Intelligence for digital
-                    learning, AI readiness, and technology advisory.
-                  </p>
-                </div>
-                <div dir="rtl" lang="ur" className="text-right">
-                  <p className="font-urdu text-xs leading-[2.1] text-[#245C4F] sm:text-sm">
-                    الشجرہ لرننگ ہب کو ڈیجیٹل لرننگ، اے آئی تیاری اور ٹیکنالوجی رہنمائی میں پیراماؤنٹ انٹیلیجنس کی معاونت حاصل ہے۔
-                  </p>
-                </div>
+              {/* Body */}
+              <div className={`mt-2.5 ${language === 'ur' ? 'text-right' : 'text-left'}`}>
+                <p className={`${language === 'ur' ? 'font-urdu text-xs leading-[2.1] sm:text-sm' : 'text-sm leading-relaxed sm:text-[0.9375rem] sm:leading-[1.65]'} text-[#245C4F]`}>
+                  {t.techAdvisory.body}
+                </p>
               </div>
 
               {/* Expandable details */}
@@ -68,15 +59,9 @@ export function TechnologyAdvisorySection() {
                 aria-hidden={!expanded}
               >
                 <div className="overflow-hidden">
-                  <div className="pt-4">
-                    <p className="text-sm leading-relaxed text-[#245C4F]/90 sm:text-[0.9375rem] sm:leading-[1.7]">
-                      Ash-Shajrah Learning Hub is proud to collaborate with Paramount
-                      Intelligence, a specialized AI and digital transformation consultancy.
-                      Paramount&apos;s team includes experienced technology leaders and AI
-                      practitioners who have supported Fortune 500 companies, private
-                      equity-backed businesses, and global enterprises. This partnership helps
-                      Ash-Shajrah integrate modern learning methodologies, digital innovation,
-                      and future-ready educational thinking into its programs.
+                  <div className={`pt-4 ${language === 'ur' ? 'text-right' : 'text-left'}`}>
+                    <p className={`${language === 'ur' ? 'font-urdu text-sm leading-[2.1]' : 'text-sm leading-relaxed sm:text-[0.9375rem] sm:leading-[1.7]'} text-[#245C4F]/90`}>
+                      {t.techAdvisory.expandedBody}
                     </p>
                   </div>
                 </div>
@@ -88,9 +73,9 @@ export function TechnologyAdvisorySection() {
               onClick={() => setExpanded((prev) => !prev)}
               aria-expanded={expanded}
               aria-controls={panelId}
-              className="shrink-0 self-start rounded-full border border-emerald/15 bg-cream/80 px-4 py-2 text-xs font-semibold text-[#0D5C48] transition-all duration-300 hover:border-gold/35 hover:bg-white hover:text-[#063F32] sm:mt-1"
+              className={`shrink-0 self-start rounded-full border border-emerald/15 bg-cream/80 px-4 py-2 text-xs font-semibold text-[#0D5C48] transition-all duration-300 hover:border-gold/35 hover:bg-white hover:text-[#063F32] sm:mt-1 ${language === 'ur' ? 'font-urdu' : ''}`}
             >
-              {expanded ? "Show less" : "Learn more"}
+              {expanded ? t.techAdvisory.showLess : t.techAdvisory.learnMore}
             </button>
           </div>
         </div>

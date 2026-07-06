@@ -7,6 +7,8 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { HeroSection } from "@/components/sections/HeroSection";
 import { AboutSection } from "@/components/sections/AboutSection";
+import { LearningCharacterLeadershipSection } from "@/components/sections/LearningCharacterLeadershipSection";
+import { ParentPartnershipSection } from "@/components/sections/ParentPartnershipSection";
 import { ProgramsSection } from "@/components/sections/ProgramsSection";
 import { ValuesSection } from "@/components/sections/ValuesSection";
 import { LearningSection } from "@/components/sections/LearningSection";
@@ -14,6 +16,7 @@ import { OnlineLearningSection } from "@/components/sections/OnlineLearningSecti
 import { LeadershipSection } from "@/components/sections/LeadershipSection";
 import { VisionSection } from "@/components/sections/VisionSection";
 import { CurriculumSection } from "@/components/sections/CurriculumSection";
+import { LogoPhilosophySection } from "@/components/sections/LogoPhilosophySection";
 
 export function HomePageContent() {
   useEffect(() => {
@@ -29,6 +32,8 @@ export function HomePageContent() {
       <main>
         <HeroSection />
         <AboutSection />
+        <LearningCharacterLeadershipSection />
+        <ParentPartnershipSection />
         <ProgramsSection />
         <ValuesSection />
         <LearningSection />
@@ -36,6 +41,7 @@ export function HomePageContent() {
         <OnlineLearningSection />
         <LeadershipSection />
         <VisionSection />
+        <LogoPhilosophySection />
       </main>
       <Footer />
     </ReducedMotionProvider>

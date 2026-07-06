@@ -5,6 +5,7 @@ export type InquiryRow = {
   whatsapp: string;
   email: string;
   message?: string;
+  preferredLanguage?: string;
 };
 
 export type RegistrationRow = {
@@ -16,6 +17,7 @@ export type RegistrationRow = {
   level: string;
   cityCountry: string;
   message?: string;
+  preferredLanguage?: string;
 };
 
 function getGoogleSheetsConfig() {
@@ -31,9 +33,9 @@ function getGoogleSheetsConfig() {
     spreadsheetId,
     serviceAccountEmail,
     privateKey,
-    range: process.env.GOOGLE_SHEET_RANGE || "Inquiries!A:E",
+    range: process.env.GOOGLE_SHEET_RANGE || "Inquiries!A:F",
     registrationRange:
-      process.env.GOOGLE_REGISTER_SHEET_RANGE || "Registrations!A:I",
+      process.env.GOOGLE_REGISTER_SHEET_RANGE || "Registrations!A:J",
   };
 }
 
@@ -62,6 +64,7 @@ export async function appendInquiryToGoogleSheet({
   whatsapp,
   email,
   message,
+  preferredLanguage,
 }: InquiryRow): Promise<void> {
   const { config, sheets } = await getAuthAndSheets();
 
@@ -71,7 +74,7 @@ export async function appendInquiryToGoogleSheet({
     valueInputOption: "USER_ENTERED",
     insertDataOption: "INSERT_ROWS",
     requestBody: {
-      values: [[new Date().toISOString(), name, whatsapp, email, message || ""]],
+      values: [[new Date().toISOString(), name, whatsapp, email, message || "", preferredLanguage || ""]],
     },
   });
 }
@@ -85,6 +88,7 @@ export async function appendRegistrationToGoogleSheet({
   level,
   cityCountry,
   message,
+  preferredLanguage,
 }: RegistrationRow): Promise<void> {
   const { config, sheets } = await getAuthAndSheets();
 
@@ -105,6 +109,7 @@ export async function appendRegistrationToGoogleSheet({
           level,
           cityCountry,
           message || "",
+          preferredLanguage || "",
         ],
       ],
     },

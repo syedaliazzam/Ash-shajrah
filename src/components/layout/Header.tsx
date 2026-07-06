@@ -4,10 +4,12 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { NAV_LINKS } from "@/lib/data";
 import { BrandLogo } from "@/components/ui/BrandLogo";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { REGISTER_URL, WHATSAPP_URL } from "@/lib/constants";
 
 export function Header() {
+  const { t, language, setLanguage } = useLanguage();
 
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -51,23 +53,32 @@ export function Header() {
         </Link>
 
         <nav className="hidden items-center gap-8 md:flex">
-          {NAV_LINKS.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="text-sm font-medium text-emerald-deep/85 transition-colors hover:text-emerald"
-            >
-              {link.label}
-            </Link>
-          ))}
+          <Link href="/#about" className="text-sm font-medium text-emerald-deep/85 transition-colors hover:text-emerald">{t.nav.about}</Link>
+          <Link href="/#programs" className="text-sm font-medium text-emerald-deep/85 transition-colors hover:text-emerald">{t.nav.programs}</Link>
+          <Link href="/#curriculum" className="text-sm font-medium text-emerald-deep/85 transition-colors hover:text-emerald">{t.nav.curriculum}</Link>
+          <Link href="/#learning-approach" className="text-sm font-medium text-emerald-deep/85 transition-colors hover:text-emerald">{t.nav.learningApproach}</Link>
+          <Link href="/#how-it-works" className="text-sm font-medium text-emerald-deep/85 transition-colors hover:text-emerald">{t.nav.howItWorks}</Link>
+          <Link href="/#values" className="text-sm font-medium text-emerald-deep/85 transition-colors hover:text-emerald">{t.nav.values}</Link>
+          <Link href="/#leadership" className="text-sm font-medium text-emerald-deep/85 transition-colors hover:text-emerald">{t.nav.leadership}</Link>
+          <Link href="/#contact" className="text-sm font-medium text-emerald-deep/85 transition-colors hover:text-emerald">{t.nav.contact}</Link>
         </nav>
 
-        <Link
-          href="/register"
-          className="hidden rounded-full bg-emerald px-5 py-2.5 text-sm font-semibold text-cream shadow-md shadow-emerald/20 transition-all hover:bg-emerald-light hover:shadow-emerald/30 md:inline-flex"
-        >
-          Enroll
-        </Link>
+        <div className="hidden items-center gap-4 md:flex">
+          <Link
+            href={REGISTER_URL}
+            className="rounded-full bg-emerald px-5 py-2.5 text-sm font-semibold text-cream shadow-md shadow-emerald/20 transition-all hover:bg-emerald-light hover:shadow-emerald/30"
+          >
+            {t.nav.enroll}
+          </Link>
+          <button
+            onClick={() => setLanguage(language === "en" ? "ur" : "en")}
+            className="flex items-center gap-1 rounded-full border border-emerald/20 px-3 py-1.5 text-xs font-semibold text-emerald-deep transition-colors hover:bg-emerald/5"
+          >
+            <span className={language === "en" ? "text-emerald" : "text-emerald-deep/60"}>EN</span>
+            <span className="text-emerald-deep/40">|</span>
+            <span className={`font-urdu text-sm ${language === "ur" ? "text-gold" : "text-emerald-deep/60"}`}>اردو</span>
+          </button>
+        </div>
 
         <button
           type="button"
@@ -90,22 +101,44 @@ export function Header() {
       {menuOpen && (
         <nav className="border-t border-emerald/10 bg-cream/95 px-6 py-6 shadow-lg backdrop-blur-xl md:hidden">
           <div className="flex flex-col gap-4">
-            {NAV_LINKS.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                onClick={() => setMenuOpen(false)}
-                className="text-base font-medium text-emerald-deep"
+            <Link href="/#about" onClick={() => setMenuOpen(false)} className="text-base font-medium text-emerald-deep">{t.nav.about}</Link>
+            <Link href="/#programs" onClick={() => setMenuOpen(false)} className="text-base font-medium text-emerald-deep">{t.nav.programs}</Link>
+            <Link href="/#curriculum" onClick={() => setMenuOpen(false)} className="text-base font-medium text-emerald-deep">{t.nav.curriculum}</Link>
+            <Link href="/#learning-approach" onClick={() => setMenuOpen(false)} className="text-base font-medium text-emerald-deep">{t.nav.learningApproach}</Link>
+            <Link href="/#how-it-works" onClick={() => setMenuOpen(false)} className="text-base font-medium text-emerald-deep">{t.nav.howItWorks}</Link>
+            <Link href="/#values" onClick={() => setMenuOpen(false)} className="text-base font-medium text-emerald-deep">{t.nav.values}</Link>
+            <Link href="/#leadership" onClick={() => setMenuOpen(false)} className="text-base font-medium text-emerald-deep">{t.nav.leadership}</Link>
+            <Link href="/#contact" onClick={() => setMenuOpen(false)} className="text-base font-medium text-emerald-deep">{t.nav.contact}</Link>
+            
+            <div className="flex items-center gap-4 mt-2 border-t border-emerald/10 pt-4">
+              <button
+                onClick={() => {
+                  setLanguage(language === "en" ? "ur" : "en");
+                  setMenuOpen(false);
+                }}
+                className="flex items-center gap-2 rounded-full border border-emerald/20 px-4 py-2 text-sm font-semibold text-emerald-deep transition-colors hover:bg-emerald/5"
               >
-                {link.label}
-              </Link>
-            ))}
+                <span>Language:</span>
+                <span className={language === "en" ? "text-emerald" : "text-emerald-deep/60"}>EN</span>
+                <span className="text-emerald-deep/40">|</span>
+                <span className={`font-urdu text-base ${language === "ur" ? "text-gold" : "text-emerald-deep/60"}`}>اردو</span>
+              </button>
+            </div>
+            <a
+              href={WHATSAPP_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => setMenuOpen(false)}
+              className="mt-4 flex items-center justify-center rounded-full border border-emerald/20 bg-emerald/5 px-5 py-3 text-center text-sm font-semibold text-emerald-deep"
+            >
+              {language === "ur" ? "واٹس ایپ" : "WhatsApp"}
+            </a>
             <Link
-              href="/register"
+              href={REGISTER_URL}
               onClick={() => setMenuOpen(false)}
               className="mt-2 rounded-full bg-emerald px-5 py-3 text-center text-sm font-semibold text-cream"
             >
-              Enroll
+              {t.nav.enroll}
             </Link>
           </div>
         </nav>
