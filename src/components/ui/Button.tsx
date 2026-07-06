@@ -1,17 +1,27 @@
 "use client";
 
-import { ReactNode } from "react";
+import * as React from "react";
 import Link from "next/link";
 
 type ButtonVariant = "primary" | "secondary" | "outline" | "light";
 
-interface ButtonProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
-  children: ReactNode;
-  href?: string;
+type BaseButtonProps = {
+  children: React.ReactNode;
   variant?: ButtonVariant;
   className?: string;
-  onClick?: () => void;
-}
+};
+
+type ButtonAsButtonProps = BaseButtonProps &
+  React.ButtonHTMLAttributes<HTMLButtonElement> & {
+    href?: never;
+  };
+
+type ButtonAsLinkProps = BaseButtonProps &
+  Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, "href"> & {
+    href: string;
+  };
+
+type ButtonProps = ButtonAsButtonProps | ButtonAsLinkProps;
 
 const variants: Record<ButtonVariant, string> = {
   primary:
@@ -26,31 +36,46 @@ const variants: Record<ButtonVariant, string> = {
 
 export function Button({
   children,
-  href,
   variant = "primary",
   className = "",
-  onClick,
-  ...rest
+  ...props
 }: ButtonProps) {
   const classes = `inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full px-7 py-3.5 text-sm font-semibold tracking-wide transition-all duration-300 hover:-translate-y-0.5 hover:scale-105 active:scale-95 ${variants[variant]} ${className}`;
 
-  if (href) {
-    if (href.startsWith("http")) {
+  if ("href" in props && props.href) {
+    const { href, target, rel, ...anchorProps } = props as ButtonAsLinkProps;
+
+    const isExternal =
+      href.startsWith("http://") ||
+      href.startsWith("https://") ||
+      href.startsWith("mailto:") ||
+      href.startsWith("tel:");
+
+    if (isExternal) {
       return (
-        <a href={href} className={classes} {...rest}>
+        <a
+          href={href}
+          target={target}
+          rel={rel || (target === "_blank" ? "noopener noreferrer" : undefined)}
+          className={classes}
+          {...anchorProps}
+        >
           {children}
         </a>
       );
     }
+
     return (
-      <Link href={href} className={classes} {...rest}>
+      <Link href={href} className={classes} {...anchorProps}>
         {children}
       </Link>
     );
   }
 
+  const { href, ...buttonProps } = props as ButtonAsButtonProps;
+
   return (
-    <button type="button" onClick={onClick} className={classes} {...(rest as any)}>
+    <button type="button" className={classes} {...buttonProps}>
       {children}
     </button>
   );
