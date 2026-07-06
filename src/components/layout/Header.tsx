@@ -9,7 +9,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { REGISTER_URL, WHATSAPP_URL } from "@/lib/constants";
 
 export function Header() {
-  const { t, language, setLanguage } = useLanguage();
+  const { t, language } = useLanguage();
 
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -70,14 +70,6 @@ export function Header() {
           >
             {t.nav.enroll}
           </Link>
-          <button
-            onClick={() => setLanguage(language === "en" ? "ur" : "en")}
-            className="flex items-center gap-1 rounded-full border border-emerald/20 px-3 py-1.5 text-xs font-semibold text-emerald-deep transition-colors hover:bg-emerald/5"
-          >
-            <span className={language === "en" ? "text-emerald" : "text-emerald-deep/60"}>EN</span>
-            <span className="text-emerald-deep/40">|</span>
-            <span className={`font-urdu text-sm ${language === "ur" ? "text-gold" : "text-emerald-deep/60"}`}>اردو</span>
-          </button>
         </div>
 
         <button
@@ -110,20 +102,7 @@ export function Header() {
             <Link href="/#leadership" onClick={() => setMenuOpen(false)} className="text-base font-medium text-emerald-deep">{t.nav.leadership}</Link>
             <Link href="/#contact" onClick={() => setMenuOpen(false)} className="text-base font-medium text-emerald-deep">{t.nav.contact}</Link>
             
-            <div className="flex items-center gap-4 mt-2 border-t border-emerald/10 pt-4">
-              <button
-                onClick={() => {
-                  setLanguage(language === "en" ? "ur" : "en");
-                  setMenuOpen(false);
-                }}
-                className="flex items-center gap-2 rounded-full border border-emerald/20 px-4 py-2 text-sm font-semibold text-emerald-deep transition-colors hover:bg-emerald/5"
-              >
-                <span>Language:</span>
-                <span className={language === "en" ? "text-emerald" : "text-emerald-deep/60"}>EN</span>
-                <span className="text-emerald-deep/40">|</span>
-                <span className={`font-urdu text-base ${language === "ur" ? "text-gold" : "text-emerald-deep/60"}`}>اردو</span>
-              </button>
-            </div>
+
             <a
               href={WHATSAPP_URL}
               target="_blank"

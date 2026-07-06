@@ -76,6 +76,8 @@ export const metadata: Metadata = {
   },
 };
 
+import { FloatingLanguageSwitcher } from "@/components/ui/FloatingLanguageSwitcher";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -86,6 +88,7 @@ export default function RootLayout({
       <body className="overflow-x-hidden">
         <LanguageProvider>
           {children}
+          <FloatingLanguageSwitcher />
         </LanguageProvider>
       </body>
     </html>
