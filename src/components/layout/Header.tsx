@@ -35,15 +35,13 @@ export function Header() {
 
     <header
 
-      className={`fixed inset-x-0 top-0 z-50 transition-all duration-500 ${
-
-        scrolled
+      className={`fixed inset-x-0 top-0 z-50 transition-all duration-500 ${scrolled
 
           ? "border-b border-emerald/15 bg-cream/90 py-2.5 shadow-md shadow-emerald-deep/10 backdrop-blur-xl sm:py-3"
 
           : "border-b border-white/10 bg-cream/55 py-3.5 shadow-sm shadow-emerald-deep/5 backdrop-blur-md sm:py-4"
 
-      }`}
+        }`}
 
     >
 
@@ -60,7 +58,7 @@ export function Header() {
           <Link href="/#how-it-works" className="text-sm font-medium text-emerald-deep/85 transition-colors hover:text-emerald">{t.nav.howItWorks}</Link>
           <Link href="/#values" className="text-sm font-medium text-emerald-deep/85 transition-colors hover:text-emerald">{t.nav.values}</Link>
           <Link href="/#leadership" className="text-sm font-medium text-emerald-deep/85 transition-colors hover:text-emerald">{t.nav.leadership}</Link>
-          <Link href="/#contact" className="text-sm font-medium text-emerald-deep/85 transition-colors hover:text-emerald">{t.nav.contact}</Link>
+          <Link href="/#footer" className="text-sm font-medium text-emerald-deep/85 transition-colors hover:text-emerald">{t.nav.contact}</Link>
         </nav>
 
         <div className="hidden items-center gap-4 md:flex">
@@ -100,8 +98,8 @@ export function Header() {
             <Link href="/#how-it-works" onClick={() => setMenuOpen(false)} className="text-base font-medium text-emerald-deep">{t.nav.howItWorks}</Link>
             <Link href="/#values" onClick={() => setMenuOpen(false)} className="text-base font-medium text-emerald-deep">{t.nav.values}</Link>
             <Link href="/#leadership" onClick={() => setMenuOpen(false)} className="text-base font-medium text-emerald-deep">{t.nav.leadership}</Link>
-            <Link href="/#contact" onClick={() => setMenuOpen(false)} className="text-base font-medium text-emerald-deep">{t.nav.contact}</Link>
-            
+            <Link href="/#footer" onClick={() => setMenuOpen(false)} className="text-base font-medium text-emerald-deep">{t.nav.contact}</Link>
+
 
             <a
               href={WHATSAPP_URL}

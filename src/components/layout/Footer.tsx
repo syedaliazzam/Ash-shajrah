@@ -31,7 +31,7 @@ export function Footer() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="relative overflow-hidden border-t border-emerald/10 bg-emerald-deep px-5 py-10 text-cream sm:px-6 lg:px-8 lg:py-12">
+    <footer id="footer" className="relative overflow-hidden border-t border-emerald/10 bg-emerald-deep px-5 py-10 text-cream sm:px-6 lg:px-8 lg:py-12">
       {/* Background accents */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_15%_30%,rgba(45,138,106,0.2),transparent_55%)]" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_85%_60%,rgba(201,162,39,0.1),transparent_50%)]" />
