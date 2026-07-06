@@ -4,8 +4,11 @@ import { Header } from "@/components/layout/Header";
 import { RegistrationForm } from "@/components/sections/RegistrationForm";
 import { SITE } from "@/lib/data";
 import { BrandLogo } from "@/components/ui/BrandLogo";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export function RegistrationPageContent() {
+  const { language } = useLanguage();
+
   return (
     <>
       <Header />
@@ -30,27 +33,34 @@ export function RegistrationPageContent() {
             <BrandLogo variant="header" className="brightness-0 invert opacity-90" priority />
           </div>
 
-          {/* Bilingual heading block */}
-          <div className="mb-10 grid grid-cols-1 gap-4 text-center sm:grid-cols-2 sm:text-left">
-            {/* English — left */}
-            <div dir="ltr" lang="en" className="text-left">
-              <h1 className="font-display text-3xl font-bold leading-tight text-cream sm:text-4xl">
-                Register for {SITE.name}
-              </h1>
-              <p className="mt-3 text-base leading-relaxed text-cream/75">
-                Complete the form below and our admissions team will contact you soon.
-              </p>
-            </div>
-
-            {/* Urdu — right */}
-            <div dir="rtl" lang="ur" className="text-right">
-              <h2 className="font-urdu text-3xl font-bold leading-[1.7] text-cream sm:text-4xl">
-                الشجرہ لرننگ ہب میں رجسٹریشن
-              </h2>
-              <p className="font-urdu mt-3 text-base leading-[2.1] text-cream/75">
-                نیچے دیا گیا فارم مکمل کریں، ہماری داخلہ ٹیم جلد آپ سے رابطہ کرے گی۔
-              </p>
-            </div>
+          {/* Heading block */}
+          <div
+            dir={language === "ur" ? "rtl" : "ltr"}
+            lang={language === "ur" ? "ur" : "en"}
+            className="mb-10 mx-auto max-w-3xl text-center"
+          >
+            <h1
+              className={`${
+                language === "ur"
+                  ? "font-urdu text-3xl font-bold leading-[1.7] text-cream sm:text-4xl"
+                  : "font-display text-3xl font-bold leading-tight text-cream sm:text-4xl"
+              }`}
+            >
+              {language === "ur"
+                ? "الشجرہ لرننگ ہب میں رجسٹریشن"
+                : `Register for ${SITE.name}`}
+            </h1>
+            <p
+              className={`${
+                language === "ur"
+                  ? "font-urdu mt-3 text-base leading-[2.1] text-cream/75"
+                  : "mt-3 text-base leading-relaxed text-cream/75"
+              }`}
+            >
+              {language === "ur"
+                ? "نیچے دیا گیا فارم مکمل کریں، ہماری داخلہ ٹیم جلد آپ سے رابطہ کرے گی۔"
+                : "Complete the form below and our admissions team will contact you soon."}
+            </p>
           </div>
 
           {/* Divider */}
@@ -61,19 +71,25 @@ export function RegistrationPageContent() {
 
           {/* WhatsApp fallback */}
           <div className="mt-8 text-center">
-            <p className="text-sm text-cream/50">
-              Having trouble? Contact us on{" "}
+            <p
+              dir={language === "ur" ? "rtl" : "ltr"}
+              lang={language === "ur" ? "ur" : "en"}
+              className={`${
+                language === "ur"
+                  ? "font-urdu text-sm leading-[2] text-cream/50"
+                  : "text-sm text-cream/50"
+              }`}
+            >
+              {language === "ur" ? "مشکل ہو رہی ہے؟ " : "Having trouble? "}
+              {language === "ur" ? "پر رابطہ کریں" : "Contact us on "}
               <a
                 href={SITE.contact.whatsapp}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="font-semibold text-gold transition-colors hover:text-gold-soft"
               >
-                WhatsApp
+                {language === "ur" ? "واٹس ایپ" : "WhatsApp"}
               </a>
-            </p>
-            <p dir="rtl" lang="ur" className="font-urdu mt-1 text-sm leading-[2] text-cream/40">
-              مشکل ہو رہی ہے؟ واٹس ایپ پر رابطہ کریں
             </p>
           </div>
         </div>

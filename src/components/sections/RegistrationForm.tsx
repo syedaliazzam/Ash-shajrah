@@ -129,6 +129,7 @@ export function RegistrationForm() {
     <form
       onSubmit={handleSubmit}
       noValidate
+      dir={language === "ur" ? "rtl" : "ltr"}
       className="relative mx-auto max-w-2xl overflow-hidden rounded-3xl border border-white/20 bg-white/5 p-6 shadow-2xl backdrop-blur-md sm:p-8"
     >
       <div className="pointer-events-none absolute -right-12 -top-12 h-32 w-32 rounded-full bg-gold/10 blur-3xl" />
@@ -149,9 +150,10 @@ export function RegistrationForm() {
               id="parentName"
               type="text"
               required
+              dir={language === "ur" ? "rtl" : "ltr"}
               value={form.parentName}
               onChange={(e) => update("parentName", e.target.value)}
-              className={inputClass}
+              className={`${inputClass} ${language === "ur" ? "text-right" : "text-left"}`}
               placeholder="Your full name"
             />
             {errors.parentName && <p className="mt-1 text-xs text-red-300">{errors.parentName}</p>}
@@ -164,9 +166,10 @@ export function RegistrationForm() {
               id="whatsapp"
               type="tel"
               required
+              dir="ltr"
               value={form.whatsapp}
               onChange={(e) => update("whatsapp", e.target.value)}
-              className={inputClass}
+              className={`${inputClass} text-left`}
               placeholder="+92 300 0000000"
             />
             {errors.whatsapp && <p className="mt-1 text-xs text-red-300">{errors.whatsapp}</p>}
@@ -179,9 +182,10 @@ export function RegistrationForm() {
               id="email"
               type="email"
               required
+              dir="ltr"
               value={form.email}
               onChange={(e) => update("email", e.target.value)}
-              className={inputClass}
+              className={`${inputClass} text-left`}
               placeholder="you@email.com"
             />
             {errors.email && <p className="mt-1 text-xs text-red-300">{errors.email}</p>}
@@ -194,9 +198,10 @@ export function RegistrationForm() {
               id="childName"
               type="text"
               required
+              dir={language === "ur" ? "rtl" : "ltr"}
               value={form.childName}
               onChange={(e) => update("childName", e.target.value)}
-              className={inputClass}
+              className={`${inputClass} ${language === "ur" ? "text-right" : "text-left"}`}
               placeholder="Child's full name"
             />
             {errors.childName && <p className="mt-1 text-xs text-red-300">{errors.childName}</p>}
@@ -209,9 +214,10 @@ export function RegistrationForm() {
               id="childAge"
               type="text"
               required
+              dir="ltr"
               value={form.childAge}
               onChange={(e) => update("childAge", e.target.value)}
-              className={inputClass}
+              className={`${inputClass} ${language === "ur" ? "text-right" : "text-left"}`}
               placeholder="e.g. 4 years"
             />
             {errors.childAge && <p className="mt-1 text-xs text-red-300">{errors.childAge}</p>}
@@ -223,9 +229,10 @@ export function RegistrationForm() {
             <select
               id="level"
               required
+              dir={language === "ur" ? "rtl" : "ltr"}
               value={form.level}
               onChange={(e) => update("level", e.target.value)}
-              className={selectClass}
+              className={`${selectClass} ${language === "ur" ? "text-right" : "text-left"}`}
             >
               <option value="" className="text-[#0d3b2e] bg-cream">Select a level</option>
               {PROGRAMME_LEVELS.map((level) => (
@@ -244,9 +251,10 @@ export function RegistrationForm() {
               id="cityCountry"
               type="text"
               required
+              dir={language === "ur" ? "rtl" : "ltr"}
               value={form.cityCountry}
               onChange={(e) => update("cityCountry", e.target.value)}
-              className={inputClass}
+              className={`${inputClass} ${language === "ur" ? "text-right" : "text-left"}`}
               placeholder="e.g. Islamabad, Pakistan"
             />
             {errors.cityCountry && <p className="mt-1 text-xs text-red-300">{errors.cityCountry}</p>}
@@ -258,9 +266,10 @@ export function RegistrationForm() {
             <textarea
               id="message"
               rows={3}
+              dir={language === "ur" ? "rtl" : "ltr"}
               value={form.message}
               onChange={(e) => update("message", e.target.value)}
-              className={`${inputClass} resize-none`}
+              className={`${inputClass} resize-none ${language === "ur" ? "text-right" : "text-left"}`}
               placeholder="Any additional details or questions..."
             />
           </div>
