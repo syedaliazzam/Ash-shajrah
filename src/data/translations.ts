@@ -351,6 +351,16 @@ export const translations = {
         },
         cityCountry: "City / Country",
         message: "Message",
+        placeholders: {
+          parentName: "Your full name",
+          whatsapp: "+92 300 0000000",
+          email: "you@email.com",
+          childName: "Child's full name",
+          childAge: "e.g. 4 years",
+          level: "Select a level",
+          cityCountry: "e.g. Islamabad, Pakistan",
+          message: "Any additional details or questions"
+        },
         submit: "Submit Registration",
         success: "Registration submitted successfully! Our admissions team will be in touch.",
         error: "There was an error submitting your registration. Please try again."
@@ -362,7 +372,10 @@ export const translations = {
       contact: {
         whatsapp: "WhatsApp",
         email: "Email",
-        office: "Admin Office"
+        office: "Admin Office",
+        whatsappValue: "0311-7263544",
+        emailValue: "admission.ashshajrah@gmail.com",
+        officeValue: "304, Altura Arcade, Block F Markaz, B-17, Islamabad"
       },
       messageUs: "Message Us on WhatsApp",
       description: "Early years learning, character, leadership — all from home.",
@@ -733,10 +746,35 @@ export const translations = {
         },
         cityCountry: "شہر / ملک",
         message: "پیغام",
+        placeholders: {
+          parentName: "اپنا مکمل نام درج کریں",
+          whatsapp: "+92 300 0000000",
+          email: "آپ کا ای میل ایڈریس",
+          childName: "بچے کا مکمل نام درج کریں",
+          childAge: "مثلاً 4 سال",
+          level: "سطح منتخب کریں",
+          cityCountry: "مثلاً اسلام آباد، پاکستان",
+          message: "اضافی معلومات یا سوالات لکھیں"
+        },
         submit: "رجسٹریشن جمع کروائیں",
         success: "رجسٹریشن کامیابی سے جمع ہو گئی! ہماری ٹیم جلد رابطہ کرے گی۔",
         error: "رجسٹریشن جمع کرنے میں خرابی پیش آئی۔ براہ کرم دوبارہ کوشش کریں۔"
       }
+    },
+    footer: {
+      phrase: "تعلیم • کردار • قیادت",
+      support: "اقدار اور ترقی پر مبنی آن لائن تعلیم۔",
+      contact: {
+        whatsapp: "واٹس ایپ",
+        email: "ای میل",
+        office: "انتظامی دفتر",
+        whatsappValue: "0311-7263544",
+        emailValue: "admission.ashshajrah@gmail.com",
+        officeValue: "304، Altura Arcade، Block F Markaz، B-17، Islamabad"
+      },
+      messageUs: "ہمیں واٹس ایپ کریں",
+      description: "ابتدائی تعلیم، کردار، قیادت — سب گھر بیٹھے۔",
+      rights: "جملہ حقوق محفوظ ہیں۔"
     }
   }
 };

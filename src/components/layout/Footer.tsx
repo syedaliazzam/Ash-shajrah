@@ -7,22 +7,41 @@ import { useLanguage } from "@/contexts/LanguageContext";
 
 function ContactRow({
   label,
-  children,
+  value,
+  href,
   language,
+  dir = "auto",
 }: {
   label: string;
-  children: ReactNode;
+  value: string;
+  href?: string;
   language: string;
+  dir?: "auto" | "ltr" | "rtl";
 }) {
   return (
-    <li>
-      <div className={`flex items-center gap-1.5 ${language === 'ur' ? 'flex-row-reverse' : ''}`}>
-        <span className={`${language === 'ur' ? 'font-urdu' : 'uppercase tracking-wider'} text-[11px] font-semibold text-gold-soft/75`}>
-          {label}
-        </span>
-      </div>
-      <div className={`mt-1 text-sm font-medium leading-snug text-cream ${language === 'ur' ? 'text-right font-sans' : 'text-left'}`}>{children}</div>
-    </li>
+    <div>
+      <p className={`${language === 'ur' ? 'font-urdu' : 'uppercase tracking-wider'} text-[11px] font-semibold text-gold-soft/75`}>
+        {label}
+      </p>
+      {href ? (
+        <a
+          href={href}
+          dir={dir}
+          target={href.startsWith('http') ? '_blank' : undefined}
+          rel={href.startsWith('http') ? 'noopener noreferrer' : undefined}
+          className={`mt-1 block text-sm font-medium leading-snug text-cream transition-colors hover:text-gold-soft ${language === 'ur' ? 'text-right font-sans' : 'text-left'}`}
+        >
+          {value}
+        </a>
+      ) : (
+        <p
+          dir={dir}
+          className={`mt-1 block text-sm font-medium leading-snug text-cream ${language === 'ur' ? 'text-right font-sans' : 'text-left'}`}
+        >
+          {value}
+        </p>
+      )}
+    </div>
   );
 }
 
@@ -81,29 +100,31 @@ export function Footer() {
 
           {/* Middle — contact */}
           <div className={`border-cream/10 md:border-t-0 lg:border-l ${language === 'ur' ? 'lg:pr-8 lg:border-r lg:border-l-0' : 'lg:pl-8 lg:pr-8'}`}>
-            <ul className="flex flex-col gap-3.5">
-              <ContactRow label={t.footer.contact.whatsapp} language={language}>
-                <a
-                  href={SITE.contact.whatsapp}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="transition-colors hover:text-gold-soft"
-                >
-                  {SITE.contact.whatsappDisplay}
-                </a>
-              </ContactRow>
-              <ContactRow label={t.footer.contact.email} language={language}>
-                <a
-                  href={`mailto:${SITE.contact.admissionEmail}`}
-                  className="break-all transition-colors hover:text-gold-soft"
-                >
-                  {SITE.contact.admissionEmail}
-                </a>
-              </ContactRow>
-              <ContactRow label={t.footer.contact.office} language={language}>
-                <span className="text-cream/90">{SITE.contact.adminOffice}</span>
-              </ContactRow>
-            </ul>
+            <div
+              dir={language === 'ur' ? 'rtl' : 'ltr'}
+              className={`flex flex-col space-y-5 ${language === 'ur' ? 'items-end text-right' : 'items-start text-left'}`}
+            >
+              <ContactRow
+                label={t.footer.contact.whatsapp}
+                value={t.footer.contact.whatsappValue || SITE.contact.whatsappDisplay}
+                href={SITE.contact.whatsapp}
+                language={language}
+                dir="ltr"
+              />
+              <ContactRow
+                label={t.footer.contact.email}
+                value={t.footer.contact.emailValue || SITE.contact.admissionEmail}
+                href={`mailto:${SITE.contact.admissionEmail}`}
+                language={language}
+                dir="ltr"
+              />
+              <ContactRow
+                label={t.footer.contact.office}
+                value={t.footer.contact.officeValue || SITE.contact.adminOffice}
+                language={language}
+                dir={language === 'ur' ? 'rtl' : 'ltr'}
+              />
+            </div>
           </div>
 
           {/* Right — CTA */}

@@ -41,10 +41,10 @@ function FormLabel({
   return (
     <label
       htmlFor={htmlFor}
-      className={`mb-1.5 flex items-baseline gap-2 ${language === 'ur' ? 'flex-row-reverse' : ''}`}
+      className={`mb-2 block text-sm font-semibold ${language === 'ur' ? 'text-right font-urdu' : 'text-left'}`}
     >
-      <span className={`${language === 'ur' ? 'font-urdu' : 'uppercase tracking-wider'} text-xs font-semibold text-cream/85`}>
-        {label} {required && <span className="text-gold">*</span>}
+      <span className={`text-xs font-semibold text-cream/85 ${language !== 'ur' ? 'uppercase tracking-wider' : ''}`}>
+        {label} {required && <span className="text-gold ml-1">*</span>}
       </span>
     </label>
   );
@@ -153,8 +153,8 @@ export function RegistrationForm() {
               dir={language === "ur" ? "rtl" : "ltr"}
               value={form.parentName}
               onChange={(e) => update("parentName", e.target.value)}
-              className={`${inputClass} ${language === "ur" ? "text-right" : "text-left"}`}
-              placeholder="Your full name"
+              className={`${inputClass} ${language === "ur" ? "text-right font-urdu placeholder:text-right" : "text-left"}`}
+              placeholder={t.register.form.placeholders.parentName}
             />
             {errors.parentName && <p className="mt-1 text-xs text-red-300">{errors.parentName}</p>}
           </div>
@@ -169,8 +169,8 @@ export function RegistrationForm() {
               dir="ltr"
               value={form.whatsapp}
               onChange={(e) => update("whatsapp", e.target.value)}
-              className={`${inputClass} text-left`}
-              placeholder="+92 300 0000000"
+              className={`${inputClass} ${language === "ur" ? "text-right placeholder:text-right" : "text-left"}`}
+              placeholder={t.register.form.placeholders.whatsapp}
             />
             {errors.whatsapp && <p className="mt-1 text-xs text-red-300">{errors.whatsapp}</p>}
           </div>
@@ -185,8 +185,8 @@ export function RegistrationForm() {
               dir="ltr"
               value={form.email}
               onChange={(e) => update("email", e.target.value)}
-              className={`${inputClass} text-left`}
-              placeholder="you@email.com"
+              className={`${inputClass} ${language === "ur" ? "text-right placeholder:text-right" : "text-left"}`}
+              placeholder={t.register.form.placeholders.email}
             />
             {errors.email && <p className="mt-1 text-xs text-red-300">{errors.email}</p>}
           </div>
@@ -201,8 +201,8 @@ export function RegistrationForm() {
               dir={language === "ur" ? "rtl" : "ltr"}
               value={form.childName}
               onChange={(e) => update("childName", e.target.value)}
-              className={`${inputClass} ${language === "ur" ? "text-right" : "text-left"}`}
-              placeholder="Child's full name"
+              className={`${inputClass} ${language === "ur" ? "text-right font-urdu placeholder:text-right" : "text-left"}`}
+              placeholder={t.register.form.placeholders.childName}
             />
             {errors.childName && <p className="mt-1 text-xs text-red-300">{errors.childName}</p>}
           </div>
@@ -217,8 +217,8 @@ export function RegistrationForm() {
               dir="ltr"
               value={form.childAge}
               onChange={(e) => update("childAge", e.target.value)}
-              className={`${inputClass} ${language === "ur" ? "text-right" : "text-left"}`}
-              placeholder="e.g. 4 years"
+              className={`${inputClass} ${language === "ur" ? "text-right placeholder:text-right" : "text-left"}`}
+              placeholder={t.register.form.placeholders.childAge}
             />
             {errors.childAge && <p className="mt-1 text-xs text-red-300">{errors.childAge}</p>}
           </div>
@@ -232,14 +232,23 @@ export function RegistrationForm() {
               dir={language === "ur" ? "rtl" : "ltr"}
               value={form.level}
               onChange={(e) => update("level", e.target.value)}
-              className={`${selectClass} ${language === "ur" ? "text-right" : "text-left"}`}
+              className={`${selectClass} ${language === "ur" ? "text-right font-urdu" : "text-left"}`}
             >
-              <option value="" className="text-[#0d3b2e] bg-cream">Select a level</option>
-              {PROGRAMME_LEVELS.map((level) => (
-                <option key={level} value={level} className="text-[#0d3b2e] bg-cream">
-                  {level}
-                </option>
-              ))}
+              <option value="" className="text-[#0d3b2e] bg-cream">{t.register.form.placeholders.level}</option>
+              {PROGRAMME_LEVELS.map((level) => {
+                const levelKey = {
+                  "Play Group": "playgroup",
+                  "Prep-I": "prepI",
+                  "Prep-II": "prepII",
+                  "Not Sure / Need Guidance": "notSure",
+                }[level] as keyof typeof t.register.form.levels;
+                
+                return (
+                  <option key={level} value={level} className="text-[#0d3b2e] bg-cream">
+                    {t.register.form.levels[levelKey]}
+                  </option>
+                );
+              })}
             </select>
             {errors.level && <p className="mt-1 text-xs text-red-300">{errors.level}</p>}
           </div>
@@ -254,8 +263,8 @@ export function RegistrationForm() {
               dir={language === "ur" ? "rtl" : "ltr"}
               value={form.cityCountry}
               onChange={(e) => update("cityCountry", e.target.value)}
-              className={`${inputClass} ${language === "ur" ? "text-right" : "text-left"}`}
-              placeholder="e.g. Islamabad, Pakistan"
+              className={`${inputClass} ${language === "ur" ? "text-right font-urdu placeholder:text-right" : "text-left"}`}
+              placeholder={t.register.form.placeholders.cityCountry}
             />
             {errors.cityCountry && <p className="mt-1 text-xs text-red-300">{errors.cityCountry}</p>}
           </div>
@@ -269,8 +278,8 @@ export function RegistrationForm() {
               dir={language === "ur" ? "rtl" : "ltr"}
               value={form.message}
               onChange={(e) => update("message", e.target.value)}
-              className={`${inputClass} resize-none ${language === "ur" ? "text-right" : "text-left"}`}
-              placeholder="Any additional details or questions..."
+              className={`${inputClass} resize-none ${language === "ur" ? "text-right font-urdu placeholder:text-right" : "text-left"}`}
+              placeholder={t.register.form.placeholders.message}
             />
           </div>
         </div>
