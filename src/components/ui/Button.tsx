@@ -72,6 +72,8 @@ export function Button({
     );
   }
 
+  // Extract href to avoid passing it to the button element (even if undefined)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { href, ...buttonProps } = props as ButtonAsButtonProps;
 
   return (
