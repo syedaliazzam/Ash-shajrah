@@ -373,7 +373,7 @@ export const translations = {
         whatsapp: "WhatsApp",
         email: "Email",
         office: "Admin Office",
-        whatsappValue: "0311-7263544",
+        whatsappValue: "0316-0256810",
         emailValue: "admission.ashshajrah@gmail.com",
         officeValue: "304, Altura Arcade, Block F Markaz, B-17, Islamabad"
       },
@@ -768,7 +768,7 @@ export const translations = {
         whatsapp: "واٹس ایپ",
         email: "ای میل",
         office: "انتظامی دفتر",
-        whatsappValue: "0311-7263544",
+        whatsappValue: "0316-0256810",
         emailValue: "admission.ashshajrah@gmail.com",
         officeValue: "304، Altura Arcade، Block F Markaz، B-17، Islamabad"
       },
