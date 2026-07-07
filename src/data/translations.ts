@@ -703,18 +703,7 @@ export const translations = {
       learnMore: "مزید جانیں",
       showLess: "کم دکھائیں"
     },
-    footer: {
-      phrase: "سیکھنا • کردار سازی • قیادت",
-      support: "اقدار اور نشوونما پر مبنی آن لائن تعلیم۔",
-      contact: {
-        whatsapp: "واٹس ایپ",
-        email: "ای میل",
-        office: "انتظامی دفتر"
-      },
-      messageUs: "واٹس ایپ پر پیغام بھیجیں",
-      description: "ابتدائی تعلیم، کردار، قیادت — سب گھر بیٹھے۔",
-      rights: "جملہ حقوق محفوظ ہیں۔"
-    },
+
     contact: {
       title: "رابطہ کریں",
       subtitle: "ہماری داخلہ ٹیم سے رابطہ کریں۔",
