@@ -3,10 +3,10 @@ export function OrganizationJsonLd() {
     "@context": "https://schema.org",
     "@type": "EducationalOrganization",
     name: "Ash-Shajrah Learning Hub",
-    alternateName: "الشجرہ لرننگ ہب",
+    alternateName: ["ALH", "Ash-Shajrah", "Ash-Shajrah Learning Hub (ALH)", "الشجرہ لرننگ ہب"],
     url: process.env.NEXT_PUBLIC_SITE_URL || "https://ashshajrah.com",
     description:
-      "Ash-Shajrah Learning Hub is an online early childhood learning hub for Play Group, Prep-I and Prep-II, focused on language, numeracy, Fehm-e-Deen, Islamic values, creativity, character, confidence, and parent-supported home learning.",
+      "Ash-Shajrah Learning Hub (ALH) is an online early childhood learning hub for Play Group, Prep-I and Prep-II, focused on parent partnership, Islamic values, creativity, character, confidence, and home-based learning support.",
     areaServed: [
       "Pakistan",
       "Overseas Pakistani families",

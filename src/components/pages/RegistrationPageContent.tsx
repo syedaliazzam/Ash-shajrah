@@ -2,12 +2,12 @@
 
 import { Header } from "@/components/layout/Header";
 import { RegistrationForm } from "@/components/sections/RegistrationForm";
-import { SITE } from "@/lib/data";
 import { BrandLogo } from "@/components/ui/BrandLogo";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { WHATSAPP_URL } from "@/lib/constants";
 
 export function RegistrationPageContent() {
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
 
   return (
     <>
@@ -46,9 +46,7 @@ export function RegistrationPageContent() {
                   : "font-display text-3xl font-bold leading-tight text-cream sm:text-4xl"
               }`}
             >
-              {language === "ur"
-                ? "الشجرہ لرننگ ہب میں رجسٹریشن"
-                : `Register for ${SITE.name}`}
+              {t.register.title}
             </h1>
             <p
               className={`${
@@ -57,9 +55,7 @@ export function RegistrationPageContent() {
                   : "mt-3 text-base leading-relaxed text-cream/75"
               }`}
             >
-              {language === "ur"
-                ? "نیچے دیا گیا فارم مکمل کریں، ہماری داخلہ ٹیم جلد آپ سے رابطہ کرے گی۔"
-                : "Complete the form below and our admissions team will contact you soon."}
+              {t.register.subtitle}
             </p>
           </div>
 
@@ -83,7 +79,7 @@ export function RegistrationPageContent() {
               {language === "ur" ? "مشکل ہو رہی ہے؟ " : "Having trouble? "}
               {language === "ur" ? "پر رابطہ کریں" : "Contact us on "}
               <a
-                href={SITE.contact.whatsapp}
+                href={WHATSAPP_URL}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="font-semibold text-gold transition-colors hover:text-gold-soft"

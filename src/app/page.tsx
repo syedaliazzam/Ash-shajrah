@@ -3,9 +3,9 @@ import { HomePageContent } from "@/components/pages/HomePageContent";
 import { OrganizationJsonLd } from "@/components/seo/OrganizationJsonLd";
 
 export const metadata: Metadata = {
-  title: "Ash-Shajrah Learning Hub | Online Learning, Character & Leadership",
+  title: "Ash-Shajrah Learning Hub (ALH) | Online Learning, Character & Leadership",
   description:
-    "A values-based online early years learning hub for Play Group, Prep-I and Prep-II, combining guided online sessions, parent-supported home learning, Islamic values, creativity, and character development.",
+    "Ash-Shajrah Learning Hub (ALH) is an online early years learning hub focused on Play Group, Prep-I, Prep-II, parent partnership, Islamic values, character building, and home-based learning support.",
 };
 
 export default function HomePage() {

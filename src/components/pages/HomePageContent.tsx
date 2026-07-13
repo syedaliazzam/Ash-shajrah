@@ -12,10 +12,11 @@ import { ParentPartnershipSection } from "@/components/sections/ParentPartnershi
 import { ProgramsSection } from "@/components/sections/ProgramsSection";
 import { ValuesSection } from "@/components/sections/ValuesSection";
 import { LearningSection } from "@/components/sections/LearningSection";
+import { CurriculumSection } from "@/components/sections/CurriculumSection";
 import { OnlineLearningSection } from "@/components/sections/OnlineLearningSection";
 import { LeadershipSection } from "@/components/sections/LeadershipSection";
+import { OurWorksSection } from "@/components/sections/OurWorksSection";
 import { VisionSection } from "@/components/sections/VisionSection";
-import { CurriculumSection } from "@/components/sections/CurriculumSection";
 import { LogoPhilosophySection } from "@/components/sections/LogoPhilosophySection";
 
 export function HomePageContent() {
@@ -40,6 +41,7 @@ export function HomePageContent() {
         <CurriculumSection />
         <OnlineLearningSection />
         <LeadershipSection />
+        <OurWorksSection />
         <VisionSection />
         <LogoPhilosophySection />
       </main>

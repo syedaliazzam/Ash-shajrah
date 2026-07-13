@@ -7,12 +7,18 @@ export const metadata: Metadata = {
     process.env.NEXT_PUBLIC_SITE_URL || "https://ashshajrah.com"
   ),
   title: {
-    default: "Ash-Shajrah Learning Hub | Online Early Years Learning",
-    template: "%s | Ash-Shajrah Learning Hub",
+    default: "Ash-Shajrah Learning Hub (ALH) | Online Early Years Learning",
+    template: "%s | Ash-Shajrah Learning Hub (ALH)",
   },
   description:
-    "Ash-Shajrah Learning Hub is an online early childhood learning hub for Play Group, Prep-I and Prep-II, focused on language, numeracy, Fehm-e-Deen, Islamic values, creativity, character, confidence, and parent-supported home learning.",
+    "Ash-Shajrah Learning Hub (ALH) is an online early childhood learning hub for Play Group, Prep-I and Prep-II, focused on parent partnership, Islamic values, creativity, character, confidence, and home-based learning support.",
   keywords: [
+    "ALH",
+    "Ash-Shajrah ALH",
+    "Ash-Shajrah Learning Hub ALH",
+    "ALH online learning",
+    "ALH early years learning",
+    "ALH Pakistan",
     "Ash-Shajrah Learning Hub",
     "Ash Shajrah",
     "online learning hub Pakistan",
@@ -37,11 +43,11 @@ export const metadata: Metadata = {
   ],
   openGraph: {
     type: "website",
-    title: "Ash-Shajrah Learning Hub | Online Early Years Learning",
+    title: "Ash-Shajrah Learning Hub (ALH) | Online Early Years Learning",
     description:
-      "Online early childhood learning with parent partnership, Islamic values, creativity, confidence, and character development.",
+      "Ash-Shajrah Learning Hub (ALH) — online early childhood learning with parent partnership, Islamic values, creativity, and character development.",
     url: process.env.NEXT_PUBLIC_SITE_URL || "https://ashshajrah.com",
-    siteName: "Ash-Shajrah Learning Hub",
+    siteName: "Ash-Shajrah Learning Hub (ALH)",
     locale: "en_US",
     alternateLocale: "ur_PK",
     images: [
@@ -55,7 +61,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Ash-Shajrah Learning Hub",
+    title: "Ash-Shajrah Learning Hub (ALH)",
     description:
       "Online early years learning rooted in values, character, and leadership.",
     images: ["/og-image.png"],

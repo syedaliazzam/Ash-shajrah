@@ -38,7 +38,7 @@ export function LearningCharacterLeadershipSection() {
   return (
     <section
       ref={sectionRef}
-      id="learning-approach"
+      id="lcl-explanation"
       className="relative overflow-hidden bg-cream px-6 py-24 lg:px-8 lg:py-32"
     >
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-gold/[0.03] to-transparent" />

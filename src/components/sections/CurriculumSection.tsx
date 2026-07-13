@@ -33,7 +33,7 @@ export function CurriculumSection() {
       <div className="relative mx-auto max-w-5xl">
         <div className={`mb-12 sm:mb-16 text-center ${language === 'ur' ? 'font-urdu' : ''}`}>
           <span className={`mb-5 inline-block rounded-full border border-emerald/20 bg-emerald/10 px-5 py-2 font-semibold uppercase text-emerald ${language === 'ur' ? 'font-urdu text-sm tracking-widest' : 'text-sm tracking-[0.2em]'}`}>
-            {language === 'ur' ? 'نصاب' : 'Curriculum'}
+            {t.nav.curriculum}
           </span>
 
           <div className="mx-auto max-w-3xl text-center">

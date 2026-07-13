@@ -102,7 +102,7 @@ export function LearningSection() {
   return (
     <section
       ref={sectionRef}
-      id="approach"
+      id="learning-approach"
       className="learning-section relative overflow-hidden px-6 py-24 lg:px-8 lg:py-32"
     >
       {/* Layered background */}
@@ -137,7 +137,7 @@ export function LearningSection() {
       <div className="relative mx-auto max-w-7xl">
         <div className={`text-center ${language === 'ur' ? 'font-urdu' : ''}`}>
           <span className="mb-4 inline-block rounded-full border border-emerald/20 bg-emerald/5 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-emerald">
-            {language === 'ur' ? 'سیکھنے کا طریقہ کار' : 'Learning Approach'}
+            {t.nav.learningApproach}
           </span>
           <h2 className={`mb-4 text-3xl font-bold text-emerald-deep sm:text-4xl ${language === 'ur' ? 'leading-[1.8]' : 'font-display'}`}>
             {t.learning.title}

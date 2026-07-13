@@ -44,7 +44,7 @@ export function ContactSection() {
       <div className="relative mx-auto max-w-4xl">
         <div data-contact-item className={`text-center mb-16 ${language === 'ur' ? 'font-urdu' : ''}`}>
           <span className="mb-4 inline-block rounded-full border border-emerald/20 bg-emerald/5 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-emerald">
-            {language === 'ur' ? 'رابطہ کریں' : 'Contact Us'}
+            {t.nav.contact}
           </span>
           <h2 className={`mb-4 text-3xl font-bold text-emerald-deep sm:text-4xl ${language === 'ur' ? 'leading-[1.8]' : 'font-display'}`}>
             {t.contact.title}

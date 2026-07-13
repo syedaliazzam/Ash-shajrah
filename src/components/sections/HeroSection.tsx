@@ -7,7 +7,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { HeroVideoBackground } from "@/components/hero/HeroVideoBackground";
 import { HeroParticles } from "@/components/hero/HeroParticles";
 import { HeroWatermark } from "@/components/hero/HeroWatermark";
-import { REGISTER_URL, WHATSAPP_URL } from "@/lib/constants";
+import { REGISTER_URL, WHATSAPP_URL, EDI_FACEBOOK_URL } from "@/lib/constants";
 
 export function HeroSection() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -22,14 +22,15 @@ export function HeroSection() {
 
       const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
 
-      tl.from("[data-hero-badge]", { y: 20, opacity: 0, duration: 0.8 })
-        .from("[data-hero-content]", { y: 40, opacity: 0, duration: 1.0 }, "-=0.35")
+      tl.from("[data-hero-supervision]", { y: -12, opacity: 0, duration: 0.7 })
+        .from("[data-hero-content]", { y: 40, opacity: 0, duration: 1.0 }, "-=0.15")
         .from("[data-hero-cta]", { y: 18, opacity: 0, duration: 0.65, stagger: 0.1 }, "-=0.35");
     },
     { scope: sectionRef }
   );
 
   const { t, language } = useLanguage();
+  const isUrdu = language === "ur";
 
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLElement>) => {
     if (!sectionRef.current || !contentRef.current) return;
@@ -85,13 +86,40 @@ export function HeroSection() {
       <HeroParticles />
       <HeroWatermark watermarkRef={watermarkRef} />
 
-      <div className="relative z-20 mx-auto flex min-h-screen w-full max-w-7xl items-center px-6 pb-20 pt-28 sm:px-8 sm:pb-24 sm:pt-32 lg:px-10">
+      <div
+        data-hero-supervision
+        className="pointer-events-auto absolute left-1/2 top-24 z-40 w-full max-w-[92vw] -translate-x-1/2 px-4 sm:top-28 sm:max-w-2xl md:top-32"
+      >
+        <p
+          className={`relative z-30 mx-auto w-fit max-w-[90vw] rounded-full border border-gold/50 bg-white/10 px-6 py-3 text-center text-cream shadow-sm backdrop-blur-md ${
+            isUrdu
+              ? "font-urdu text-base leading-relaxed sm:text-lg md:text-xl"
+              : "text-sm font-medium tracking-wide sm:text-base"
+          }`}
+        >
+          <span>{t.brand.supervisionPrefix} </span>
+          <a
+            href={EDI_FACEBOOK_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`relative z-40 pointer-events-auto text-gold underline-offset-4 transition hover:text-yellow-300 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-gold ${
+              isUrdu ? "font-urdu text-base sm:text-lg md:text-xl" : "font-semibold"
+            }`}
+          >
+            {t.brand.supervisionName}
+          </a>
+        </p>
+      </div>
+
+      <div className="pointer-events-none relative z-20 mx-auto flex min-h-screen w-full max-w-7xl items-center px-6 pb-20 pt-36 sm:px-8 sm:pb-24 sm:pt-40 lg:px-10 lg:pt-44">
         <div ref={contentRef} className="relative z-30 w-full pointer-events-auto">
 
 
-          <div data-hero-content className={`flex flex-col ${language === 'ur' ? 'text-right font-urdu items-end' : 'text-left items-start'}`}>
+          <div data-hero-content className={`flex flex-col ${isUrdu ? 'text-right font-urdu items-end' : 'text-left items-start'}`}>
             <div className="max-w-3xl">
-              <h1 className={`${language === 'ur' ? 'font-urdu leading-[1.6]' : 'font-display leading-tight'} text-4xl font-bold text-cream sm:text-5xl lg:text-6xl xl:text-[4rem]`}>
+              <h1
+                className={`${isUrdu ? "font-urdu leading-[1.6]" : "font-display leading-tight"} text-4xl font-bold text-cream sm:text-5xl lg:text-6xl xl:text-[4rem]`}
+              >
                 {t.hero.title}
               </h1>
               <p className={`mt-4 ${language === 'ur' ? 'font-urdu leading-[2]' : 'font-display leading-snug'} text-xl font-semibold text-gold sm:text-2xl`}>

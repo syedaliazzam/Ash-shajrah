@@ -1,18 +1,30 @@
 export const translations = {
   en: {
+    brand: {
+      fullName: "Ash-Shajrah Learning Hub",
+      shortName: "ALH",
+      shortNameUrdu: "",
+      displayName: "Ash-Shajrah Learning Hub (ALH)",
+      navDisplayName: "Ash-Shajrah (ALH)",
+      tagline: "Learning • Character • Leadership",
+      supervisionPrefix: "Under the supervision of",
+      supervisionName: "Educator Development Institutes",
+      facebookAriaLabel: "Open Ash-Shajrah Learning Hub Facebook page",
+    },
     nav: {
-      about: "About",
-      programs: "Programs",
-      curriculum: "Curriculum",
-      learningApproach: "Learning Approach",
-      howItWorks: "How It Works",
+      about: "About Us",
+      programs: "Our Programs",
       values: "Values",
+      learningApproach: "Learning Approach",
+      curriculum: "Curriculum",
+      howItWorks: "How It Works",
       leadership: "Leadership",
-      contact: "Contact",
+      works: "Our Works",
+      contact: "Contact Us",
       enroll: "Enroll",
     },
     hero: {
-      title: "Ash-Shajrah Learning Hub",
+      title: "Ash-Shajrah Learning Hub (ALH)",
       subtitle: "Learning • Character • Leadership",
       description: "A Centre for Learning, Character, and Leadership",
       badge: "Fully Online Early Childhood Learning Hub",
@@ -21,8 +33,9 @@ export const translations = {
       contactCta: "WhatsApp",
     },
     about: {
-      introductionTitle: "Introduction",
-      introductionBody: "Ash-Shajrah is an emerging online educational and developmental institution founded on the belief that the home is a child’s first learning environment and parents are the earliest, most influential and lifelong educators. Its model focuses on early childhood education and parent partnership so children receive structured online learning while parents are empowered to support development at home.",
+      introductionTitle: "About Us",
+      introductionBody:
+        "Ash-Shajrah Learning Hub (ALH) is an online educational and developmental institution founded on the belief that the home is a child's first learning environment and parents are the earliest, most influential and lifelong educators. Its model focuses on early childhood education and parent partnership so children receive structured online learning while parents are empowered to support development at home.",
       missionTitle: "Our Mission",
       missionBody: "To provide a balanced and purposeful online educational and developmental environment that nurtures knowledge, practical skills, strong values and positive attitudes in children so they grow into capable, responsible individuals who are obedient to their Creator, a source of mercy for their families, and beneficial to society.",
       visionTitle: "Our Vision",
@@ -195,7 +208,7 @@ export const translations = {
       ]
     },
     values: {
-      title: "Core Values",
+      title: "Values",
       description: "Our education is grounded in Islamic values. These values are not just taught — they are woven into every session, activity, and interaction to become a natural part of each child's character.",
       items: [
         { title: "Love for Learning", description: "The root of all growth" },
@@ -298,20 +311,27 @@ export const translations = {
     },
     leadership: {
       title: "Leadership",
+      viewMore: "View More",
+      showLess: "Show Less",
       items: [
         {
           name: "Muhammad Azeem Siddiqui",
           title: "Director",
-          bio: "Muhammad Azeem Siddiqui is a seasoned educationist, transformational trainer, writer, consultant, and family counselor with over 30 years of experience. He leads Ash-Shajrah Learning Hub's vision for online learning excellence — guiding educators, parents, and families through values-based development and leadership habits.",
+          bio: "A seasoned educationist, trainer, consultant, and mentor with extensive experience in educational development, personal growth, leadership training, and values-based learning.",
+          fullBio:
+            "Muhammad Azeem Siddiqui is a seasoned educationist, transformational trainer, writer, consultant, and family counselor with over 30 years of experience. He leads Ash-Shajrah Learning Hub's vision for online learning excellence — guiding educators, parents, and families through values-based development and leadership habits.",
+          image: "/images/works/director-training-profile.jpg",
           focus: ["Online Learning Vision", "Educator Development", "Parent Guidance"],
         },
         {
           name: "Humaira Kanwal",
           title: "Principal",
-          bio: "Humaira Kanwal is a dedicated education professional with over five years of leadership experience in Montessori, preschool, and elementary education. She holds a B.Sc., B.Ed., AMI Montessori Diploma, and Early Childhood Education certificate. She specializes in early years online learning design, child-centered guidance, and engaging digital experiences for young learners.",
+          bio: "A dedicated education professional with leadership experience in Montessori, preschool, and elementary education, specializing in early years online learning and child-centered guidance.",
+          fullBio:
+            "Humaira Kanwal is a dedicated education professional with over five years of leadership experience in Montessori, preschool, and elementary education. She holds a B.Sc., B.Ed., AMI Montessori Diploma, and Early Childhood Education certificate. She specializes in early years online learning design, child-centered guidance, and engaging digital experiences for young learners.",
           focus: ["Early Years Online Learning", "Montessori Guidance", "Child-Centered Development"],
-        }
-      ]
+        },
+      ],
     },
     techAdvisory: {
       title: "Technology Advisory Partner",
@@ -319,6 +339,13 @@ export const translations = {
       expandedBody: "Ash-Shajrah Learning Hub is proud to collaborate with Paramount Intelligence, a specialized AI and digital transformation consultancy. Paramount's team includes experienced technology leaders and AI practitioners who have supported Fortune 500 companies, private equity-backed businesses, and global enterprises. This partnership helps Ash-Shajrah integrate modern learning methodologies, digital innovation, and future-ready educational thinking into its programs.",
       learnMore: "Learn more",
       showLess: "Show less"
+    },
+    works: {
+      title: "Our Works",
+      description:
+        "Training sessions, workshops, seminars, and educational activities led by Ash-Shajrah Learning Hub and allied institutions.",
+      readMore: "Read More",
+      close: "Close",
     },
     contact: {
       title: "Contact Us",
@@ -334,7 +361,7 @@ export const translations = {
       }
     },
     register: {
-      title: "Register for Ash-Shajrah Learning Hub",
+      title: "Register for Ash-Shajrah Learning Hub (ALH)",
       subtitle: "Complete the form below and our admissions team will contact you soon.",
       form: {
         parentName: "Parent / Guardian Name",
@@ -368,12 +395,13 @@ export const translations = {
     },
     footer: {
       phrase: "Learning • Character • Leadership",
+      brandName: "Ash-Shajrah Learning Hub (ALH)",
       support: "Online learning rooted in values and growth.",
       contact: {
         whatsapp: "WhatsApp",
         email: "Email",
         office: "Admin Office",
-        whatsappValue: "0316-0256810",
+        whatsappValue: "0311-7263544",
         emailValue: "admission.ashshajrah@gmail.com",
         officeValue: "304, Altura Arcade, Block F Markaz, B-17, Islamabad"
       },
@@ -383,19 +411,31 @@ export const translations = {
     }
   },
   ur: {
+    brand: {
+      fullName: "الشجرہ لرننگ ہب",
+      shortName: "ALH",
+      shortNameUrdu: "اے ایل ایچ",
+      displayName: "الشجرہ لرننگ ہب (ALH)",
+      navDisplayName: "الشجرہ (ALH)",
+      tagline: "سیکھنے، کردار سازی اور قیادت کا مرکز",
+      supervisionPrefix: "زیر نگرانی",
+      supervisionName: "ایجوکیٹر ڈیولپمنٹ انسٹی ٹیوٹس",
+      facebookAriaLabel: "الشجرہ لرننگ ہب کا فیس بک پیج کھولیں",
+    },
     nav: {
-      about: "تعارف",
-      programs: "پروگرامز",
-      curriculum: "نصاب",
-      learningApproach: "طریقہ تعلیم",
-      howItWorks: "طریقہ کار",
+      about: "ہمارا تعارف",
+      programs: "ہمارے پروگرامز",
       values: "اقدار",
+      learningApproach: "طریقہ تعلیم",
+      curriculum: "نصاب",
+      howItWorks: "طریقہ کار",
       leadership: "قیادت",
-      contact: "رابطہ",
+      works: "ہمارا کام",
+      contact: "رابطہ کریں",
       enroll: "داخلہ",
     },
     hero: {
-      title: "الشجرہ لرننگ ہب",
+      title: "الشجرہ لرننگ ہب (اے ایل ایچ)",
       subtitle: "سیکھنے، کردار سازی اور قیادت کا مرکز",
       description: "ایک مرکز برائے سیکھنے، کردار سازی اور قیادت",
       badge: "مکمل آن لائن ابتدائی تعلیم کا مرکز",
@@ -404,8 +444,9 @@ export const translations = {
       contactCta: "واٹس ایپ رابطہ",
     },
     about: {
-      introductionTitle: "تعارف",
-      introductionBody: "الشجرہ ایک ابھرتا ہوا آن لائن تعلیمی و تربیتی ادارہ ہے جو اس یقین پر قائم ہے کہ گھر بچے کی پہلی درسگاہ ہے اور والدین اس کے اولین، مؤثر ترین اور دیرپا معلم ہیں۔ اس کا ماڈل ابتدائی بچپن کی تعلیم اور والدین کی شراکت پر مبنی ہے تاکہ بچے منظم آن لائن تعلیم حاصل کریں اور والدین گھر پر ان کی نشوونما میں مؤثر کردار ادا کر سکیں۔",
+      introductionTitle: "ہمارا تعارف",
+      introductionBody:
+        "الشجرہ لرننگ ہب (ALH) ایک آن لائن تعلیمی و تربیتی ادارہ ہے جو اس یقین پر قائم ہے کہ گھر بچے کی پہلی درسگاہ ہے اور والدین اس کے اولین، مؤثر ترین اور دیرپا معلم ہیں۔ اس کا ماڈل ابتدائی بچپن کی تعلیم اور والدین کی شراکت پر مبنی ہے تاکہ بچے منظم آن لائن تعلیم حاصل کریں اور والدین گھر پر ان کی نشوونما میں مؤثر کردار ادا کر سکیں۔",
       missionTitle: "ہمارا مشن",
       missionBody: "الشجرہ کا مشن ایک ایسا متوازن اور بامقصد آن لائن تعلیمی و تربیتی ماحول فراہم کرنا ہے جو بچوں میں علم، عملی مہارتوں، اعلیٰ اقدار اور مثبت رویوں کی نشوونما کرے تاکہ وہ اپنے خالق کے مطیع، اپنے خاندان کے لیے باعثِ رحمت اور اپنے معاشرے کے لیے مفید، باصلاحیت اور ذمہ دار افراد بن سکیں۔",
       visionTitle: "ہماری وژن",
@@ -485,7 +526,7 @@ export const translations = {
       ]
     },
     learning: {
-      title: "سیکھنے کا طریقہ کار",
+      title: "طریقہ تعلیم",
       subtitle: "ابتدائی بچپن کی نشوونما، اسلامی اقدار، تخلیقی صلاحیت، اعتماد، کردار سازی اور گھر پر والدین کی معاونت کے ساتھ ایک بامقصد آن لائن تعلیمی ماڈل۔",
       modelTitle: "سیکھنے کا ماڈل",
       modelBody: "ہمارا سیکھنے کا ماڈل مختصر، مؤثر آن لائن سیشنز پر مبنی ہے جو بچوں کی عمر اور سطح کے مطابق ڈیزائن کیے گئے ہیں۔ ہر سیشن کے بعد والدین کی رہنمائی میں گھریلو سرگرمیاں کی جاتی ہیں جو سیکھی ہوئی باتوں کو مضبوط بناتی ہیں۔ یہ ماڈل بچوں میں آزادانہ سوچ، تخلیقی صلاحیت اور نظم و ضبط کو فروغ دیتا ہے۔",
@@ -535,7 +576,7 @@ export const translations = {
       ]
     },
     howItWorks: {
-      title: "آن لائن سیکھنے کا عمل",
+      title: "آن لائن تعلیم کا طریقہ کار",
       subtitle: "پہلے رابطے سے گھر میں مستقل ترقی تک — ایک واضح، رہنمائی یافتہ ڈیجیٹل سفر۔",
       mockups: {
         onlineSession: "آن لائن سیشن",
@@ -578,7 +619,7 @@ export const translations = {
       ]
     },
     values: {
-      title: "بنیادی اقدار",
+      title: "اقدار",
       description: "ہماری تعلیم کی بنیاد اسلامی اقدار پر رکھی گئی ہے۔ ہر سیشن میں یہ اقدار عملی طور پر بچوں کی زندگی کا حصہ بنائی جاتی ہیں۔",
       items: [
         { title: "محبت برائے تعلیم", description: "تمام ترقی کی بنیاد" },
@@ -681,20 +722,27 @@ export const translations = {
     },
     leadership: {
       title: "قیادت",
+      viewMore: "مزید پڑھیں",
+      showLess: "کم دکھائیں",
       items: [
         {
           name: "محمد عظیم صدیقی",
           title: "ڈائریکٹر",
-          bio: "محمد عظیم صدیقی ایک تجربہ کار ماہر تعلیم، تربیتی ٹرینر، مصنف، مشیر اور خاندانی رہنما ہیں جن کا ۳۰ سال سے زیادہ کا تجربہ ہے۔ وہ الشجرہ لرننگ ہب کی آن لائن تعلیمی بصیرت کی قیادت کرتے ہیں اور اقدار پر مبنی ترقی اور قیادت کی عادات میں رہنمائی فراہم کرتے ہیں۔",
+          bio: "ایک تجربہ کار ماہرِ تعلیم، ٹرینر، کنسلٹنٹ اور رہنما، جنہیں تعلیمی ترقی، شخصی نشوونما، قیادت کی تربیت اور اقدار پر مبنی تعلیم میں وسیع تجربہ حاصل ہے۔",
+          fullBio:
+            "محمد عظیم صدیقی ایک تجربہ کار ماہر تعلیم، تربیتی ٹرینر، مصنف، مشیر اور خاندانی رہنما ہیں جن کا ۳۰ سال سے زیادہ کا تجربہ ہے۔ وہ الشجرہ لرننگ ہب کی آن لائن تعلیمی بصیرت کی قیادت کرتے ہیں اور اقدار پر مبنی ترقی اور قیادت کی عادات میں رہنمائی فراہم کرتے ہیں۔",
+          image: "/images/works/director-training-profile.jpg",
           focus: ["آن لائن تعلیمی بصیرت", "اساتذہ کی ترقی", "والدین کی رہنمائی"],
         },
         {
           name: "حمیرا کنول",
           title: "پرنسپل",
-          bio: "حمیرا کنول ایک سرشار تعلیمی پیشہ ور ہیں جن کا مونٹیسوری، پری اسکول اور ابتدائی تعلیم میں پانچ سال سے زیادہ کا قیادتی تجربہ ہے۔ وہ بی ایس سی، بی ایڈ، اے ایم آئی مونٹیسوری ڈپلومہ اور ابتدائی بچپن کی تعلیم کا سرٹیفیکیٹ رکھتی ہیں۔ وہ ابتدائی سالوں کی آن لائن تعلیم اور بچے کے مرکزی ڈیجیٹل تجربات میں مہارت رکھتی ہیں۔",
+          bio: "مونٹیسوری، پری اسکول اور ابتدائی تعلیم میں قیادتی تجربے کی حامل ایک سرشار تعلیمی پیشہ ور، جو ابتدائی سالوں کی آن لائن تعلیم اور بچے کی مرکزی رہنمائی میں مہارت رکھتی ہیں۔",
+          fullBio:
+            "حمیرا کنول ایک سرشار تعلیمی پیشہ ور ہیں جن کا مونٹیسوری، پری اسکول اور ابتدائی تعلیم میں پانچ سال سے زیادہ کا قیادتی تجربہ ہے۔ وہ بی ایس سی، بی ایڈ، اے ایم آئی مونٹیسوری ڈپلومہ اور ابتدائی بچپن کی تعلیم کا سرٹیفیکیٹ رکھتی ہیں۔ وہ ابتدائی سالوں کی آن لائن تعلیم اور بچے کے مرکزی ڈیجیٹل تجربات میں مہارت رکھتی ہیں۔",
           focus: ["ابتدائی سالوں کی آن لائن تعلیم", "مونٹیسوری رہنمائی", "بچے کی مرکزی نشوونما"],
-        }
-      ]
+        },
+      ],
     },
     techAdvisory: {
       title: "ٹیکنالوجی ایڈوائزری پارٹنر",
@@ -702,6 +750,13 @@ export const translations = {
       expandedBody: "الشجرہ لرننگ ہب پیراماؤنٹ انٹیلیجنس کے ساتھ اشتراک پر فخر محسوس کرتا ہے، جو ایک خصوصی اے آئی اور ڈیجیٹل تبدیلی کی مشاورتی کمپنی ہے۔ پیراماؤنٹ کی ٹیم میں تجربہ کار ٹیکنالوجی رہنما اور اے آئی ماہرین شامل ہیں جنہوں نے فارچیون 500 کمپنیوں کی معاونت کی ہے۔ یہ شراکت الشجرہ کو جدید تعلیمی طریقوں اور ڈیجیٹل جدت کو اپنے پروگرامز میں شامل کرنے میں مدد دیتی ہے۔",
       learnMore: "مزید جانیں",
       showLess: "کم دکھائیں"
+    },
+    works: {
+      title: "ہمارا کام",
+      description:
+        "الشجرہ لرننگ ہب اور متعلقہ اداروں کی جانب سے منعقد تربیتی سیشنز، ورکشاپس، سیمینارز اور تعلیمی سرگرمیاں۔",
+      readMore: "مزید پڑھیں",
+      close: "بند کریں",
     },
 
     contact: {
@@ -718,7 +773,7 @@ export const translations = {
       }
     },
     register: {
-      title: "الشجرہ لرننگ ہب میں رجسٹریشن",
+      title: "الشجرہ لرننگ ہب (ALH) میں رجسٹریشن",
       subtitle: "نیچے دیا گیا فارم مکمل کریں، ہماری داخلہ ٹیم جلد آپ سے رابطہ کرے گی۔",
       form: {
         parentName: "والد / سرپرست کا نام",
@@ -752,14 +807,15 @@ export const translations = {
     },
     footer: {
       phrase: "تعلیم • کردار • قیادت",
+      brandName: "الشجرہ لرننگ ہب (ALH)",
       support: "اقدار اور ترقی پر مبنی آن لائن تعلیم۔",
       contact: {
         whatsapp: "واٹس ایپ",
         email: "ای میل",
         office: "انتظامی دفتر",
-        whatsappValue: "0316-0256810",
+        whatsappValue: "0311-7263544",
         emailValue: "admission.ashshajrah@gmail.com",
-        officeValue: "304، Altura Arcade، Block F Markaz، B-17، Islamabad"
+        officeValue: "304, Altura Arcade, Block F Markaz, B-17, Islamabad"
       },
       messageUs: "ہمیں واٹس ایپ کریں",
       description: "ابتدائی تعلیم، کردار، قیادت — سب گھر بیٹھے۔",
