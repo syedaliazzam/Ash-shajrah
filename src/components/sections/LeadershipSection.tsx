@@ -12,6 +12,7 @@ type LeaderItem = {
   bio: string;
   fullBio?: string;
   image?: string;
+  mirrorImage?: boolean;
   focus: string[];
 };
 
@@ -37,20 +38,22 @@ function LeaderPortrait({
 
   if (leader.image) {
     return (
-      <div className="relative h-28 w-28 shrink-0 overflow-hidden rounded-3xl shadow-2xl shadow-emerald-deep/20 ring-2 ring-gold/30 sm:h-32 sm:w-32">
+      <div className="relative h-36 w-36 shrink-0 overflow-hidden rounded-3xl shadow-2xl shadow-emerald-deep/20 ring-2 ring-gold/30 sm:h-44 sm:w-44 lg:h-52 lg:w-52">
         <Image
           src={leader.image}
           alt={alt}
           width={360}
           height={360}
-          className="h-full w-full object-cover"
+          className={`h-full w-full object-cover object-[center_30%] ${
+            leader.mirrorImage ? "-scale-x-[1.1] scale-y-[1.1]" : "scale-110"
+          }`}
         />
       </div>
     );
   }
 
   return (
-    <div className="flex h-28 w-28 shrink-0 items-center justify-center rounded-3xl bg-gradient-to-br from-emerald to-emerald-deep font-display text-2xl font-bold text-cream shadow-lg shadow-emerald/30 ring-2 ring-gold/20 sm:h-32 sm:w-32">
+    <div className="flex h-36 w-36 shrink-0 items-center justify-center rounded-3xl bg-gradient-to-br from-emerald to-emerald-deep font-display text-2xl font-bold text-cream shadow-lg shadow-emerald/30 ring-2 ring-gold/20 sm:h-44 sm:w-44 lg:h-52 lg:w-52">
       {getInitials(leader.name)}
     </div>
   );
@@ -84,13 +87,13 @@ function LeaderCard({
       <div className="absolute -right-12 -top-12 h-40 w-40 rounded-full bg-gold/5 blur-2xl transition-all group-hover:bg-gold/10" />
 
       <div
-        className={`mb-6 flex flex-col gap-5 sm:flex-row sm:items-start ${
+        className={`mb-6 flex flex-col items-center gap-5 sm:flex-row sm:items-start ${
           isUrdu ? "sm:flex-row-reverse" : ""
         }`}
       >
         <LeaderPortrait leader={leader} language={language} />
 
-        <div className={`flex min-w-0 flex-1 flex-col gap-1 ${isUrdu ? "" : "font-display"}`}>
+        <div className={`flex min-w-0 flex-1 flex-col gap-1 text-center sm:text-start ${isUrdu ? "sm:text-right" : "font-display sm:text-left"}`}>
           <h3
             className={`${
               isUrdu ? "text-xl font-bold leading-[1.8]" : "text-2xl font-semibold"

@@ -17,15 +17,30 @@
 @layer base {
   html {
     scroll-behavior: smooth;
+    max-width: 100%;
+    overflow-x: hidden;
   }
 
   body {
     @apply bg-cream text-emerald-deep antialiased;
     font-family: var(--font-body), system-ui, sans-serif;
+    max-width: 100%;
+    overflow-x: hidden;
   }
 
   ::selection {
     @apply bg-emerald-light/30 text-emerald-deep;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 }
 
@@ -137,7 +152,13 @@
 
   /* Our Works — Swiper coverflow carousel */
   .works-coverflow .works-swiper {
-    overflow: visible;
+    overflow: hidden;
+  }
+
+  @media (min-width: 640px) {
+    .works-coverflow .works-swiper {
+      overflow: visible;
+    }
   }
 
   .works-coverflow .swiper-slide {
@@ -165,5 +186,37 @@
     width: 32px;
     border-radius: 999px;
     background: linear-gradient(90deg, #d4af37, #064635);
+  }
+
+  .events-pagination .swiper-pagination-bullet {
+    width: 10px;
+    height: 10px;
+    margin: 0 4px !important;
+    background: rgba(6, 70, 53, 0.25);
+    opacity: 1;
+    transition: width 0.3s ease, background 0.3s ease;
+  }
+
+  .events-pagination .swiper-pagination-bullet-active {
+    width: 32px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #d4af37, #064635);
+  }
+
+  /* Our Event — Swiper coverflow (mirrors Our Works globe slideshow) */
+  .events-coverflow .events-swiper {
+    overflow: visible;
+  }
+
+  .events-coverflow .swiper-slide {
+    height: auto;
+    transition: opacity 0.45s ease, filter 0.45s ease;
+    opacity: 0.55;
+    filter: saturate(0.85);
+  }
+
+  .events-coverflow .swiper-slide-active {
+    opacity: 1;
+    filter: saturate(1);
   }
 }

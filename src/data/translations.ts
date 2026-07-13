@@ -20,6 +20,7 @@ export const translations = {
       howItWorks: "How It Works",
       leadership: "Leadership",
       works: "Our Works",
+      events: "Our Event",
       contact: "Contact Us",
       enroll: "Enroll",
     },
@@ -320,7 +321,8 @@ export const translations = {
           bio: "A seasoned educationist, trainer, consultant, and mentor with extensive experience in educational development, personal growth, leadership training, and values-based learning.",
           fullBio:
             "Muhammad Azeem Siddiqui is a seasoned educationist, transformational trainer, writer, consultant, and family counselor with over 30 years of experience. He leads Ash-Shajrah Learning Hub's vision for online learning excellence — guiding educators, parents, and families through values-based development and leadership habits.",
-          image: "/images/works/director-training-profile.jpg",
+          image: "/images/director.jpeg",
+          mirrorImage: true,
           focus: ["Online Learning Vision", "Educator Development", "Parent Guidance"],
         },
         {
@@ -346,6 +348,14 @@ export const translations = {
         "Training sessions, workshops, seminars, and educational activities led by Ash-Shajrah Learning Hub and allied institutions.",
       readMore: "Read More",
       close: "Close",
+    },
+    events: {
+      title: "Our Event",
+      subtitle:
+        "Explore Ash-Shajrah Learning Hub events, learning activities, parent sessions, and educational updates shared through Facebook.",
+      button: "View on Facebook",
+      fallbackBadge: "Facebook Event",
+      empty: "Events will be added soon.",
     },
     contact: {
       title: "Contact Us",
@@ -401,7 +411,7 @@ export const translations = {
         whatsapp: "WhatsApp",
         email: "Email",
         office: "Admin Office",
-        whatsappValue: "0311-7263544",
+        whatsappValue: "0336-5409798",
         emailValue: "admission.ashshajrah@gmail.com",
         officeValue: "304, Altura Arcade, Block F Markaz, B-17, Islamabad"
       },
@@ -431,6 +441,7 @@ export const translations = {
       howItWorks: "طریقہ کار",
       leadership: "قیادت",
       works: "ہمارا کام",
+      events: "ہمارے ایونٹس",
       contact: "رابطہ کریں",
       enroll: "داخلہ",
     },
@@ -731,7 +742,8 @@ export const translations = {
           bio: "ایک تجربہ کار ماہرِ تعلیم، ٹرینر، کنسلٹنٹ اور رہنما، جنہیں تعلیمی ترقی، شخصی نشوونما، قیادت کی تربیت اور اقدار پر مبنی تعلیم میں وسیع تجربہ حاصل ہے۔",
           fullBio:
             "محمد عظیم صدیقی ایک تجربہ کار ماہر تعلیم، تربیتی ٹرینر، مصنف، مشیر اور خاندانی رہنما ہیں جن کا ۳۰ سال سے زیادہ کا تجربہ ہے۔ وہ الشجرہ لرننگ ہب کی آن لائن تعلیمی بصیرت کی قیادت کرتے ہیں اور اقدار پر مبنی ترقی اور قیادت کی عادات میں رہنمائی فراہم کرتے ہیں۔",
-          image: "/images/works/director-training-profile.jpg",
+          image: "/images/director.jpeg",
+          mirrorImage: true,
           focus: ["آن لائن تعلیمی بصیرت", "اساتذہ کی ترقی", "والدین کی رہنمائی"],
         },
         {
@@ -757,6 +769,14 @@ export const translations = {
         "الشجرہ لرننگ ہب اور متعلقہ اداروں کی جانب سے منعقد تربیتی سیشنز، ورکشاپس، سیمینارز اور تعلیمی سرگرمیاں۔",
       readMore: "مزید پڑھیں",
       close: "بند کریں",
+    },
+    events: {
+      title: "ہمارے ایونٹس",
+      subtitle:
+        "الشجرہ لرننگ ہب کے ایونٹس، تعلیمی سرگرمیاں، والدین کے سیشنز اور فیس بک پر شیئر کی گئی اپڈیٹس دیکھیں۔",
+      button: "فیس بک پر دیکھیں",
+      fallbackBadge: "فیس بک ایونٹ",
+      empty: "ایونٹس جلد شامل کیے جائیں گے۔",
     },
 
     contact: {
@@ -813,7 +833,7 @@ export const translations = {
         whatsapp: "واٹس ایپ",
         email: "ای میل",
         office: "انتظامی دفتر",
-        whatsappValue: "0311-7263544",
+        whatsappValue: "0336-5409798",
         emailValue: "admission.ashshajrah@gmail.com",
         officeValue: "304, Altura Arcade, Block F Markaz, B-17, Islamabad"
       },

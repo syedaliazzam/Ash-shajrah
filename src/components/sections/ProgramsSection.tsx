@@ -62,7 +62,7 @@ export function ProgramsSection() {
     <section
       ref={sectionRef}
       id="programs"
-      className="relative overflow-hidden bg-gradient-to-b from-cream via-white to-cream px-6 py-24 lg:px-8 lg:py-32"
+      className="relative overflow-hidden bg-gradient-to-b from-cream via-white to-cream px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-28"
     >
       {/* Background soft light shapes */}
       <div className="pointer-events-none absolute inset-0">

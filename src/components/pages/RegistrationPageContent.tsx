@@ -12,7 +12,7 @@ export function RegistrationPageContent() {
   return (
     <>
       <Header />
-      <main className="relative min-h-screen overflow-hidden bg-gradient-to-b from-emerald-deep via-emerald-deep/95 to-emerald/80 pb-24 pt-32">
+      <main className="relative min-h-screen w-full max-w-full overflow-x-hidden bg-gradient-to-b from-emerald-deep via-emerald-deep/95 to-emerald/80 pb-28 pt-28 sm:pb-24 sm:pt-32">
         {/* Background */}
         <div className="pointer-events-none absolute inset-0">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_20%,rgba(201,162,39,0.12),transparent_55%)]" />

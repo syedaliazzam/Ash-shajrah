@@ -1,0 +1,62 @@
+[
+  {
+    "id": "facebook-event-01",
+    "url": "https://www.facebook.com/share/p/1D4ffUsfpu/",
+    "imageSaved": true,
+    "imageUrl": "local:facebook-event-01.jpg",
+    "title": "Parenting Challenges Workshop",
+    "description": "Verified local thumbnail only",
+    "source": "local",
+    "error": null
+  },
+  {
+    "id": "facebook-event-02",
+    "url": "https://www.facebook.com/share/p/186Cu8JK1L/",
+    "imageSaved": false,
+    "imageUrl": null,
+    "title": null,
+    "description": null,
+    "source": null,
+    "error": "No verified local thumbnail — UI shows Facebook fallback"
+  },
+  {
+    "id": "facebook-event-03",
+    "url": "https://www.facebook.com/share/p/1JiPKMAtF9/",
+    "imageSaved": false,
+    "imageUrl": null,
+    "title": null,
+    "description": null,
+    "source": null,
+    "error": "Rejected generic Facebook branding thumbnail — UI shows Facebook fallback"
+  },
+  {
+    "id": "facebook-event-04",
+    "url": "https://www.facebook.com/share/p/1DawJTNPeK/",
+    "imageSaved": false,
+    "imageUrl": null,
+    "title": null,
+    "description": null,
+    "source": null,
+    "error": "Rejected generic Facebook branding thumbnail — UI shows Facebook fallback"
+  },
+  {
+    "id": "facebook-event-05",
+    "url": "https://www.facebook.com/share/p/18xMEZ7fQr/",
+    "imageSaved": true,
+    "imageUrl": "local:facebook-event-05.jpg",
+    "title": "Mission & Curriculum Alignment Workshop",
+    "description": "Verified local thumbnail only",
+    "source": "local",
+    "error": null
+  },
+  {
+    "id": "facebook-event-06",
+    "url": "https://www.facebook.com/share/p/1JjySWVEPC/",
+    "imageSaved": false,
+    "imageUrl": null,
+    "title": null,
+    "description": null,
+    "source": null,
+    "error": "Rejected generic Facebook branding thumbnail — UI shows Facebook fallback"
+  }
+]

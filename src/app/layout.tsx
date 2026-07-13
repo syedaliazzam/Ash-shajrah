@@ -40,6 +40,12 @@ export const metadata: Metadata = {
     "Urdu English online learning",
     "online learning for Pakistani children",
     "values based education Pakistan",
+    "Ash-Shajrah events",
+    "ALH events",
+    "online learning events",
+    "parent guidance sessions",
+    "educational workshops Pakistan",
+    "Ash-Shajrah Facebook updates",
   ],
   openGraph: {
     type: "website",
@@ -91,9 +97,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="overflow-x-hidden">
+      <body className="w-full max-w-full overflow-x-hidden">
         <LanguageProvider>
-          {children}
+          <div className="w-full max-w-full overflow-x-hidden">
+            {children}
+          </div>
           <FloatingLanguageSwitcher />
         </LanguageProvider>
       </body>

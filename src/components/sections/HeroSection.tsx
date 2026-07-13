@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useCallback } from "react";
+import Link from "next/link";
 import { gsap, useGSAP, ensurePlugins } from "@/lib/gsap";
 import { Button } from "@/components/ui/Button";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -33,6 +34,7 @@ export function HeroSection() {
   const isUrdu = language === "ur";
 
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLElement>) => {
+    if (typeof window !== "undefined" && window.innerWidth < 1024) return;
     if (!sectionRef.current || !contentRef.current) return;
     const rect = sectionRef.current.getBoundingClientRect();
     mouseRef.current = {
@@ -72,7 +74,7 @@ export function HeroSection() {
     <section
       ref={sectionRef}
       id="hero"
-      className="relative flex min-h-screen items-center overflow-hidden"
+      className="relative flex min-h-[100svh] items-center overflow-hidden"
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
     >
@@ -88,10 +90,10 @@ export function HeroSection() {
 
       <div
         data-hero-supervision
-        className="pointer-events-auto absolute left-1/2 top-24 z-40 w-full max-w-[92vw] -translate-x-1/2 px-4 sm:top-28 sm:max-w-2xl md:top-32"
+        className="pointer-events-auto absolute left-1/2 top-20 z-40 w-full max-w-[92vw] -translate-x-1/2 px-4 sm:top-28 sm:max-w-2xl md:top-32"
       >
         <p
-          className={`relative z-30 mx-auto w-fit max-w-[90vw] rounded-full border border-gold/50 bg-white/10 px-6 py-3 text-center text-cream shadow-sm backdrop-blur-md ${
+          className={`relative z-30 mx-auto w-fit max-w-[90vw] rounded-full border border-gold/50 bg-white/10 px-4 py-2 text-center text-cream shadow-sm backdrop-blur-md sm:px-6 sm:py-3 ${
             isUrdu
               ? "font-urdu text-base leading-relaxed sm:text-lg md:text-xl"
               : "text-sm font-medium tracking-wide sm:text-base"
@@ -111,68 +113,68 @@ export function HeroSection() {
         </p>
       </div>
 
-      <div className="pointer-events-none relative z-20 mx-auto flex min-h-screen w-full max-w-7xl items-center px-6 pb-20 pt-36 sm:px-8 sm:pb-24 sm:pt-40 lg:px-10 lg:pt-44">
-        <div ref={contentRef} className="relative z-30 w-full pointer-events-auto">
+      <div className="pointer-events-none relative z-20 mx-auto flex min-h-[100svh] w-full max-w-7xl items-center px-4 pb-24 pt-40 sm:px-8 sm:pb-24 sm:pt-44 lg:px-10 lg:pt-48">
+        <div ref={contentRef} className="relative z-30 w-full max-w-full pointer-events-auto">
 
 
-          <div data-hero-content className={`flex flex-col ${isUrdu ? 'text-right font-urdu items-end' : 'text-left items-start'}`}>
-            <div className="max-w-3xl">
+          <div data-hero-content className={`flex w-full max-w-full flex-col ${isUrdu ? 'text-right font-urdu items-end' : 'text-left items-start'}`}>
+            <div className="w-full max-w-3xl">
               <h1
-                className={`${isUrdu ? "font-urdu leading-[1.6]" : "font-display leading-tight"} text-4xl font-bold text-cream sm:text-5xl lg:text-6xl xl:text-[4rem]`}
+                className={`${isUrdu ? "font-urdu leading-[1.65]" : "font-display leading-tight"} text-3xl font-bold text-cream sm:text-4xl md:text-5xl lg:text-6xl xl:text-[4rem]`}
               >
                 {t.hero.title}
               </h1>
-              <p className={`mt-4 ${language === 'ur' ? 'font-urdu leading-[2]' : 'font-display leading-snug'} text-xl font-semibold text-gold sm:text-2xl`}>
+              <p className={`mt-3 sm:mt-4 ${language === 'ur' ? 'font-urdu leading-[2]' : 'font-display leading-snug'} text-lg font-semibold text-gold sm:text-xl md:text-2xl`}>
                 {t.hero.subtitle}
               </p>
-              <p className={`mt-4 ${language === 'ur' ? 'font-urdu leading-[2.1] sm:leading-[2.2]' : 'leading-relaxed'} text-base text-cream/80 sm:text-lg`}>
+              <p className={`mt-3 sm:mt-4 ${language === 'ur' ? 'font-urdu leading-[2.1] sm:leading-[2.2]' : 'leading-relaxed'} text-base text-cream/80 sm:text-lg`}>
                 {t.hero.description}
               </p>
             </div>
 
-            <div className={`mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:gap-3 ${language === 'ur' ? 'items-end sm:items-center sm:justify-end' : 'items-start'}`}>
+            <div className={`mt-8 flex w-full max-w-xl flex-col gap-3 sm:mt-10 sm:flex-row sm:flex-wrap sm:gap-3 ${language === 'ur' ? 'items-stretch sm:items-center sm:justify-end' : 'items-stretch sm:items-start'}`}>
               {language === 'en' ? (
                 <>
-                  <div data-hero-cta className="relative z-30 pointer-events-auto">
-                    <Button href={REGISTER_URL} variant="primary">
+                  <div data-hero-cta className="relative z-30 w-full pointer-events-auto sm:w-auto">
+                    <Button href={REGISTER_URL} variant="primary" className="w-full sm:w-auto">
                       {t.hero.primaryCta}
                     </Button>
                   </div>
-                  <div data-hero-cta className="relative z-30 pointer-events-auto">
-                    <Button href="#programs" variant="secondary">
+                  <div data-hero-cta className="relative z-30 w-full pointer-events-auto sm:w-auto">
+                    <Button href="/#programs" variant="secondary" className="w-full sm:w-auto">
                       {t.hero.secondaryCta}
                     </Button>
                   </div>
-                  <div data-hero-cta className="relative z-30 pointer-events-auto">
-                    <Button href={WHATSAPP_URL} variant="light" target="_blank" rel="noopener noreferrer">
+                  <div data-hero-cta className="relative z-30 w-full pointer-events-auto sm:w-auto">
+                    <Button href={WHATSAPP_URL} variant="light" target="_blank" rel="noopener noreferrer" className="w-full sm:w-auto">
                       {t.hero.contactCta}
                     </Button>
                   </div>
                 </>
               ) : (
                 <>
-                  <div data-hero-cta className="relative z-30 pointer-events-auto">
-                    <a
+                  <div data-hero-cta className="relative z-30 w-full pointer-events-auto sm:w-auto">
+                    <Link
                       href={REGISTER_URL}
-                      className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full bg-gold px-6 py-3 text-sm font-semibold text-emerald-deep shadow-lg shadow-gold/30 transition-all hover:bg-gold-soft hover:shadow-gold/45"
+                      className="inline-flex min-h-[44px] w-full min-w-[44px] items-center justify-center rounded-full bg-gold px-6 py-3 text-sm font-semibold text-emerald-deep shadow-lg shadow-gold/30 transition-all hover:bg-gold-soft hover:shadow-gold/45 sm:w-auto"
                     >
                       {t.hero.primaryCta}
-                    </a>
+                    </Link>
                   </div>
-                  <div data-hero-cta className="relative z-30 pointer-events-auto">
-                    <a
-                      href="#programs"
-                      className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border border-cream/30 bg-white/10 px-6 py-3 text-sm font-semibold text-cream backdrop-blur-sm transition-all hover:border-cream/50 hover:bg-white/15"
+                  <div data-hero-cta className="relative z-30 w-full pointer-events-auto sm:w-auto">
+                    <Link
+                      href="/#programs"
+                      className="inline-flex min-h-[44px] w-full min-w-[44px] items-center justify-center rounded-full border border-cream/30 bg-white/10 px-6 py-3 text-sm font-semibold text-cream backdrop-blur-sm transition-all hover:border-cream/50 hover:bg-white/15 sm:w-auto"
                     >
                       {t.hero.secondaryCta}
-                    </a>
+                    </Link>
                   </div>
-                  <div data-hero-cta className="relative z-30 pointer-events-auto">
+                  <div data-hero-cta className="relative z-30 w-full pointer-events-auto sm:w-auto">
                     <a
                       href={WHATSAPP_URL}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border border-cream/30 bg-white/10 px-6 py-3 text-sm font-semibold text-cream backdrop-blur-sm transition-all hover:border-cream/50 hover:bg-white/15"
+                      className="inline-flex min-h-[44px] w-full min-w-[44px] items-center justify-center rounded-full border border-cream/30 bg-white/10 px-6 py-3 text-sm font-semibold text-cream backdrop-blur-sm transition-all hover:border-cream/50 hover:bg-white/15 sm:w-auto"
                     >
                       {t.hero.contactCta}
                     </a>

@@ -62,7 +62,7 @@ export function AboutSection() {
           </div>
 
           {/* Key pillars row */}
-          <div data-about-content className="mt-12 grid grid-cols-2 gap-4 sm:grid-cols-4">
+          <div data-about-content className="mt-12 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
             {[
               { key: "playgroup", en: "Play Group", ur: "پلے گروپ" },
               { key: "prepI", en: "Prep-I", ur: "پری پہلی" },
@@ -71,9 +71,9 @@ export function AboutSection() {
             ].map((item) => (
               <div
                 key={item.key}
-                className="flex flex-col items-center justify-center gap-1 rounded-2xl border border-emerald/10 bg-white/60 p-4 text-center shadow-sm backdrop-blur-sm min-h-[5rem]"
+                className="flex min-h-[4.5rem] flex-col items-center justify-center gap-1 rounded-2xl border border-emerald/10 bg-white/60 p-4 text-center shadow-sm backdrop-blur-sm sm:min-h-[5rem]"
               >
-                <span className={`text-emerald-deep font-semibold ${language === 'ur' ? 'font-urdu text-sm leading-[1.9]' : 'text-sm'}`}>
+                <span className={`font-semibold text-emerald-deep ${language === 'ur' ? 'font-urdu text-sm leading-[1.9]' : 'text-sm'}`}>
                   {language === 'ur' ? item.ur : item.en}
                 </span>
               </div>

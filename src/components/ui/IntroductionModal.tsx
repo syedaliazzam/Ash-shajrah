@@ -34,16 +34,16 @@ export function IntroductionModal({ isOpen, onClose }: IntroductionModalProps) {
       />
 
       {/* Modal Container */}
-      <div className={`relative flex max-h-[90vh] w-full max-w-4xl flex-col overflow-hidden rounded-2xl bg-cream shadow-2xl ${language === 'ur' ? 'text-right font-urdu' : 'text-left font-display'}`}>
+      <div className={`relative flex max-h-[min(85vh,100dvh)] w-[92vw] max-w-4xl flex-col overflow-hidden rounded-2xl bg-cream shadow-2xl sm:w-full ${language === 'ur' ? 'text-right font-urdu' : 'text-left font-display'}`}>
         
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-emerald/10 bg-white/50 px-6 py-4 sm:px-8 sm:py-6">
-          <h2 className={`text-2xl font-bold text-emerald-deep sm:text-3xl ${language === 'ur' ? 'leading-[1.7]' : ''}`}>
+        <div className="flex items-start justify-between gap-3 border-b border-emerald/10 bg-white/50 px-4 py-4 sm:px-8 sm:py-6">
+          <h2 className={`min-w-0 flex-1 text-xl font-bold text-emerald-deep sm:text-2xl lg:text-3xl ${language === 'ur' ? 'leading-[1.7]' : ''}`}>
             {t.aboutModal.title}
           </h2>
           <button 
             onClick={onClose}
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald/10 text-emerald-deep transition-colors hover:bg-emerald/20 focus:outline-none"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald/10 text-emerald-deep transition-colors hover:bg-emerald/20 focus:outline-none"
             aria-label={t.aboutModal.modalClose}
           >
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

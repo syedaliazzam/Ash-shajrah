@@ -342,4 +342,154 @@ export const WORK_ITEMS: WorkItem[] = [
       ur: "سیلف ڈیفنس اور فٹنس تربیت کے سیمینار کا پوسٹر",
     },
   },
+  {
+    id: "hifz-quran-parent-workshop",
+    image: "/images/works/hifz-quran-parent-workshop.jpg",
+    fit: "contain",
+    category: {
+      en: "Parent Workshop",
+      ur: "والدین ورکشاپ",
+    },
+    title: {
+      en: "Hifz-e-Quran Opening & Parent Workshop",
+      ur: "تقریب حفظِ قرآن اور والدین ورکشاپ",
+    },
+    description: {
+      en: "A parent-focused workshop connected with Hifz-e-Quran learning, guidance, and children’s educational development.",
+      ur: "حفظِ قرآن، والدین کی رہنمائی اور بچوں کی تعلیمی نشوونما سے متعلق ایک تربیتی ورکشاپ۔",
+    },
+    details: {
+      en: "This work reflects guidance for parents on supporting children through Quranic learning, discipline, positive habits, and meaningful educational development.",
+      ur: "یہ کام والدین کو بچوں کی قرآنی تعلیم، نظم و ضبط، مثبت عادات اور بامقصد تعلیمی نشوونما میں معاونت فراہم کرنے کی عکاسی کرتا ہے۔",
+    },
+    alt: {
+      en: "Hifz-e-Quran opening and parent workshop poster",
+      ur: "تقریب حفظِ قرآن اور والدین ورکشاپ کا پوسٹر",
+    },
+  },
+  {
+    id: "educating-children-current-challenges-2021",
+    image: "/images/works/educating-children-current-challenges-2021.jpg",
+    fit: "contain",
+    category: {
+      en: "Parent Guidance",
+      ur: "والدین کی رہنمائی",
+    },
+    title: {
+      en: "Educating Children and Current Challenges",
+      ur: "موجودہ چیلنجز کے ساتھ بچوں کی تربیت",
+    },
+    description: {
+      en: "A training session for parents on raising and educating children in the face of modern challenges.",
+      ur: "موجودہ دور کے چیلنجز میں بچوں کی تربیت اور تعلیم کے حوالے سے والدین کے لیے تربیتی نشست۔",
+    },
+    details: {
+      en: "This session focused on parenting awareness, child education, family responsibility, and practical guidance for supporting children in a changing world.",
+      ur: "اس نشست میں والدین کی آگاہی، بچوں کی تعلیم، خاندانی ذمہ داری اور بدلتے ہوئے دور میں بچوں کی معاونت کے عملی طریقوں پر توجہ دی گئی۔",
+    },
+    alt: {
+      en: "Educating children and current challenges parent training poster",
+      ur: "موجودہ چیلنجز کے ساتھ بچوں کی تربیت کا پوسٹر",
+    },
+  },
+  {
+    id: "stress-management-session",
+    image: "/images/works/stress-management-session.jpg",
+    fit: "contain",
+    category: {
+      en: "Personal Development",
+      ur: "شخصی نشوونما",
+    },
+    title: {
+      en: "Stress Management Session",
+      ur: "اسٹریس مینجمنٹ سیشن",
+    },
+    description: {
+      en: "An interactive session focused on managing stress, improving emotional balance, and building healthier routines.",
+      ur: "ذہنی دباؤ کو کم کرنے، جذباتی توازن بہتر بنانے اور صحت مند معمولات اپنانے سے متعلق انٹرایکٹو نشست۔",
+    },
+    details: {
+      en: "This session addressed stress awareness, emotional control, practical coping strategies, and guidance for improving personal wellbeing.",
+      ur: "اس نشست میں ذہنی دباؤ کی آگاہی، جذباتی کنٹرول، عملی حکمت عملیوں اور ذاتی بہتری کی رہنمائی پر بات کی گئی۔",
+    },
+    alt: {
+      en: "Stress management interactive session poster",
+      ur: "اسٹریس مینجمنٹ انٹرایکٹو سیشن کا پوسٹر",
+    },
+  },
+  {
+    id: "sehat-mand-bachay-workshop",
+    image: "/images/works/sehat-mand-bachay-workshop.jpg",
+    fit: "contain",
+    category: {
+      en: "Parent Workshop",
+      ur: "والدین ورکشاپ",
+    },
+    title: {
+      en: "Sehat Mand Bachay aur Sehat Mand Gharana",
+      ur: "صحت مند بچے اور صحت مند گھرانہ",
+    },
+    description: {
+      en: "A parent workshop on children’s health, family wellbeing, and building positive home routines.",
+      ur: "بچوں کی صحت، خاندانی بہتری اور مثبت گھریلو معمولات پر والدین کے لیے ورکشاپ۔",
+    },
+    details: {
+      en: "This workshop focused on helping parents understand healthy child development, family habits, wellbeing, and the role of parents in creating a supportive home environment.",
+      ur: "اس ورکشاپ میں بچوں کی صحت مند نشوونما، خاندانی عادات، فلاح و بہبود اور معاون گھریلو ماحول بنانے میں والدین کے کردار پر رہنمائی دی گئی۔",
+    },
+    alt: {
+      en: "Sehat Mand Bachay aur Sehat Mand Gharana workshop poster",
+      ur: "صحت مند بچے اور صحت مند گھرانہ ورکشاپ کا پوسٹر",
+    },
+  },
+  {
+    id: "parents-training-session-current-challenges",
+    image: "/images/works/parents-training-session-current-challenges.jpg",
+    fit: "contain",
+    category: {
+      en: "Parent Training",
+      ur: "والدین کی تربیت",
+    },
+    title: {
+      en: "Training Session for Parents",
+      ur: "والدین کے لیے تربیتی سیشن",
+    },
+    description: {
+      en: "A parent training session on educating children and responding to current challenges with awareness and responsibility.",
+      ur: "بچوں کی تربیت اور موجودہ چیلنجز کا شعور و ذمہ داری کے ساتھ جواب دینے کے لیے والدین کی تربیتی نشست۔",
+    },
+    details: {
+      en: "This work highlights structured parent guidance around child education, modern challenges, family responsibility, and practical parenting strategies.",
+      ur: "یہ کام بچوں کی تعلیم، جدید چیلنجز، خاندانی ذمہ داری اور عملی والدین رہنمائی سے متعلق منظم تربیت کو ظاہر کرتا ہے۔",
+    },
+    alt: {
+      en: "Training session for parents poster",
+      ur: "والدین کے لیے تربیتی سیشن کا پوسٹر",
+    },
+  },
+  {
+    id: "green-flag-parent-workshop",
+    image: "/images/works/green-flag-parent-workshop.jpg",
+    fit: "contain",
+    category: {
+      en: "Parent Workshop",
+      ur: "والدین ورکشاپ",
+    },
+    title: {
+      en: "Green Flag Schools Parent Workshop",
+      ur: "گرین فلیگ اسکولز والدین ورکشاپ",
+    },
+    description: {
+      en: "A workshop for parents on healthy children, healthy families, values, and purposeful child development.",
+      ur: "صحت مند بچوں، صحت مند خاندان، اقدار اور بامقصد نشوونما کے حوالے سے والدین کے لیے ورکشاپ۔",
+    },
+    details: {
+      en: "This workshop reflects parent-focused educational training around children’s wellbeing, values, family role, and the importance of active parental involvement.",
+      ur: "یہ ورکشاپ بچوں کی فلاح، اقدار، خاندان کے کردار اور والدین کی فعال شمولیت کی اہمیت پر مبنی تربیتی کام کو ظاہر کرتی ہے۔",
+    },
+    alt: {
+      en: "Green Flag Schools parent workshop poster",
+      ur: "گرین فلیگ اسکولز والدین ورکشاپ کا پوسٹر",
+    },
+  },
 ];

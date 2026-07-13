@@ -29,14 +29,14 @@ function ContactRow({
           dir={dir}
           target={href.startsWith('http') ? '_blank' : undefined}
           rel={href.startsWith('http') ? 'noopener noreferrer' : undefined}
-          className={`mt-1 block text-sm font-medium leading-snug text-cream transition-colors hover:text-gold-soft ${language === 'ur' ? 'text-right font-sans' : 'text-left'}`}
+          className={`mt-1 block break-words text-sm font-medium leading-snug text-cream transition-colors hover:text-gold-soft ${language === 'ur' ? 'text-right font-sans' : 'text-left'}`}
         >
           {value}
         </a>
       ) : (
         <p
           dir={dir}
-          className={`mt-1 block text-sm font-medium leading-snug text-cream ${language === 'ur' ? 'text-right font-sans' : 'text-left'}`}
+          className={`mt-1 block break-words text-sm font-medium leading-snug text-cream ${language === 'ur' ? 'text-right font-sans' : 'text-left'}`}
         >
           {value}
         </p>

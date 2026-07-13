@@ -13,10 +13,10 @@ export const SITE = {
   intro:
     "A fully online learning hub focused on early years learning, Montessori-inspired guidance, character development, creativity, confidence, leadership habits, and parent-friendly learning support.",
   contact: {
-    phone: "+92 311 7263544",
-    whatsappDisplay: "0311-7263544",
+    phone: "+92 336 5409798",
+    whatsappDisplay: "0336-5409798",
     whatsapp:
-      "https://wa.me/923117263544?text=Assalamualaikum%2C%20I%20want%20to%20know%20more%20about%20Ash-Shajrah%20Learning%20Hub%20online%20programs.",
+      "https://wa.me/923365409798?text=Assalamualaikum%2C%20I%20want%20to%20know%20more%20about%20Ash-Shajrah%20Learning%20Hub%20online%20programs.",
     email: "admission.ashshajrah@gmail.com",
     admissionEmail: "admission.ashshajrah@gmail.com",
     adminOffice: "304, Altura Arcade, Block F Markaz, B-17, Islamabad",

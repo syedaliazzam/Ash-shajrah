@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "fetch:event-thumbnails": "node scripts/fetch-facebook-event-thumbnails.mjs"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",

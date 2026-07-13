@@ -23,10 +23,10 @@ function CarouselArrow({
       onClick={onClick}
       disabled={disabled}
       aria-label={label}
-      className={`values-carousel-arrow group absolute top-1/2 z-20 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full border border-emerald/20 bg-white/90 text-emerald-deep shadow-[0_8px_28px_rgba(13,59,46,0.14)] backdrop-blur-md transition-all duration-300 hover:scale-110 hover:border-gold/50 hover:bg-white hover:text-gold hover:shadow-[0_12px_36px_rgba(201,162,39,0.28),0_0_0_4px_rgba(45,138,106,0.08)] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:scale-100 sm:h-14 sm:w-14 ${
+      className={`values-carousel-arrow group absolute top-1/2 z-20 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-emerald/20 bg-white/95 text-emerald-deep shadow-[0_8px_28px_rgba(13,59,46,0.14)] backdrop-blur-md transition-all duration-300 hover:scale-110 hover:border-gold/50 hover:bg-white hover:text-gold disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:scale-100 sm:h-14 sm:w-14 ${
         direction === "prev"
-          ? "left-0 -translate-x-1/2 sm:left-2 sm:translate-x-0 lg:-left-2 xl:-left-4"
-          : "right-0 translate-x-1/2 sm:right-2 sm:translate-x-0 lg:-right-2 xl:-right-4"
+          ? "left-2 translate-x-0 sm:left-3 lg:left-0 lg:-translate-x-1/2 xl:-left-2"
+          : "right-2 translate-x-0 sm:right-3 lg:right-0 lg:translate-x-1/2 xl:-right-2"
       }`}
     >
       <svg
@@ -117,7 +117,7 @@ export function CoreValuesCarousel() {
         aria-hidden
       />
 
-      <div className="relative px-2 sm:px-8 md:px-12 lg:px-16 xl:px-20">
+      <div className="relative px-12 sm:px-14 md:px-16 lg:px-20 xl:px-24">
         <CarouselArrow direction="prev" onClick={scrollPrev} disabled={!canScrollPrev} />
         <CarouselArrow direction="next" onClick={scrollNext} disabled={!canScrollNext} />
 
@@ -131,7 +131,7 @@ export function CoreValuesCarousel() {
             {t.values.items.map((value: { title: string; description: string; }, index: number) => (
               <div
                 key={value.title}
-                className={`values-carousel-slide min-w-0 flex-[0_0_88%] px-2 sm:flex-[0_0_85%] md:flex-[0_0_320px] lg:flex-[0_0_380px] xl:flex-[0_0_400px]`}
+                className="values-carousel-slide min-w-0 flex-[0_0_88%] px-2 sm:flex-[0_0_min(85%,340px)] md:flex-[0_0_320px] lg:flex-[0_0_380px] xl:flex-[0_0_400px]"
               >
                 <ValueCard
                   title={value.title}

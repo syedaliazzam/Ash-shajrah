@@ -47,25 +47,31 @@ export function CurriculumSection() {
         </div>
 
         <div ref={tableRef} className="overflow-hidden rounded-2xl border border-emerald/15 bg-white/70 shadow-lg shadow-emerald-deep/5 backdrop-blur-md">
-          <div className={`grid grid-cols-1 md:grid-cols-[1fr_2fr] border-b border-emerald/15 bg-emerald/5 px-6 py-4 sm:px-8 ${language === 'ur' ? 'text-right font-urdu' : 'text-left font-display'}`}>
-            <div className="font-semibold text-emerald-deep text-lg">{t.curriculumTable.headers.area}</div>
-            <div className="hidden md:block font-semibold text-emerald-deep text-lg">{t.curriculumTable.headers.description}</div>
+          {/* Desktop / tablet table header */}
+          <div className={`hidden border-b border-emerald/15 bg-emerald/5 px-6 py-4 md:grid md:grid-cols-[1fr_2fr] sm:px-8 ${language === 'ur' ? 'text-right font-urdu' : 'text-left font-display'}`}>
+            <div className="text-lg font-semibold text-emerald-deep">{t.curriculumTable.headers.area}</div>
+            <div className="text-lg font-semibold text-emerald-deep">{t.curriculumTable.headers.description}</div>
           </div>
           
           <div className="divide-y divide-emerald/10">
             {t.curriculumTable.rows.map((row, i) => (
-              <div 
-                key={i} 
+              <article
+                key={i}
                 data-curriculum-row
-                className={`grid grid-cols-1 md:grid-cols-[1fr_2fr] gap-2 md:gap-6 px-6 py-5 sm:px-8 transition-colors hover:bg-emerald/5 ${language === 'ur' ? 'text-right font-urdu' : 'text-left'}`}
+                className={`px-5 py-5 transition-colors hover:bg-emerald/5 sm:px-8 md:grid md:grid-cols-[1fr_2fr] md:gap-6 ${language === 'ur' ? 'text-right font-urdu' : 'text-left'}`}
               >
                 <div className={`font-semibold text-emerald-deep ${language === 'ur' ? 'text-lg leading-[1.8]' : 'text-base'}`}>
                   {row.area}
                 </div>
-                <div className={`text-emerald-deep/80 ${language === 'ur' ? 'text-base leading-[2.1]' : 'text-sm sm:text-base leading-relaxed'}`}>
-                  {row.description}
+                <div className="mt-2 md:mt-0">
+                  <p className={`mb-1 text-[11px] font-semibold uppercase tracking-wider text-emerald/50 md:hidden ${language === 'ur' ? 'font-urdu normal-case tracking-normal' : ''}`}>
+                    {t.curriculumTable.headers.description}
+                  </p>
+                  <div className={`text-emerald-deep/80 ${language === 'ur' ? 'text-base leading-[2.1]' : 'text-sm leading-relaxed sm:text-base'}`}>
+                    {row.description}
+                  </div>
                 </div>
-              </div>
+              </article>
             ))}
           </div>
         </div>

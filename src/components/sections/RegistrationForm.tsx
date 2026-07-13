@@ -22,10 +22,10 @@ const INITIAL: RegistrationFormData = {
 };
 
 const inputClass =
-  "form-input w-full rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-sm text-cream outline-none transition-all duration-300 placeholder:text-cream/30 focus:border-gold focus:bg-white/15 focus:shadow-[0_0_0_3px_rgba(201,162,39,0.15)]";
+  "form-input min-h-12 w-full max-w-full rounded-xl border border-white/20 bg-white/10 px-4 py-3 text-base text-cream outline-none transition-all duration-300 placeholder:text-cream/30 focus:border-gold focus:bg-white/15 focus:shadow-[0_0_0_3px_rgba(201,162,39,0.15)]";
 
 const selectClass =
-  "form-select w-full rounded-xl border border-white/20 bg-emerald-deep px-4 py-2.5 text-sm text-cream outline-none transition-all duration-300 focus:border-gold focus:shadow-[0_0_0_3px_rgba(201,162,39,0.15)]";
+  "form-select min-h-12 w-full max-w-full rounded-xl border border-white/20 bg-emerald-deep px-4 py-3 text-base text-cream outline-none transition-all duration-300 focus:border-gold focus:shadow-[0_0_0_3px_rgba(201,162,39,0.15)]";
 
 function FormLabel({
   htmlFor,
@@ -302,7 +302,7 @@ export function RegistrationForm() {
           <button
             type="submit"
             disabled={loading}
-            className={`w-full rounded-full bg-gold px-8 py-3.5 text-sm font-semibold tracking-wide text-[#0d3b2e] shadow-lg shadow-gold/25 transition-all duration-300 hover:bg-gold-soft hover:shadow-gold/40 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:min-w-[280px] ${language === 'ur' ? 'font-urdu' : ''}`}
+            className={`min-h-12 w-full rounded-full bg-gold px-8 py-3.5 text-sm font-semibold tracking-wide text-[#0d3b2e] shadow-lg shadow-gold/25 transition-all duration-300 hover:bg-gold-soft hover:shadow-gold/40 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:min-w-[280px] ${language === 'ur' ? 'font-urdu' : ''}`}
           >
             {loading ? (language === 'ur' ? "جمع کر رہا ہے..." : "Submitting...") : t.register.form.submit}
           </button>
