@@ -150,44 +150,6 @@
     }
   }
 
-  /* Our Works — Swiper coverflow carousel */
-  .works-coverflow .works-swiper {
-    overflow: hidden;
-  }
-
-  @media (min-width: 640px) {
-    .works-coverflow .works-swiper {
-      overflow: visible;
-    }
-  }
-
-  .works-coverflow .swiper-slide {
-    height: auto;
-    transition: opacity 0.45s ease, filter 0.45s ease;
-    opacity: 0.55;
-    filter: saturate(0.85);
-  }
-
-  .works-coverflow .swiper-slide-active {
-    opacity: 1;
-    filter: saturate(1);
-  }
-
-  .works-pagination .swiper-pagination-bullet {
-    width: 10px;
-    height: 10px;
-    margin: 0 4px !important;
-    background: rgba(6, 70, 53, 0.25);
-    opacity: 1;
-    transition: width 0.3s ease, background 0.3s ease;
-  }
-
-  .works-pagination .swiper-pagination-bullet-active {
-    width: 32px;
-    border-radius: 999px;
-    background: linear-gradient(90deg, #d4af37, #064635);
-  }
-
   .events-pagination .swiper-pagination-bullet {
     width: 10px;
     height: 10px;

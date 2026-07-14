@@ -20,7 +20,7 @@ export function FloatingLanguageSwitcher() {
       dir="ltr"
       className={`
         fixed z-40
-        bottom-5 right-4 sm:bottom-6 sm:right-6
+        bottom-20 right-4 sm:bottom-6 sm:right-6
         pb-[env(safe-area-inset-bottom)]
         inline-flex min-h-12 min-w-[88px] items-center justify-center gap-2
         rounded-full border border-white/25
