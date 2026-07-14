@@ -1,8 +1,16 @@
 node_modules
 .next
 out
+.env
 .env*.local
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 *.log
 .DS_Store
-.env
 /src/generated/prisma
+test-conn.js
+*.pem
+credentials.json
+service-account*.json

@@ -151,6 +151,12 @@ export function Footer() {
             </p>
             <div className="mt-5 flex flex-wrap items-center gap-3">
               <a
+                href="/careers"
+                className={`inline-flex items-center justify-center rounded-full border border-cream/25 bg-white/5 px-5 py-2.5 text-sm font-semibold text-cream transition-all duration-300 hover:border-gold/45 hover:bg-gold/15 hover:text-gold-soft ${language === 'ur' ? 'font-urdu' : ''}`}
+              >
+                {t.nav.careers}
+              </a>
+              <a
                 href={WHATSAPP_URL}
                 target="_blank"
                 rel="noopener noreferrer"

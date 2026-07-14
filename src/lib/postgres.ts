@@ -2,16 +2,40 @@ import { Pool } from "pg";
 
 let pool: Pool | null = null;
 
+/**
+ * Runtime queries use DATABASE_URL (Supabase pooled, port 6543 + pgbouncer=true).
+ * DIRECT_URL is reserved for migrations/setup scripts — not for the app pool.
+ */
+function stripQuotes(url: string): string {
+  if (
+    (url.startsWith('"') && url.endsWith('"')) ||
+    (url.startsWith("'") && url.endsWith("'"))
+  ) {
+    return url.slice(1, -1);
+  }
+  return url;
+}
+
 function getDatabaseUrl() {
-  let url = process.env.DATABASE_URL || process.env.DIRECT_URL || null;
-  
-  // Strip surrounding quotes if the user accidentally pasted them into Vercel
-  if (url && (url.startsWith('"') || url.startsWith("'"))) {
-    url = url.replace(/^['"]|['"]$/g, '');
+  const raw = process.env.DATABASE_URL || null;
+  if (!raw) return null;
+
+  const url = stripQuotes(raw.trim());
+
+  if (url === "base" || !url.startsWith("postgres")) {
+    console.error("Invalid DATABASE_URL configured (value redacted).");
+    return null;
   }
 
-  if (url === "base" || (url && !url.startsWith("postgres"))) {
-    console.error("Invalid DATABASE_URL configured:", url);
+  return url;
+}
+
+export function getDirectDatabaseUrl(): string | null {
+  const raw = process.env.DIRECT_URL || process.env.DATABASE_URL || null;
+  if (!raw) return null;
+  const url = stripQuotes(raw.trim());
+  if (!url.startsWith("postgres")) {
+    console.error("Invalid DIRECT_URL configured (value redacted).");
     return null;
   }
   return url;
