@@ -3,7 +3,7 @@
 import { BrandLogo } from "@/components/ui/BrandLogo";
 import { FacebookIcon } from "@/components/ui/FacebookIcon";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { ASH_SHAJRAH_FACEBOOK_URL, WHATSAPP_URL } from "@/lib/constants";
+import { ASH_SHAJRAH_FACEBOOK_URL } from "@/lib/constants";
 
 function ContactRow({
   label,
@@ -115,7 +115,6 @@ export function Footer() {
               <ContactRow
                 label={t.footer.contact.whatsapp}
                 value={t.footer.contact.whatsappValue}
-                href={WHATSAPP_URL}
                 language={language}
                 dir="ltr"
               />
@@ -155,14 +154,6 @@ export function Footer() {
                 className={`inline-flex items-center justify-center rounded-full border border-cream/25 bg-white/5 px-5 py-2.5 text-sm font-semibold text-cream transition-all duration-300 hover:border-gold/45 hover:bg-gold/15 hover:text-gold-soft ${language === 'ur' ? 'font-urdu' : ''}`}
               >
                 {t.nav.careers}
-              </a>
-              <a
-                href={WHATSAPP_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={`inline-flex items-center justify-center rounded-full border border-gold/35 bg-gold/15 px-5 py-2.5 text-sm font-semibold text-cream transition-all duration-300 hover:border-gold/55 hover:bg-gold/25 hover:text-gold-soft ${language === 'ur' ? 'font-urdu' : ''}`}
-              >
-                {t.footer.messageUs}
               </a>
               {ASH_SHAJRAH_FACEBOOK_URL && (
                 <a

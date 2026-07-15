@@ -7,7 +7,6 @@ import {
   MAX_RESUME_BYTES,
   type CareerSource,
 } from "@/lib/careers";
-import { WHATSAPP_URL } from "@/lib/constants";
 
 type Props = {
   source: CareerSource;
@@ -255,15 +254,7 @@ export function CareersSubmissionForm({ source, variant = "website" }: Props) {
               : "border-red-300/40 bg-red-500/10 text-red-100"
           } ${isUrdu ? "font-urdu leading-[2]" : ""}`}
         >
-          {error}{" "}
-          <a
-            href={WHATSAPP_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="underline"
-          >
-            WhatsApp
-          </a>
+          {error}
         </div>
       )}
 

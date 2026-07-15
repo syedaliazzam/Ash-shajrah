@@ -4,7 +4,6 @@ import { Header } from "@/components/layout/Header";
 import { CareersSubmissionForm } from "@/components/careers/CareersSubmissionForm";
 import { BrandLogo } from "@/components/ui/BrandLogo";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { WHATSAPP_URL } from "@/lib/constants";
 
 export function CareersPageContent() {
   const { language, t } = useLanguage();
@@ -51,17 +50,6 @@ export function CareersPageContent() {
           <div className="mb-10 h-px w-full bg-gradient-to-r from-transparent via-gold/40 to-transparent" />
 
           <CareersSubmissionForm source="Website Careers Page" variant="website" />
-
-          <div className="mt-8 text-center">
-            <a
-              href={WHATSAPP_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`text-sm text-cream/55 underline-offset-2 hover:text-gold-soft hover:underline ${isUrdu ? "font-urdu" : ""}`}
-            >
-              {t.careers.whatsappHelp}
-            </a>
-          </div>
         </div>
       </main>
     </>

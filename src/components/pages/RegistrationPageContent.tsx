@@ -4,7 +4,6 @@ import { Header } from "@/components/layout/Header";
 import { RegistrationForm } from "@/components/sections/RegistrationForm";
 import { BrandLogo } from "@/components/ui/BrandLogo";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { WHATSAPP_URL } from "@/lib/constants";
 
 export function RegistrationPageContent() {
   const { language, t } = useLanguage();
@@ -64,30 +63,6 @@ export function RegistrationPageContent() {
 
           {/* Registration form */}
           <RegistrationForm />
-
-          {/* WhatsApp fallback */}
-          <div className="mt-8 text-center">
-            <p
-              dir={language === "ur" ? "rtl" : "ltr"}
-              lang={language === "ur" ? "ur" : "en"}
-              className={`${
-                language === "ur"
-                  ? "font-urdu text-sm leading-[2] text-cream/50"
-                  : "text-sm text-cream/50"
-              }`}
-            >
-              {language === "ur" ? "مشکل ہو رہی ہے؟ " : "Having trouble? "}
-              {language === "ur" ? "پر رابطہ کریں" : "Contact us on "}
-              <a
-                href={WHATSAPP_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-semibold text-gold transition-colors hover:text-gold-soft"
-              >
-                {language === "ur" ? "واٹس ایپ" : "WhatsApp"}
-              </a>
-            </p>
-          </div>
         </div>
       </main>
     </>

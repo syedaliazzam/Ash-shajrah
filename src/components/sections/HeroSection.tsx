@@ -8,7 +8,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { HeroVideoBackground } from "@/components/hero/HeroVideoBackground";
 import { HeroParticles } from "@/components/hero/HeroParticles";
 import { HeroWatermark } from "@/components/hero/HeroWatermark";
-import { REGISTER_URL, WHATSAPP_URL, EDI_FACEBOOK_URL } from "@/lib/constants";
+import { REGISTER_URL, EDI_FACEBOOK_URL } from "@/lib/constants";
 
 export function HeroSection() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -145,11 +145,6 @@ export function HeroSection() {
                       {t.hero.secondaryCta}
                     </Button>
                   </div>
-                  <div data-hero-cta className="relative z-30 w-full pointer-events-auto sm:w-auto">
-                    <Button href={WHATSAPP_URL} variant="light" target="_blank" rel="noopener noreferrer" className="w-full sm:w-auto">
-                      {t.hero.contactCta}
-                    </Button>
-                  </div>
                 </>
               ) : (
                 <>
@@ -168,16 +163,6 @@ export function HeroSection() {
                     >
                       {t.hero.secondaryCta}
                     </Link>
-                  </div>
-                  <div data-hero-cta className="relative z-30 w-full pointer-events-auto sm:w-auto">
-                    <a
-                      href={WHATSAPP_URL}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex min-h-[44px] w-full min-w-[44px] items-center justify-center rounded-full border border-cream/30 bg-white/10 px-6 py-3 text-sm font-semibold text-cream backdrop-blur-sm transition-all hover:border-cream/50 hover:bg-white/15 sm:w-auto"
-                    >
-                      {t.hero.contactCta}
-                    </a>
                   </div>
                 </>
               )}
