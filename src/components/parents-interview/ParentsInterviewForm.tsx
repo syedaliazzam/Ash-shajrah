@@ -17,6 +17,7 @@ import {
 import type { ParentInterviewPublicMeta } from "@/lib/parents-interview/db";
 import { YesNoDetailQuestion } from "@/components/parents-interview/YesNoDetailQuestion";
 import { RadioCardGroup } from "@/components/parents-interview/RadioCardGroup";
+import { QuestionCard } from "@/components/parents-interview/QuestionCard";
 
 type Props = {
   token: string;
@@ -26,8 +27,14 @@ type Props = {
 const inputClass =
   "mt-2 w-full rounded-2xl border border-emerald-900/15 bg-white px-4 py-3 text-base text-emerald-950 outline-none transition placeholder:text-emerald-950/40 focus:border-gold focus:ring-2 focus:ring-gold/30";
 
+const inputClassFlush =
+  "w-full rounded-2xl border border-emerald-900/15 bg-white px-4 py-3 text-base text-emerald-950 outline-none transition placeholder:text-emerald-950/40 focus:border-gold focus:ring-2 focus:ring-gold/30";
+
 const textareaClass =
   "mt-2 min-h-28 w-full resize-y rounded-2xl border border-emerald-900/15 bg-white px-4 py-4 text-base leading-7 text-emerald-950 outline-none transition placeholder:text-emerald-950/40 focus:border-gold focus:ring-2 focus:ring-gold/30";
+
+const textareaClassFlush =
+  "min-h-28 w-full resize-y rounded-2xl border border-emerald-900/15 bg-white px-4 py-4 text-base leading-7 text-emerald-950 outline-none transition placeholder:text-emerald-950/40 focus:border-gold focus:ring-2 focus:ring-gold/30";
 
 export function ParentsInterviewForm({ token, initialMeta }: Props) {
   const [step, setStep] = useState(0);
@@ -180,7 +187,7 @@ export function ParentsInterviewForm({ token, initialMeta }: Props) {
         detailsError={fieldErrors[`${question.id}.details`]}
         fieldsetRef={
           isFirstError([question.id])
-            ? (el) => {
+            ? (el: HTMLElement | null) => {
                 firstErrorRef.current = el;
               }
             : undefined
@@ -207,10 +214,11 @@ export function ParentsInterviewForm({ token, initialMeta }: Props) {
       return (
         <div
           key={question.id}
-          className="rounded-2xl border border-emerald-900/10 bg-white p-5 shadow-sm"
+          className="min-w-0 rounded-[24px] border border-emerald-900/10 bg-white px-4 pb-5 pt-4 shadow-sm sm:px-6 sm:pb-6 sm:pt-5"
         >
-          <h4 className="text-base font-semibold leading-7 text-emerald-950">
-            {question.number}. {question.label}
+          <h4 className="text-lg font-semibold leading-7 text-emerald-950 sm:text-xl">
+            <span className="mr-1">{question.number}.</span>
+            <span>{question.label}</span>
           </h4>
           <div className="mt-4 space-y-4">
             {question.subquestions.map((sub) =>
@@ -228,24 +236,22 @@ export function ParentsInterviewForm({ token, initialMeta }: Props) {
         { key: "walked" as const, label: "Started walking" },
       ];
       return (
-        <fieldset
+        <QuestionCard
           key={question.id}
-          ref={
+          number={question.number}
+          label={question.label}
+          fieldsetRef={
             isFirstError([
               `${question.id}.sat`,
               `${question.id}.crawled`,
               `${question.id}.walked`,
             ])
-              ? (el) => {
+              ? (el: HTMLElement | null) => {
                   firstErrorRef.current = el;
                 }
               : undefined
           }
-          className="rounded-2xl border border-emerald-900/10 bg-white p-5 shadow-sm"
         >
-          <legend className="w-full text-base font-semibold leading-7 text-emerald-950">
-            {question.number}. {question.label}
-          </legend>
           <div className="mt-4 grid gap-4 sm:grid-cols-3">
             {fields.map((field) => (
               <div key={field.key}>
@@ -273,7 +279,7 @@ export function ParentsInterviewForm({ token, initialMeta }: Props) {
               </div>
             ))}
           </div>
-        </fieldset>
+        </QuestionCard>
       );
     }
 
@@ -281,20 +287,18 @@ export function ParentsInterviewForm({ token, initialMeta }: Props) {
       const rating = value.rating || value.answer || "";
       const showDetails = rating === "fair" || rating === "poor";
       return (
-        <fieldset
+        <QuestionCard
           key={question.id}
-          ref={
+          number={question.number}
+          label={question.label}
+          fieldsetRef={
             isFirstError([question.id])
-              ? (el) => {
+              ? (el: HTMLElement | null) => {
                   firstErrorRef.current = el;
                 }
               : undefined
           }
-          className="rounded-2xl border border-emerald-900/10 bg-white p-5 shadow-sm"
         >
-          <legend className="w-full text-base font-semibold leading-7 text-emerald-950">
-            {question.number}. {question.label}
-          </legend>
           <div className="mt-4">
             <RadioCardGroup
               name={`${question.id}.rating`}
@@ -334,60 +338,57 @@ export function ParentsInterviewForm({ token, initialMeta }: Props) {
               )}
             </div>
           )}
-        </fieldset>
+        </QuestionCard>
       );
     }
 
     if (question.type === "select") {
+      const selectOptions = question.options || BIRTH_ORDER_OPTIONS;
       return (
-        <fieldset
+        <QuestionCard
           key={question.id}
-          ref={
+          number={question.number}
+          label={question.label}
+          fieldsetRef={
             isFirstError([question.id])
-              ? (el) => {
+              ? (el: HTMLElement | null) => {
                   firstErrorRef.current = el;
                 }
               : undefined
           }
-          className="rounded-2xl border border-emerald-900/10 bg-white p-5 shadow-sm"
         >
-          <legend className="w-full text-base font-semibold leading-7 text-emerald-950">
-            {question.number}. {question.label}
-          </legend>
           <div className="mt-4">
             <RadioCardGroup
               name={`${question.id}.answer`}
-              options={question.options || BIRTH_ORDER_OPTIONS}
+              options={selectOptions}
               value={value.answer || ""}
               onChange={(next) =>
                 patchAnswer(question.id, { answer: next })
               }
-              columns={2}
+              columns={selectOptions.length > 4 ? 3 : 2}
             />
           </div>
           {fieldErrors[question.id] && (
             <p className="mt-2 text-sm text-red-600">{fieldErrors[question.id]}</p>
           )}
-        </fieldset>
+        </QuestionCard>
       );
     }
 
     if (question.type === "screen_time") {
       return (
-        <fieldset
+        <QuestionCard
           key={question.id}
-          ref={
+          number={question.number}
+          label={question.label}
+          fieldsetRef={
             isFirstError([question.id])
-              ? (el) => {
+              ? (el: HTMLElement | null) => {
                   firstErrorRef.current = el;
                 }
               : undefined
           }
-          className="rounded-2xl border border-emerald-900/10 bg-white p-5 shadow-sm"
         >
-          <legend className="w-full text-base font-semibold leading-7 text-emerald-950">
-            {question.number}. {question.label}
-          </legend>
           <div className="mt-4">
             <RadioCardGroup
               name={`${question.id}.duration`}
@@ -403,22 +404,22 @@ export function ParentsInterviewForm({ token, initialMeta }: Props) {
             <p className="mt-2 text-sm text-red-600">{fieldErrors[question.id]}</p>
           )}
           <label
-            className={`mt-4 flex min-h-11 cursor-pointer items-start gap-3 rounded-xl border px-4 py-3 transition ${
+            className={`mt-4 flex min-h-14 cursor-pointer items-start gap-3 rounded-2xl border px-4 py-3 transition ${
               value.supervised
-                ? "border-gold bg-emerald-deep shadow-[0_8px_20px_-6px_rgba(13,59,46,0.45),0_0_0_1px_rgba(201,162,39,0.55)]"
-                : "border-emerald-900/10 bg-cream/50 hover:border-emerald/30 hover:bg-cream"
+                ? "border-[#d4af37] bg-emerald-800 shadow-md"
+                : "border-emerald-900/15 bg-[#fffdf7] hover:border-emerald-700/40 hover:bg-emerald-50"
             }`}
           >
             <input
               type="checkbox"
-              className="mt-1 h-4 w-4 accent-gold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2"
+              className="mt-1 h-4 w-4 accent-gold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d4af37] focus-visible:ring-offset-2"
               checked={Boolean(value.supervised)}
               onChange={(e) =>
                 patchAnswer(question.id, { supervised: e.target.checked })
               }
             />
             <span
-              className={`text-sm leading-6 ${
+              className={`text-sm leading-6 sm:text-base ${
                 value.supervised
                   ? "font-semibold text-white"
                   : "font-medium text-emerald-950"
@@ -427,26 +428,24 @@ export function ParentsInterviewForm({ token, initialMeta }: Props) {
               Screen time is usually supervised by an adult
             </span>
           </label>
-        </fieldset>
+        </QuestionCard>
       );
     }
 
     if (question.type === "time") {
       return (
-        <fieldset
+        <QuestionCard
           key={question.id}
-          ref={
+          number={question.number}
+          label={question.label}
+          fieldsetRef={
             isFirstError([question.id])
-              ? (el) => {
+              ? (el: HTMLElement | null) => {
                   firstErrorRef.current = el;
                 }
               : undefined
           }
-          className="rounded-2xl border border-emerald-900/10 bg-white p-5 shadow-sm"
         >
-          <legend className="w-full text-base font-semibold leading-7 text-emerald-950">
-            {question.number}. {question.label}
-          </legend>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             <div>
               <label
@@ -494,72 +493,72 @@ export function ParentsInterviewForm({ token, initialMeta }: Props) {
           {fieldErrors[question.id] && (
             <p className="mt-2 text-sm text-red-600">{fieldErrors[question.id]}</p>
           )}
-        </fieldset>
+        </QuestionCard>
       );
     }
 
     if (question.type === "short_text") {
       return (
-        <fieldset
+        <QuestionCard
           key={question.id}
-          ref={
+          number={question.number}
+          label={question.label}
+          fieldsetRef={
             isFirstError([question.id])
-              ? (el) => {
+              ? (el: HTMLElement | null) => {
                   firstErrorRef.current = el;
                 }
               : undefined
           }
-          className="rounded-2xl border border-emerald-900/10 bg-white p-5 shadow-sm"
         >
-          <legend className="w-full text-base font-semibold leading-7 text-emerald-950">
-            {question.number}. {question.label}
-          </legend>
-          <input
-            type="text"
-            value={value.answer || ""}
-            placeholder={question.placeholder}
-            onChange={(e) =>
-              patchAnswer(question.id, { answer: e.target.value })
-            }
-            className={inputClass}
-          />
+          <div className="mt-4">
+            <input
+              type="text"
+              value={value.answer || ""}
+              placeholder={question.placeholder}
+              onChange={(e) =>
+                patchAnswer(question.id, { answer: e.target.value })
+              }
+              className={inputClassFlush}
+            />
+          </div>
           {fieldErrors[question.id] && (
             <p className="mt-2 text-sm text-red-600">{fieldErrors[question.id]}</p>
           )}
-        </fieldset>
+        </QuestionCard>
       );
     }
 
     const min = question.minLength ?? 0;
     const text = value.answer || "";
     return (
-      <fieldset
+      <QuestionCard
         key={question.id}
-        ref={
+        number={question.number}
+        label={question.label}
+        fieldsetRef={
           isFirstError([question.id])
-            ? (el) => {
+            ? (el: HTMLElement | null) => {
                 firstErrorRef.current = el;
               }
             : undefined
         }
-        className="rounded-2xl border border-emerald-900/10 bg-white p-5 shadow-sm"
       >
-        <legend className="w-full text-base font-semibold leading-7 text-emerald-950">
-          {question.number}. {question.label}
-        </legend>
-        <textarea
-          rows={min > 0 ? 7 : 4}
-          value={text}
-          placeholder={question.placeholder}
-          onChange={(e) =>
-            patchAnswer(question.id, { answer: e.target.value })
-          }
-          className={
-            min > 0
-              ? "mt-4 min-h-40 w-full resize-y rounded-2xl border border-emerald-900/15 bg-white px-4 py-4 text-base leading-7 text-emerald-950 outline-none transition placeholder:text-emerald-950/40 focus:border-gold focus:ring-2 focus:ring-gold/30"
-              : textareaClass
-          }
-        />
+        <div className="mt-4">
+          <textarea
+            rows={min > 0 ? 7 : 4}
+            value={text}
+            placeholder={question.placeholder}
+            onChange={(e) =>
+              patchAnswer(question.id, { answer: e.target.value })
+            }
+            className={
+              min > 0
+                ? "min-h-40 w-full resize-y rounded-2xl border border-emerald-900/15 bg-white px-4 py-4 text-base leading-7 text-emerald-950 outline-none transition placeholder:text-emerald-950/40 focus:border-gold focus:ring-2 focus:ring-gold/30"
+                : textareaClassFlush
+            }
+          />
+        </div>
         {min > 0 && (
           <p className="mt-2 text-xs text-emerald-950/55">
             {text.trim().length} characters (minimum {min})
@@ -568,7 +567,7 @@ export function ParentsInterviewForm({ token, initialMeta }: Props) {
         {fieldErrors[question.id] && (
           <p className="mt-2 text-sm text-red-600">{fieldErrors[question.id]}</p>
         )}
-      </fieldset>
+      </QuestionCard>
     );
   }
 

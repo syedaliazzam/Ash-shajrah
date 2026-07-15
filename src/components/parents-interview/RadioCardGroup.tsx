@@ -12,7 +12,7 @@ type Props = {
   options: readonly Option[] | Option[];
   value?: string;
   onChange: (value: string) => void;
-  columns?: 1 | 2;
+  columns?: 1 | 2 | 3;
   className?: string;
 };
 
@@ -30,14 +30,16 @@ export function RadioCardGroup({
   const gridClass =
     columns === 1
       ? "grid grid-cols-1 gap-3"
-      : "grid grid-cols-1 gap-3 min-[380px]:grid-cols-2";
+      : columns === 3
+        ? "grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3"
+        : "grid grid-cols-1 gap-3 sm:grid-cols-2";
 
   return (
     <div className={`${gridClass} ${className}`.trim()} role="presentation">
       {options.map((option) => {
         const selected = value === option.value;
         return (
-          <label key={option.value} className="cursor-pointer">
+          <label key={option.value} className="block cursor-pointer">
             <input
               type="radio"
               name={name}

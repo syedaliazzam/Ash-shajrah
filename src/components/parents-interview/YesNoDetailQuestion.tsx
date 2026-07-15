@@ -1,5 +1,6 @@
 "use client";
 
+import { QuestionCard } from "@/components/parents-interview/QuestionCard";
 import { RadioCardGroup } from "@/components/parents-interview/RadioCardGroup";
 
 type Props = {
@@ -15,7 +16,7 @@ type Props = {
   detailsError?: string;
   onAnswerChange: (answer: "yes" | "no") => void;
   onDetailsChange: (details: string) => void;
-  fieldsetRef?: (el: HTMLElement | null) => void;
+  fieldsetRef?: (el: HTMLFieldSetElement | null) => void;
 };
 
 const YES_NO_OPTIONS = [
@@ -40,24 +41,18 @@ export function YesNoDetailQuestion({
 }: Props) {
   const errorId = `${questionId}-error`;
   const detailsErrorId = `${questionId}-details-error`;
+  const describedBy = [error ? errorId : null, detailsError ? detailsErrorId : null]
+    .filter(Boolean)
+    .join(" ");
 
   return (
-    <fieldset
-      ref={fieldsetRef}
-      className="rounded-2xl border border-emerald-900/10 bg-white p-5 shadow-sm"
-      aria-invalid={error || detailsError ? true : undefined}
-      aria-describedby={
-        error || detailsError
-          ? [error ? errorId : null, detailsError ? detailsErrorId : null]
-              .filter(Boolean)
-              .join(" ")
-          : undefined
-      }
+    <QuestionCard
+      number={number}
+      label={label}
+      invalid={Boolean(error || detailsError)}
+      errorIds={describedBy || undefined}
+      fieldsetRef={fieldsetRef}
     >
-      <legend className="w-full text-base font-semibold leading-7 text-emerald-950">
-        {number}. {label}
-      </legend>
-
       <div className="mt-4">
         <RadioCardGroup
           name={`${questionId}.answer`}
@@ -99,6 +94,6 @@ export function YesNoDetailQuestion({
           )}
         </div>
       )}
-    </fieldset>
+    </QuestionCard>
   );
 }
