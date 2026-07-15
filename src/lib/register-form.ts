@@ -127,9 +127,10 @@ export function formatRegistrationEmailHtml(
 
 export function formatRegistrationConfirmationText(
   data: RegistrationFormData,
-  submittedAt: string
+  submittedAt: string,
+  interviewUrl?: string
 ): string {
-  return [
+  const lines = [
     "Registration Confirmed - Ash-Shajrah Learning Hub",
     "=".repeat(50),
     "",
@@ -146,18 +147,63 @@ export function formatRegistrationConfirmationText(
     `Child Age: ${data.childAge.trim()}`,
     `Interested Level: ${data.level.trim()}`,
     `City / Country: ${data.cityCountry.trim()}`,
+  ];
+
+  if (interviewUrl) {
+    lines.push(
+      "",
+      "Next Step: Complete the Parents Interview Form",
+      "",
+      "Every child develops and learns differently. To help our admission and academic team understand your child’s health, development, learning readiness, daily routine, behaviour, interests, and home environment, please complete the Parents Interview Form using the button below.",
+      "",
+      "This is not a test, and there are no right or wrong answers. The information will help us prepare a more caring, supportive, and age-appropriate learning experience for your child.",
+      "",
+      "Complete Parents Interview Form:",
+      interviewUrl
+    );
+  }
+
+  lines.push(
     "",
     "If you need to update any information, please reply to this email.",
     "",
     "Warm regards,",
-    "Ash-Shajrah Learning Hub",
-  ].join("\n");
+    "Ash-Shajrah Learning Hub"
+  );
+
+  return lines.join("\n");
 }
 
 export function formatRegistrationConfirmationHtml(
   data: RegistrationFormData,
-  submittedAt: string
+  submittedAt: string,
+  interviewUrl?: string
 ): string {
+  const interviewSection = interviewUrl
+    ? `
+      <div style="background:#faf7f0;border:1px solid #e8e4dc;border-radius:12px;padding:20px 18px;margin:24px 0;">
+        <h2 style="margin:0 0 12px;color:#0d3b2e;font-size:18px;font-weight:700;">Next Step: Complete the Parents Interview Form</h2>
+        <p style="margin:0 0 12px;color:#0d3b2e;font-size:15px;line-height:1.7;">
+          Every child develops and learns differently. To help our admission and academic team understand your child’s health, development, learning readiness, daily routine, behaviour, interests, and home environment, please complete the Parents Interview Form using the button below.
+        </p>
+        <p style="margin:0 0 18px;color:#0d3b2e;font-size:15px;line-height:1.7;">
+          This is not a test, and there are no right or wrong answers. The information will help us prepare a more caring, supportive, and age-appropriate learning experience for your child.
+        </p>
+        <p style="margin:0 0 12px;">
+          <a
+            href="${escapeHtml(interviewUrl)}"
+            style="display:inline-block;background:#0f5a43;color:#ffffff;padding:14px 24px;border-radius:999px;text-decoration:none;font-weight:700;"
+          >
+            Complete Parents Interview Form
+          </a>
+        </p>
+        <p style="margin:0;color:#5c4a32;font-size:12px;line-height:1.6;word-break:break-all;">
+          If the button does not work, open this link:<br/>
+          <a href="${escapeHtml(interviewUrl)}" style="color:#0f5a43;">${escapeHtml(interviewUrl)}</a>
+        </p>
+      </div>`
+    : "";
+
   return `<!DOCTYPE html>
 <html>
 <body style="margin:0;padding:24px;background:#faf7f0;font-family:Georgia,serif;">
@@ -182,6 +228,7 @@ export function formatRegistrationConfirmationHtml(
         <p style="margin:16px 0 8px;color:#5c4a32;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;">Programme</p>
         <p style="margin:0;color:#0d3b2e;font-size:14px;">${escapeHtml(data.level.trim())}</p>
       </div>
+      ${interviewSection}
       <p style="margin:0;color:#0d3b2e;font-size:15px;line-height:1.7;">
         If you need to update any information, please reply to this email.
       </p>

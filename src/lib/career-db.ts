@@ -2,6 +2,7 @@ import { randomUUID } from "crypto";
 import { getPgPool } from "@/lib/postgres";
 import type { CareerStatus } from "@/lib/careers";
 import { sanitizeFileName } from "@/lib/careers";
+import { getLmsCareersAdminUrl } from "@/lib/lms-url";
 
 export type CareerApplicationRow = {
   id: string;
@@ -36,7 +37,7 @@ export function toAdminCareerApplication(
 ): AdminCareerApplication {
   return {
     ...row,
-    resumeAccessPath: `/api/admin/careers/${row.id}/resume`,
+    resumeAccessPath: getLmsCareersAdminUrl(row.id),
   };
 }
 

@@ -11,6 +11,7 @@ import {
   formatCareerNotificationSubject,
   formatCareerNotificationText,
 } from "@/lib/career-email";
+import { getLmsCareersAdminUrl } from "@/lib/lms-url";
 
 export const runtime = "nodejs";
 
@@ -127,9 +128,7 @@ export async function POST(request: NextRequest) {
 
     const smtpConfig = getSmtpConfig();
     if (smtpConfig) {
-      const siteUrl =
-        process.env.NEXT_PUBLIC_SITE_URL || "https://ashshajrah.com";
-      const adminPortalUrl = `${siteUrl.replace(/\/$/, "")}/lms/admin/careers?id=${application.id}`;
+      const adminPortalUrl = getLmsCareersAdminUrl(application.id);
       const fromEmail = process.env.SMTP_FROM || smtpConfig.auth.user;
       const transporter = nodemailer.createTransport(smtpConfig);
 

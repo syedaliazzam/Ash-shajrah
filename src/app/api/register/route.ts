@@ -13,6 +13,17 @@ import {
   insertInterestedStudent,
 } from "@/lib/postgres";
 import { appendRegistrationToGoogleSheet } from "@/lib/google-sheets";
+import {
+  createParentInterviewForm,
+  rotateParentInterviewToken,
+} from "@/lib/parents-interview/db";
+import {
+  buildParentInterviewUrl,
+  createParentInterviewRawToken,
+  hashParentInterviewToken,
+} from "@/lib/parents-interview/validation";
+
+export const runtime = "nodejs";
 
 const SUCCESS_MESSAGE =
   "Thank you! Your registration has been submitted successfully. Our admissions team will contact you soon.";
@@ -55,7 +66,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true, message: SUCCESS_MESSAGE });
     }
 
-    const preferredLanguage = (body as { preferredLanguage?: string }).preferredLanguage;
+    const preferredLanguage = (body as { preferredLanguage?: string })
+      .preferredLanguage;
 
     const formData: RegistrationFormData = {
       parentName: body.parentName ?? "",
@@ -66,19 +78,25 @@ export async function POST(request: NextRequest) {
       level: body.level ?? "",
       cityCountry: body.cityCountry ?? "",
       message: body.message ?? "",
-      preferredLanguage: preferredLanguage?.trim()
+      preferredLanguage: preferredLanguage?.trim(),
     };
 
     const errors = validateRegistrationForm(formData);
     if (Object.keys(errors).length > 0) {
-      return NextResponse.json({ error: "Validation failed", errors }, { status: 400 });
+      return NextResponse.json(
+        { error: "Validation failed", errors },
+        { status: 400 }
+      );
     }
 
     const smtpConfig = getSmtpConfig();
     if (!smtpConfig) {
       console.error("SMTP environment variables are not configured.");
       return NextResponse.json(
-        { error: "Something went wrong. Please try again or contact us on WhatsApp." },
+        {
+          error:
+            "Something went wrong. Please try again or contact us on WhatsApp.",
+        },
         { status: 503 }
       );
     }
@@ -90,7 +108,7 @@ export async function POST(request: NextRequest) {
       timeZone: "Asia/Karachi",
     });
 
-    await insertInterestedStudent({
+    const registrationId = await insertInterestedStudent({
       parentName: formData.parentName.trim(),
       phone: formData.whatsapp.trim(),
       email: formData.email.trim(),
@@ -100,6 +118,29 @@ export async function POST(request: NextRequest) {
       cityCountry: formData.cityCountry.trim(),
       message: formData.message.trim(),
     });
+
+    const rawToken = createParentInterviewRawToken();
+    const tokenHash = hashParentInterviewToken(rawToken);
+
+  // If a pending form already exists for this registration, rotate to the new token.
+  const created = await createParentInterviewForm({
+      registrationId,
+      tokenHash,
+      parentName: formData.parentName.trim(),
+      parentEmail: formData.email.trim().toLowerCase(),
+      childName: formData.childName.trim(),
+      childAge: formData.childAge.trim(),
+      interestedProgramme: formData.level.trim(),
+    });
+
+    if (created.registrationId === registrationId) {
+      await rotateParentInterviewToken({
+        registrationId,
+        tokenHash,
+      });
+    }
+
+    const interviewUrl = buildParentInterviewUrl(rawToken);
 
     try {
       await appendRegistrationToGoogleSheet({
@@ -119,15 +160,26 @@ export async function POST(request: NextRequest) {
 
     const transporter = nodemailer.createTransport(smtpConfig);
     const coordinatorEmails = await getActiveCoordinatorEmails();
-    const coordinatorRecipients = coordinatorEmails.length > 0 ? coordinatorEmails : [getCoordinatorEmail()];
+    const coordinatorRecipients =
+      coordinatorEmails.length > 0
+        ? coordinatorEmails
+        : [getCoordinatorEmail()];
 
     await transporter.sendMail({
       from: `"Ash-Shajrah Learning Hub" <${fromEmail}>`,
       to: formData.email.trim(),
       replyTo: coordinatorRecipients[0],
       subject: "Registration Confirmed - Ash-Shajrah Learning Hub",
-      text: formatRegistrationConfirmationText(formData, submittedAt),
-      html: formatRegistrationConfirmationHtml(formData, submittedAt),
+      text: formatRegistrationConfirmationText(
+        formData,
+        submittedAt,
+        interviewUrl
+      ),
+      html: formatRegistrationConfirmationHtml(
+        formData,
+        submittedAt,
+        interviewUrl
+      ),
     });
 
     await transporter.sendMail({
@@ -143,7 +195,10 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error("Registration API error:", error);
     return NextResponse.json(
-      { error: "Something went wrong. Please try again or contact us on WhatsApp." },
+      {
+        error:
+          "Something went wrong. Please try again or contact us on WhatsApp.",
+      },
       { status: 500 }
     );
   }

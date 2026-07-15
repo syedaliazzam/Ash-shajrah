@@ -10,10 +10,9 @@ import {
 
 type Props = {
   source: CareerSource;
-  variant?: "website" | "lms";
 };
 
-export function CareersSubmissionForm({ source, variant = "website" }: Props) {
+export function CareersSubmissionForm({ source }: Props) {
   const { language, t } = useLanguage();
   const isUrdu = language === "ur";
   const c = t.careers;
@@ -30,18 +29,12 @@ export function CareersSubmissionForm({ source, variant = "website" }: Props) {
   const [success, setSuccess] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const isLms = variant === "lms";
-  const inputClass = isLms
-    ? "mt-1.5 w-full rounded-xl border border-emerald/15 bg-white px-4 py-3 text-sm text-emerald-deep outline-none transition focus:border-emerald/40 focus:ring-2 focus:ring-emerald/15"
-    : "mt-1.5 w-full rounded-xl border border-white/15 bg-white/10 px-4 py-3 text-sm text-cream placeholder:text-cream/40 outline-none transition focus:border-gold/40 focus:ring-2 focus:ring-gold/20";
-  // Native <option> lists often ignore parent text color — force dark readable options.
-  const selectClass = isLms
-    ? "mt-1.5 min-h-14 w-full rounded-xl border border-emerald/15 bg-white px-4 py-3 text-sm text-emerald-deep outline-none transition focus:border-emerald/40 focus:ring-2 focus:ring-emerald/15 [&_option]:bg-white [&_option]:text-emerald-950"
-    : "mt-1.5 min-h-14 w-full rounded-2xl border border-white/20 bg-white/10 px-5 py-3 text-base text-white outline-none transition focus:border-[#d4af37] focus:ring-2 focus:ring-[#d4af37]/40 [&_option]:bg-white [&_option]:text-emerald-950";
-  const labelClass = isLms
-    ? `block text-sm font-semibold text-emerald-deep ${isUrdu ? "font-urdu" : ""}`
-    : `block text-sm font-semibold text-cream/90 ${isUrdu ? "font-urdu" : ""}`;
-  const errorClass = `mt-1 text-xs ${isLms ? "text-red-600" : "text-red-200"} ${isUrdu ? "font-urdu" : ""}`;
+  const inputClass =
+    "mt-1.5 w-full rounded-xl border border-white/15 bg-white/10 px-4 py-3 text-sm text-cream placeholder:text-cream/40 outline-none transition focus:border-gold/40 focus:ring-2 focus:ring-gold/20";
+  const selectClass =
+    "mt-1.5 min-h-14 w-full rounded-2xl border border-white/20 bg-white/10 px-5 py-3 text-base text-white outline-none transition focus:border-[#d4af37] focus:ring-2 focus:ring-[#d4af37]/40 [&_option]:bg-white [&_option]:text-emerald-950";
+  const labelClass = `block text-sm font-semibold text-cream/90 ${isUrdu ? "font-urdu" : ""}`;
+  const errorClass = `mt-1 text-xs text-red-200 ${isUrdu ? "font-urdu" : ""}`;
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
@@ -101,11 +94,7 @@ export function CareersSubmissionForm({ source, variant = "website" }: Props) {
       onSubmit={onSubmit}
       dir={isUrdu ? "rtl" : "ltr"}
       lang={isUrdu ? "ur" : "en"}
-      className={
-        isLms
-          ? "rounded-2xl border border-emerald/10 bg-cream/60 p-5 shadow-sm sm:p-8"
-          : "rounded-2xl border border-white/10 bg-white/5 p-5 shadow-xl backdrop-blur-sm sm:p-8"
-      }
+      className="rounded-2xl border border-white/10 bg-white/5 p-5 shadow-xl backdrop-blur-sm sm:p-8"
       noValidate
     >
       {/* honeypot */}
@@ -212,7 +201,7 @@ export function CareersSubmissionForm({ source, variant = "website" }: Props) {
             required
           />
           <p
-            className={`mt-1.5 text-xs ${isLms ? "text-emerald-deep/60" : "text-cream/55"} ${isUrdu ? "font-urdu" : ""}`}
+            className={`mt-1.5 text-xs text-cream/55 ${isUrdu ? "font-urdu" : ""}`}
           >
             {c.form.resumeHint}
           </p>
@@ -236,11 +225,7 @@ export function CareersSubmissionForm({ source, variant = "website" }: Props) {
 
       {success && (
         <div
-          className={`mt-6 rounded-xl border px-4 py-3 text-sm ${
-            isLms
-              ? "border-emerald/20 bg-emerald/10 text-emerald-deep"
-              : "border-gold/30 bg-gold/10 text-cream"
-          } ${isUrdu ? "font-urdu leading-[2]" : ""}`}
+          className={`mt-6 rounded-xl border border-gold/30 bg-gold/10 px-4 py-3 text-sm text-cream ${isUrdu ? "font-urdu leading-[2]" : ""}`}
         >
           {success}
         </div>
@@ -248,11 +233,7 @@ export function CareersSubmissionForm({ source, variant = "website" }: Props) {
 
       {error && (
         <div
-          className={`mt-6 rounded-xl border px-4 py-3 text-sm ${
-            isLms
-              ? "border-red-200 bg-red-50 text-red-700"
-              : "border-red-300/40 bg-red-500/10 text-red-100"
-          } ${isUrdu ? "font-urdu leading-[2]" : ""}`}
+          className={`mt-6 rounded-xl border border-red-300/40 bg-red-500/10 px-4 py-3 text-sm text-red-100 ${isUrdu ? "font-urdu leading-[2]" : ""}`}
         >
           {error}
         </div>
@@ -261,11 +242,7 @@ export function CareersSubmissionForm({ source, variant = "website" }: Props) {
       <button
         type="submit"
         disabled={submitting}
-        className={`mt-6 inline-flex min-h-12 w-full items-center justify-center rounded-full px-6 py-3 text-sm font-semibold transition disabled:opacity-60 md:w-auto ${
-          isLms
-            ? "bg-emerald text-cream hover:bg-emerald-light"
-            : "bg-gold text-emerald-deep hover:bg-gold-soft"
-        } ${isUrdu ? "font-urdu" : ""}`}
+        className={`mt-6 inline-flex min-h-12 w-full items-center justify-center rounded-full bg-gold px-6 py-3 text-sm font-semibold text-emerald-deep transition hover:bg-gold-soft disabled:opacity-60 md:w-auto ${isUrdu ? "font-urdu" : ""}`}
       >
         {submitting ? c.form.submitting : c.form.submit}
       </button>

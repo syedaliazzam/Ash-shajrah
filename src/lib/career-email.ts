@@ -2,7 +2,7 @@ import type { CareerApplicationRow } from "@/lib/career-db";
 
 export function formatCareerNotificationSubject(source: string): string {
   if (source === "LMS Careers Page") {
-    return "New Career Resume Submission - LMS Portal";
+    return "New Career Resume Submission - Ash-Shajrah LMS";
   }
   return "New Career Resume Submission - Ash-Shajrah Learning Hub";
 }
@@ -27,9 +27,9 @@ export function formatCareerNotificationText(
     })}`,
     "",
     `Resume: ${application.resumeFileName}`,
-    "Please log in to the LMS Admin Portal to view/download the resume.",
+    "View this application in the Ash-Shajrah LMS:",
     "",
-    `Admin Portal: ${adminPortalUrl}`,
+    adminPortalUrl,
   ].join("\n");
 }
 
@@ -61,11 +61,11 @@ export function formatCareerNotificationHtml(
         ${row("Resume", escapeHtml(application.resumeFileName))}
       </table>
       <p style="margin:16px 0 0;color:#333">
-        Please log in to the LMS Admin Portal to view/download the resume.
+        View this application in the Ash-Shajrah LMS.
       </p>
       <p style="margin:16px 0 0">
         <a href="${escapeHtml(adminPortalUrl)}" style="display:inline-block;background:#064635;color:#fff;padding:12px 18px;border-radius:999px;text-decoration:none;font-weight:600">
-          Open Admin Portal
+          Open Ash-Shajrah LMS
         </a>
       </p>
     </div>

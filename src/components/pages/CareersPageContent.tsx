@@ -49,7 +49,7 @@ export function CareersPageContent() {
 
           <div className="mb-10 h-px w-full bg-gradient-to-r from-transparent via-gold/40 to-transparent" />
 
-          <CareersSubmissionForm source="Website Careers Page" variant="website" />
+          <CareersSubmissionForm source="Website Careers Page" />
         </div>
       </main>
     </>

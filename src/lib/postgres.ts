@@ -85,10 +85,10 @@ export async function insertInterestedStudent(input: {
   level: string;
   cityCountry: string;
   message: string;
-}): Promise<void> {
+}): Promise<string> {
   const client = getPgPool();
 
-  await client.query(
+  const result = await client.query<{ id: string | number }>(
     `
       insert into public.interested_students (
         student_name,
@@ -114,6 +114,7 @@ export async function insertInterestedStudent(input: {
         $1, $2, $3, $4, $5, $6, $7, $8, $9,
         '', 'website', null, null, null, null, $6, null, null, null
       )
+      returning id::text as id
     `,
     [
       input.childName,
@@ -127,4 +128,10 @@ export async function insertInterestedStudent(input: {
       input.message || null,
     ]
   );
+
+  const id = result.rows[0]?.id;
+  if (!id) {
+    throw new Error("Registration insert did not return an id.");
+  }
+  return String(id);
 }
