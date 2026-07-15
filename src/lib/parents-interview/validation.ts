@@ -56,12 +56,8 @@ export type ParentInterviewQuestionsSnapshot = Record<
 
 /** Versioned JSONB payload saved to parent_interview_forms.responses */
 export type ParentInterviewResponsePayload = {
-<<<<<<< HEAD
-  formVersion: number;
-  questions: ParentInterviewQuestionsSnapshot;
-=======
   formVersion: typeof PARENT_INTERVIEW_FORM_VERSION;
->>>>>>> bd7f707c59fce2208e09535c2a145087df9e345f
+  questions: ParentInterviewQuestionsSnapshot;
   answers: ParentInterviewAnswers;
 };
 
