@@ -16,7 +16,7 @@ type Props = {
   detailsError?: string;
   onAnswerChange: (answer: "yes" | "no") => void;
   onDetailsChange: (details: string) => void;
-  fieldsetRef?: (el: HTMLElement | null) => void;
+  fieldsetRef?: (el: HTMLFieldSetElement | null) => void;
 };
 
 const YES_NO_OPTIONS = [

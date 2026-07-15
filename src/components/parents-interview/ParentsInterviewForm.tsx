@@ -186,7 +186,7 @@ export function ParentsInterviewForm({ token, initialMeta }: Props) {
         detailsError={fieldErrors[`${question.id}.details`]}
         fieldsetRef={
           isFirstError([question.id])
-            ? (el) => {
+            ? (el: HTMLElement | null) => {
                 firstErrorRef.current = el;
               }
             : undefined
@@ -245,7 +245,7 @@ export function ParentsInterviewForm({ token, initialMeta }: Props) {
               `${question.id}.crawled`,
               `${question.id}.walked`,
             ])
-              ? (el) => {
+              ? (el: HTMLElement | null) => {
                   firstErrorRef.current = el;
                 }
               : undefined
@@ -292,7 +292,7 @@ export function ParentsInterviewForm({ token, initialMeta }: Props) {
           label={question.label}
           fieldsetRef={
             isFirstError([question.id])
-              ? (el) => {
+              ? (el: HTMLElement | null) => {
                   firstErrorRef.current = el;
                 }
               : undefined
@@ -350,7 +350,7 @@ export function ParentsInterviewForm({ token, initialMeta }: Props) {
           label={question.label}
           fieldsetRef={
             isFirstError([question.id])
-              ? (el) => {
+              ? (el: HTMLElement | null) => {
                   firstErrorRef.current = el;
                 }
               : undefined
@@ -382,7 +382,7 @@ export function ParentsInterviewForm({ token, initialMeta }: Props) {
           label={question.label}
           fieldsetRef={
             isFirstError([question.id])
-              ? (el) => {
+              ? (el: HTMLElement | null) => {
                   firstErrorRef.current = el;
                 }
               : undefined
@@ -439,7 +439,7 @@ export function ParentsInterviewForm({ token, initialMeta }: Props) {
           label={question.label}
           fieldsetRef={
             isFirstError([question.id])
-              ? (el) => {
+              ? (el: HTMLElement | null) => {
                   firstErrorRef.current = el;
                 }
               : undefined
@@ -504,7 +504,7 @@ export function ParentsInterviewForm({ token, initialMeta }: Props) {
           label={question.label}
           fieldsetRef={
             isFirstError([question.id])
-              ? (el) => {
+              ? (el: HTMLElement | null) => {
                   firstErrorRef.current = el;
                 }
               : undefined
@@ -537,7 +537,7 @@ export function ParentsInterviewForm({ token, initialMeta }: Props) {
         label={question.label}
         fieldsetRef={
           isFirstError([question.id])
-            ? (el) => {
+            ? (el: HTMLElement | null) => {
                 firstErrorRef.current = el;
               }
             : undefined

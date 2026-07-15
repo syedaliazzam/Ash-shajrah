@@ -9,7 +9,9 @@ type Props = {
   className?: string;
   errorIds?: string;
   invalid?: boolean;
-  fieldsetRef?: Ref<HTMLFieldSetElement> | ((el: HTMLElement | null) => void);
+  fieldsetRef?:
+    | Ref<HTMLFieldSetElement>
+    | ((el: HTMLFieldSetElement | null) => void);
 };
 
 /** Compact question card: content-height, no legend border gap. */
