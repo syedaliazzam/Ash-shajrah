@@ -4,6 +4,7 @@ import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import {
   BIRTH_ORDER_OPTIONS,
   HEALTH_RATING_OPTIONS,
+  PARENT_INTERVIEW_FORM_VERSION,
   SCREEN_DURATION_OPTIONS,
   parentInterviewSections,
   type ParentInterviewQuestion,
@@ -121,7 +122,7 @@ export function ParentsInterviewForm({ token, initialMeta }: Props) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           responses: {
-            formVersion: 2,
+            formVersion: PARENT_INTERVIEW_FORM_VERSION,
             answers: payloadAnswers,
           },
         }),

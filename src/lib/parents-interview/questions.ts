@@ -32,11 +32,15 @@ export type ParentInterviewSection = {
 };
 
 /**
- * External LMS response contract (formVersion 2)
+ * External LMS response contract (formVersion 3)
  *
  * responses JSONB shape:
  * {
- *   formVersion: 2,
+ *   formVersion: 3,
+ *   questions: {
+ *     q1: { number: "1", label: "What is your child's birth order?" },
+ *     ...
+ *   },
  *   answers: {
  *     q1: "first",
  *     q2: { answer: "yes"|"no", details?: string },
@@ -52,7 +56,7 @@ export type ParentInterviewSection = {
  * Stable IDs: q1–q29 plus q20_1–q20_4.
  * Render labels/sections from parentInterviewSections in this file.
  */
-export const PARENT_INTERVIEW_FORM_VERSION = 2;
+export const PARENT_INTERVIEW_FORM_VERSION = 3;
 
 export const BIRTH_ORDER_OPTIONS = [
   { value: "first", label: "First child" },
