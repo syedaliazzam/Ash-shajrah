@@ -1,5 +1,4 @@
 import { getPgPool } from "@/lib/postgres";
-import { PARENT_INTERVIEW_FORM_VERSION } from "@/lib/parents-interview/questions";
 import type { ParentInterviewResponsePayload } from "@/lib/parents-interview/validation";
 
 export type ParentInterviewStatus = "pending" | "submitted" | "reviewed";
@@ -13,15 +12,15 @@ export type ParentInterviewSummary = {
   childAge: string | null;
   interestedProgramme: string | null;
   status: ParentInterviewStatus;
-  formVersion: string;
   submittedAt: string | null;
   reviewedAt: string | null;
   createdAt: string;
   updatedAt: string;
 };
 
-export type ParentInterviewDetail = ParentInterviewSummary & {
-  responses: ParentInterviewResponsePayload | Record<string, unknown> | null;
+export type ParentInterviewRow = ParentInterviewSummary & {
+  formVersion: number;
+  responses: ParentInterviewResponsePayload | null;
 };
 
 export type ParentInterviewPublicMeta = {
@@ -41,9 +40,9 @@ type DbRow = {
   child_name: string | null;
   child_age: string | null;
   interested_programme: string | null;
+  form_version: number | null;
+  responses: ParentInterviewResponsePayload | null;
   status: string;
-  form_version: string;
-  responses: ParentInterviewResponsePayload | Record<string, unknown> | null;
   submitted_at: Date | null;
   reviewed_at: Date | null;
   created_at: Date;
@@ -59,14 +58,18 @@ const SUMMARY_COLUMNS = `
   child_age,
   interested_programme,
   status,
-  form_version,
   submitted_at,
   reviewed_at,
   created_at,
   updated_at
 `;
 
-function mapSummary(row: Omit<DbRow, "responses">): ParentInterviewSummary {
+const DETAIL_COLUMNS = `
+  form_version,
+  responses
+`;
+
+function mapSummary(row: DbRow): ParentInterviewSummary {
   return {
     id: row.id,
     registrationId: row.registration_id,
@@ -76,7 +79,6 @@ function mapSummary(row: Omit<DbRow, "responses">): ParentInterviewSummary {
     childAge: row.child_age,
     interestedProgramme: row.interested_programme,
     status: row.status as ParentInterviewStatus,
-    formVersion: row.form_version || String(PARENT_INTERVIEW_FORM_VERSION),
     submittedAt: row.submitted_at ? row.submitted_at.toISOString() : null,
     reviewedAt: row.reviewed_at ? row.reviewed_at.toISOString() : null,
     createdAt: row.created_at.toISOString(),
@@ -84,9 +86,10 @@ function mapSummary(row: Omit<DbRow, "responses">): ParentInterviewSummary {
   };
 }
 
-function mapDetail(row: DbRow): ParentInterviewDetail {
+function mapRow(row: DbRow): ParentInterviewRow {
   return {
     ...mapSummary(row),
+    formVersion: row.form_version ?? 2,
     responses: row.responses,
   };
 }
@@ -107,10 +110,10 @@ export async function ensureParentInterviewFormsTable(): Promise<void> {
       child_name TEXT,
       child_age TEXT,
       interested_programme TEXT,
+      form_version INTEGER NOT NULL DEFAULT 2,
+      responses JSONB,
       status TEXT NOT NULL DEFAULT 'pending'
         CHECK (status IN ('pending', 'submitted', 'reviewed')),
-      form_version TEXT NOT NULL DEFAULT '2',
-      responses JSONB,
       submitted_at TIMESTAMPTZ,
       reviewed_at TIMESTAMPTZ,
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -118,6 +121,19 @@ export async function ensureParentInterviewFormsTable(): Promise<void> {
     );
   `);
 
+  await client.query(`
+    ALTER TABLE public.parent_interview_forms
+      ADD COLUMN IF NOT EXISTS form_version INTEGER NOT NULL DEFAULT 2;
+  `);
+  await client.query(`
+    ALTER TABLE public.parent_interview_forms
+      ADD COLUMN IF NOT EXISTS responses JSONB;
+  `);
+
+  await client.query(`
+    CREATE INDEX IF NOT EXISTS idx_parent_interview_registration
+      ON public.parent_interview_forms(registration_id);
+  `);
   await client.query(`
     CREATE INDEX IF NOT EXISTS idx_parent_interview_status
       ON public.parent_interview_forms(status);
@@ -129,10 +145,6 @@ export async function ensureParentInterviewFormsTable(): Promise<void> {
   await client.query(`
     CREATE INDEX IF NOT EXISTS idx_parent_interview_created_at
       ON public.parent_interview_forms(created_at DESC);
-  `);
-  await client.query(`
-    ALTER TABLE public.parent_interview_forms
-    ADD COLUMN IF NOT EXISTS form_version TEXT NOT NULL DEFAULT '2';
   `);
 
   ensured = true;
@@ -150,13 +162,8 @@ export async function createParentInterviewForm(input: {
   await ensureParentInterviewFormsTable();
   const client = getPgPool();
 
-  const existing = await client.query<Omit<DbRow, "responses">>(
-    `
-      SELECT ${SUMMARY_COLUMNS}
-      FROM public.parent_interview_forms
-      WHERE registration_id = $1
-      LIMIT 1
-    `,
+  const existing = await client.query<DbRow>(
+    `SELECT ${SUMMARY_COLUMNS} FROM public.parent_interview_forms WHERE registration_id = $1 LIMIT 1`,
     [input.registrationId]
   );
 
@@ -164,7 +171,7 @@ export async function createParentInterviewForm(input: {
     return mapSummary(existing.rows[0]);
   }
 
-  const result = await client.query<Omit<DbRow, "responses">>(
+  const result = await client.query<DbRow>(
     `
       INSERT INTO public.parent_interview_forms (
         registration_id,
@@ -174,9 +181,8 @@ export async function createParentInterviewForm(input: {
         child_name,
         child_age,
         interested_programme,
-        status,
-        form_version
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, 'pending', $8)
+        status
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, 'pending')
       RETURNING ${SUMMARY_COLUMNS}
     `,
     [
@@ -187,7 +193,6 @@ export async function createParentInterviewForm(input: {
       input.childName || null,
       input.childAge || null,
       input.interestedProgramme || null,
-      String(PARENT_INTERVIEW_FORM_VERSION),
     ]
   );
 
@@ -200,80 +205,98 @@ export async function rotateParentInterviewToken(input: {
 }): Promise<ParentInterviewSummary | null> {
   await ensureParentInterviewFormsTable();
   const client = getPgPool();
-  const result = await client.query<Omit<DbRow, "responses">>(
+  const result = await client.query<DbRow>(
     `
       UPDATE public.parent_interview_forms
-      SET token_hash = $1,
-          form_version = $3,
-          updated_at = NOW()
+      SET token_hash = $1, updated_at = NOW()
       WHERE registration_id = $2 AND status = 'pending'
       RETURNING ${SUMMARY_COLUMNS}
     `,
-    [
-      input.tokenHash,
-      input.registrationId,
-      String(PARENT_INTERVIEW_FORM_VERSION),
-    ]
+    [input.tokenHash, input.registrationId]
   );
   return result.rows[0] ? mapSummary(result.rows[0]) : null;
 }
 
-export async function getParentInterviewByTokenHash(
+export async function getParentInterviewPublicMetaByTokenHash(
   tokenHash: string
-): Promise<ParentInterviewDetail | null> {
+): Promise<ParentInterviewPublicMeta | null> {
   await ensureParentInterviewFormsTable();
   const client = getPgPool();
   const result = await client.query<DbRow>(
     `
-      SELECT ${SUMMARY_COLUMNS}, responses
+      SELECT parent_name, parent_email, child_name, child_age, interested_programme, status
       FROM public.parent_interview_forms
       WHERE token_hash = $1
       LIMIT 1
     `,
     [tokenHash]
   );
-  return result.rows[0] ? mapDetail(result.rows[0]) : null;
-}
-
-export async function getParentInterviewPublicMetaByTokenHash(
-  tokenHash: string
-): Promise<ParentInterviewPublicMeta | null> {
-  const row = await getParentInterviewByTokenHash(tokenHash);
+  const row = result.rows[0];
   if (!row) return null;
   return {
-    parentName: row.parentName,
-    parentEmail: row.parentEmail,
-    childName: row.childName,
-    childAge: row.childAge,
-    interestedProgramme: row.interestedProgramme,
-    status: row.status,
+    parentName: row.parent_name,
+    parentEmail: row.parent_email,
+    childName: row.child_name,
+    childAge: row.child_age,
+    interestedProgramme: row.interested_programme,
+    status: row.status as ParentInterviewStatus,
   };
 }
 
 export async function submitParentInterviewByTokenHash(input: {
   tokenHash: string;
   responses: ParentInterviewResponsePayload;
-}): Promise<ParentInterviewDetail | null> {
+}): Promise<ParentInterviewSummary | null> {
   await ensureParentInterviewFormsTable();
   const client = getPgPool();
+
   const result = await client.query<DbRow>(
     `
       UPDATE public.parent_interview_forms
       SET
         responses = $1::jsonb,
+        form_version = 2,
         status = 'submitted',
-        form_version = $3,
         submitted_at = NOW(),
         updated_at = NOW()
       WHERE token_hash = $2
         AND status = 'pending'
-      RETURNING ${SUMMARY_COLUMNS}, responses
+      RETURNING ${SUMMARY_COLUMNS}
     `,
-    [
-      JSON.stringify(input.responses),
-      input.tokenHash,
-      String(PARENT_INTERVIEW_FORM_VERSION),
-    ]
+    [JSON.stringify(input.responses), input.tokenHash]
   );
-  return result.rows[0] ? mapDetail(result.rows[0]) : null;
+  return result.rows[0] ? mapSummary(result.rows[0]) : null;
+}
+
+/** Full row for external LMS detail view (by primary key). */
+export async function getParentInterviewById(
+  id: string
+): Promise<ParentInterviewRow | null> {
+  await ensureParentInterviewFormsTable();
+  const client = getPgPool();
+  const result = await client.query<DbRow>(
+    `
+      SELECT ${SUMMARY_COLUMNS}, ${DETAIL_COLUMNS}
+      FROM public.parent_interview_forms
+      WHERE id = $1
+      LIMIT 1
+    `,
+    [id]
+  );
+  return result.rows[0] ? mapRow(result.rows[0]) : null;
+}
+
+export async function listParentInterviewForms(): Promise<
+  ParentInterviewSummary[]
+> {
+  await ensureParentInterviewFormsTable();
+  const client = getPgPool();
+  const result = await client.query<DbRow>(
+    `
+      SELECT ${SUMMARY_COLUMNS}
+      FROM public.parent_interview_forms
+      ORDER BY created_at DESC
+    `
+  );
+  return result.rows.map(mapSummary);
 }

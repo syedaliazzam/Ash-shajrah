@@ -9,6 +9,7 @@
     "lint": "next lint",
     "db:ensure-careers": "node scripts/ensure-career-applications.mjs",
     "db:ensure-parent-interviews": "node scripts/ensure-parent-interview-forms.mjs",
+    "db:migrate-parent-interviews-jsonb": "node scripts/migrate-parent-interview-columns-to-jsonb.mjs",
     "fetch:event-thumbnails": "node scripts/fetch-facebook-event-thumbnails.mjs"
   },
   "dependencies": {

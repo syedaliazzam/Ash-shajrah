@@ -8,6 +8,10 @@ import {
   type ParentInterviewQuestion,
 } from "@/lib/parents-interview/questions";
 
+export type YesNoAnswer = {
+  answer: "yes" | "no";
+};
+
 export type YesNoDetailAnswer = {
   answer: "yes" | "no";
   details?: string;
@@ -32,6 +36,7 @@ export type ScreenTimeAnswer = {
 /** Per-question answer values stored under responses.answers */
 export type ParentInterviewAnswerValue =
   | string
+  | YesNoAnswer
   | YesNoDetailAnswer
   | HealthRatingAnswer
   | DevelopmentAgesAnswer
@@ -41,7 +46,7 @@ export type ParentInterviewAnswers = Record<string, ParentInterviewAnswerValue>;
 
 /** Versioned JSONB payload saved to parent_interview_forms.responses */
 export type ParentInterviewResponsePayload = {
-  formVersion: number;
+  formVersion: typeof PARENT_INTERVIEW_FORM_VERSION;
   answers: ParentInterviewAnswers;
 };
 
@@ -142,6 +147,9 @@ function validateOneQuestion(
       }
       return { answer, details };
     }
+    if (question.type === "yes_no_details") {
+      return { answer, details: "" };
+    }
     return { answer };
   }
 
@@ -234,10 +242,15 @@ export function buildPayloadFromFormState(
     }
     if (question.type === "yes_no" || question.type === "yes_no_details") {
       if (value.answer === "yes" || value.answer === "no") {
-        answers[question.id] =
-          value.answer === "yes" && value.details
-            ? { answer: value.answer, details: value.details }
-            : { answer: value.answer };
+        if (question.type === "yes_no_details") {
+          answers[question.id] = {
+            answer: value.answer,
+            details:
+              value.answer === "yes" ? (value.details || "").trim() : "",
+          };
+        } else {
+          answers[question.id] = { answer: value.answer };
+        }
       }
       continue;
     }

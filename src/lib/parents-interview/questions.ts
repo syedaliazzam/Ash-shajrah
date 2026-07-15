@@ -49,7 +49,7 @@ export type ParentInterviewSection = {
  *   }
  * }
  *
- * Stable IDs: q1–q29 plus q20_1–q20_4.
+ * Stable IDs: q1–q29 plus q20_1–q20_4. No toilet-training question (q23).
  * Render labels/sections from parentInterviewSections in this file.
  */
 export const PARENT_INTERVIEW_FORM_VERSION = 2;
