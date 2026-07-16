@@ -44,9 +44,20 @@ export type ParentInterviewAnswerValue =
 
 export type ParentInterviewAnswers = Record<string, ParentInterviewAnswerValue>;
 
+export type ParentInterviewQuestionSnapshot = {
+  number: string;
+  label: string;
+};
+
+export type ParentInterviewQuestionsSnapshot = Record<
+  string,
+  ParentInterviewQuestionSnapshot
+>;
+
 /** Versioned JSONB payload saved to parent_interview_forms.responses */
 export type ParentInterviewResponsePayload = {
   formVersion: typeof PARENT_INTERVIEW_FORM_VERSION;
+  questions: ParentInterviewQuestionsSnapshot;
   answers: ParentInterviewAnswers;
 };
 
@@ -78,6 +89,18 @@ export function buildParentInterviewUrl(rawToken: string): string {
     process.env.NEXT_PUBLIC_SITE_URL || "https://ashshajrah.com"
   ).replace(/\/$/, "");
   return `${siteUrl}/parents-interview/${rawToken}`;
+}
+
+export function buildQuestionSnapshot(): ParentInterviewQuestionsSnapshot {
+  return Object.fromEntries(
+    getAllAnswerableQuestions().map((question) => [
+      question.id,
+      {
+        number: question.number,
+        label: question.label,
+      },
+    ])
+  );
 }
 
 function asObject(
@@ -337,6 +360,7 @@ export function validateParentInterviewResponses(
     ok: true,
     payload: {
       formVersion: PARENT_INTERVIEW_FORM_VERSION,
+      questions: buildQuestionSnapshot(),
       answers,
     },
   };
