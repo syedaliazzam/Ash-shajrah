@@ -135,3 +135,117 @@ export async function insertInterestedStudent(input: {
   }
   return String(id);
 }
+
+export type ExistingRegistration = {
+  id: string;
+  parentName: string;
+  phone: string;
+  email: string;
+  childName: string;
+  childAge: string;
+  level: string;
+  cityCountry: string;
+  message: string;
+};
+
+export async function getLatestInterestedStudentByEmail(
+  email: string
+): Promise<ExistingRegistration | null> {
+  const client = getPgPool();
+
+  const result = await client.query<{
+    id: string | number;
+    parent_name: string | null;
+    phone: string | null;
+    email: string | null;
+    child_name: string | null;
+    child_age: string | null;
+    class_level: string | null;
+    city_country: string | null;
+    message: string | null;
+  }>(
+    `
+      select
+        id::text as id,
+        parent_name,
+        phone,
+        email,
+        child_name,
+        child_age,
+        class_level,
+        city_country,
+        message
+      from public.interested_students
+      where lower(trim(email)) = lower(trim($1))
+      order by id desc
+      limit 1
+    `,
+    [email]
+  );
+
+  const row = result.rows[0];
+  if (!row) return null;
+
+  return {
+    id: String(row.id),
+    parentName: row.parent_name ?? "",
+    phone: row.phone ?? "",
+    email: row.email ?? email,
+    childName: row.child_name ?? "",
+    childAge: row.child_age ?? "",
+    level: row.class_level ?? "",
+    cityCountry: row.city_country ?? "",
+    message: row.message ?? "",
+  };
+}
+
+export type PendingParentInterviewCandidate = {
+  registrationId: string;
+  parentName: string;
+  email: string;
+  childName: string;
+  childAge: string;
+  level: string;
+};
+
+export async function listPendingParentInterviewCandidates(): Promise<
+  PendingParentInterviewCandidate[]
+> {
+  const client = getPgPool();
+
+  const result = await client.query<{
+    registration_id: string | number;
+    parent_name: string | null;
+    email: string | null;
+    child_name: string | null;
+    child_age: string | null;
+    class_level: string | null;
+  }>(`
+    select distinct on (lower(trim(i.email)))
+      i.id::text as registration_id,
+      i.parent_name,
+      i.email,
+      i.child_name,
+      i.child_age,
+      i.class_level
+    from public.interested_students i
+    left join public.parent_interview_forms p
+      on lower(trim(p.parent_email)) = lower(trim(i.email))
+    where i.email is not null
+      and trim(i.email) <> ''
+      and (
+        p.status is null
+        or p.status = 'pending'
+      )
+    order by lower(trim(i.email)), i.id desc
+  `);
+
+  return result.rows.map((row) => ({
+    registrationId: String(row.registration_id),
+    parentName: row.parent_name ?? "",
+    email: row.email ?? "",
+    childName: row.child_name ?? "",
+    childAge: row.child_age ?? "",
+    level: row.class_level ?? "",
+  }));
+}
