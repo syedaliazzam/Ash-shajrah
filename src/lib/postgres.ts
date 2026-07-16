@@ -199,6 +199,56 @@ export async function getLatestInterestedStudentByEmail(
   };
 }
 
+export async function getInterestedStudentById(
+  id: string
+): Promise<ExistingRegistration | null> {
+  const client = getPgPool();
+
+  const result = await client.query<{
+    id: string | number;
+    parent_name: string | null;
+    phone: string | null;
+    email: string | null;
+    child_name: string | null;
+    child_age: string | null;
+    class_level: string | null;
+    city_country: string | null;
+    message: string | null;
+  }>(
+    `
+      select
+        id::text as id,
+        parent_name,
+        phone,
+        email,
+        child_name,
+        child_age,
+        class_level,
+        city_country,
+        message
+      from public.interested_students
+      where id::text = $1
+      limit 1
+    `,
+    [id]
+  );
+
+  const row = result.rows[0];
+  if (!row) return null;
+
+  return {
+    id: String(row.id),
+    parentName: row.parent_name ?? "",
+    phone: row.phone ?? "",
+    email: row.email ?? "",
+    childName: row.child_name ?? "",
+    childAge: row.child_age ?? "",
+    level: row.class_level ?? "",
+    cityCountry: row.city_country ?? "",
+    message: row.message ?? "",
+  };
+}
+
 export type PendingParentInterviewCandidate = {
   registrationId: string;
   parentName: string;

@@ -31,6 +31,7 @@ type PendingCandidate = {
 
 export function ParentInterviewPreviewTool() {
   const [email, setEmail] = useState("");
+  const [selectedRegistrationId, setSelectedRegistrationId] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
@@ -97,33 +98,28 @@ export function ParentInterviewPreviewTool() {
       </svg>
     );
 
+  async function loadCandidates() {
+    setCandidateLoading(true);
+    try {
+      const response = await fetch("/api/parent-interview-preview/pending-registrations", {
+        cache: "no-store",
+      });
+      const data = await response.json();
+      if (!response.ok || !data.candidates) return;
+      setCandidates(data.candidates as PendingCandidate[]);
+    } catch {
+      // Keep the manual email input available if the list cannot load.
+    } finally {
+      setCandidateLoading(false);
+    }
+  }
+
   useEffect(() => {
     if (typeof window !== "undefined") {
       setAccessGranted(sessionStorage.getItem(accessStorageKey) === "true");
     }
 
-    let cancelled = false;
-
-    async function loadCandidates() {
-      setCandidateLoading(true);
-      try {
-        const response = await fetch("/api/parent-interview-preview/pending-registrations");
-        const data = await response.json();
-        if (!response.ok || !data.candidates) return;
-        if (!cancelled) {
-          setCandidates(data.candidates as PendingCandidate[]);
-        }
-      } catch {
-        // Keep the manual email input available if the list cannot load.
-      } finally {
-        if (!cancelled) setCandidateLoading(false);
-      }
-    }
-
     void loadCandidates();
-    return () => {
-      cancelled = true;
-    };
   }, []);
 
   function handlePasswordSubmit(event: FormEvent) {
@@ -150,7 +146,10 @@ export function ParentInterviewPreviewTool() {
       const response = await fetch("/api/parent-interview-preview", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({
+          email,
+          registrationId: selectedRegistrationId,
+        }),
       });
 
       const data = await response.json();
@@ -164,6 +163,9 @@ export function ParentInterviewPreviewTool() {
       setSuccessMessage(
         (data as PreviewResponse).message || "Email sent successfully."
       );
+      setSelectedRegistrationId("");
+      setEmail("");
+      void loadCandidates();
     } catch {
       setError("Unable to generate preview.");
     } finally {
@@ -268,8 +270,15 @@ export function ParentInterviewPreviewTool() {
                   required
                 />
                 <select
-                  value=""
-                  onChange={(event) => setEmail(event.target.value)}
+                  value={selectedRegistrationId}
+                  onChange={(event) => {
+                    const nextRegistrationId = event.target.value;
+                    setSelectedRegistrationId(nextRegistrationId);
+                    const selectedCandidate = candidates.find(
+                      (candidate) => candidate.registrationId === nextRegistrationId
+                    );
+                    setEmail(selectedCandidate?.email || "");
+                  }}
                   className="mt-3 min-h-12 w-full rounded-2xl border border-emerald/15 bg-cream px-4 py-3 text-sm outline-none transition focus:border-gold focus:bg-white"
                 >
                   <option value="">
@@ -278,8 +287,12 @@ export function ParentInterviewPreviewTool() {
                       : "Pick from registrations"}
                   </option>
                   {candidates.map((candidate) => (
-                    <option key={candidate.registrationId} value={candidate.email}>
-                      {candidate.parentName} - {candidate.email} - {candidate.childName}
+                    <option
+                      key={candidate.registrationId}
+                      value={candidate.registrationId}
+                    >
+                      {candidate.parentName} - {candidate.email} - {candidate.childName} -{" "}
+                      {candidate.level}
                     </option>
                   ))}
                 </select>

@@ -6,6 +6,7 @@ import {
   type RegistrationFormData,
 } from "@/lib/register-form";
 import {
+  getInterestedStudentById,
   getLatestInterestedStudentByEmail,
 } from "@/lib/postgres";
 import {
@@ -52,20 +53,23 @@ function getCoordinatorEmail() {
 
 export async function POST(request: NextRequest) {
   try {
-    const body = (await request.json()) as { email?: string };
+    const body = (await request.json()) as { email?: string; registrationId?: string };
     const email = body.email?.trim().toLowerCase() || "";
+    const registrationId = body.registrationId?.trim() || "";
 
-    if (!email) {
+    if (!email && !registrationId) {
       return NextResponse.json(
-        { error: "Email is required." },
+        { error: "Email or registration ID is required." },
         { status: 400 }
       );
     }
 
-    const registration = await getLatestInterestedStudentByEmail(email);
+    const registration = registrationId
+      ? await getInterestedStudentById(registrationId)
+      : await getLatestInterestedStudentByEmail(email);
     if (!registration) {
       return NextResponse.json(
-        { error: "No registered user was found for this email address." },
+        { error: "No registered user was found for the selected row." },
         { status: 404 }
       );
     }
