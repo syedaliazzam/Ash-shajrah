@@ -221,7 +221,7 @@ export async function listPendingParentInterviewCandidates(): Promise<
     child_age: string | null;
     class_level: string | null;
   }>(`
-    select distinct on (lower(trim(i.email)))
+    select
       i.id::text as registration_id,
       i.parent_name,
       i.email,
@@ -229,15 +229,14 @@ export async function listPendingParentInterviewCandidates(): Promise<
       i.child_age,
       i.class_level
     from public.interested_students i
-    left join public.parent_interview_forms p
-      on lower(trim(p.parent_email)) = lower(trim(i.email))
     where i.email is not null
       and trim(i.email) <> ''
-      and (
-        p.status is null
-        or p.status = 'pending'
+      and not exists (
+        select 1
+        from public.parent_interview_forms p
+        where p.registration_id = i.id::text
       )
-    order by lower(trim(i.email)), i.id desc
+    order by i.id desc
   `);
 
   return result.rows.map((row) => ({

@@ -44,6 +44,7 @@ export function ParentInterviewPreviewTool() {
 
   const gatePassword =
     process.env.NEXT_PUBLIC_PARENT_INTERVIEW_PREVIEW_PASSWORD;
+  const accessStorageKey = "parent-interview-preview-access";
 
   const EyeIcon = ({ hidden }: { hidden?: boolean }) =>
     hidden ? (
@@ -97,6 +98,10 @@ export function ParentInterviewPreviewTool() {
     );
 
   useEffect(() => {
+    if (typeof window !== "undefined") {
+      setAccessGranted(sessionStorage.getItem(accessStorageKey) === "true");
+    }
+
     let cancelled = false;
 
     async function loadCandidates() {
@@ -125,6 +130,7 @@ export function ParentInterviewPreviewTool() {
     event.preventDefault();
     if (password.trim() === gatePassword) {
       setAccessGranted(true);
+      sessionStorage.setItem(accessStorageKey, "true");
       setPasswordError("");
       return;
     }
@@ -268,8 +274,8 @@ export function ParentInterviewPreviewTool() {
                 >
                   <option value="">
                     {candidateLoading
-                      ? "Loading pending registrations..."
-                      : "Pick from pending registrations"}
+                      ? "Loading registrations..."
+                      : "Pick from registrations"}
                   </option>
                   {candidates.map((candidate) => (
                     <option key={candidate.registrationId} value={candidate.email}>
@@ -280,8 +286,8 @@ export function ParentInterviewPreviewTool() {
               </div>
 
               <p className="text-xs leading-6 text-warm-brown">
-                Only registrations that have not submitted the parent interview form appear here.
-                You can also type an email manually if needed.
+                All parent emails from interested students appear here. You can
+                also type an email manually if needed.
               </p>
 
               <button
