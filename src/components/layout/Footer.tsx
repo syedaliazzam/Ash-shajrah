@@ -112,12 +112,23 @@ export function Footer() {
               dir={language === 'ur' ? 'rtl' : 'ltr'}
               className={`flex flex-col space-y-5 ${language === 'ur' ? 'items-end text-right' : 'items-start text-left'}`}
             >
-              <ContactRow
-                label={t.footer.contact.whatsapp}
-                value={t.footer.contact.whatsappValue}
-                language={language}
-                dir="ltr"
-              />
+              <div>
+                <p className={`${language === 'ur' ? 'font-urdu' : 'uppercase tracking-wider'} text-[11px] font-semibold text-gold-soft/75`}>
+                  {t.footer.contact.whatsapp}
+                </p>
+                <p
+                  dir="ltr"
+                  className={`mt-1 block break-words text-sm font-medium leading-snug text-cream ${language === 'ur' ? 'text-right font-sans' : 'text-left'}`}
+                >
+                  {t.footer.contact.whatsappValue}
+                </p>
+                <p
+                  dir="ltr"
+                  className={`mt-1 block break-words text-sm font-medium leading-snug text-cream ${language === 'ur' ? 'text-right font-sans' : 'text-left'}`}
+                >
+                  {t.footer.contact.whatsappValueSecondary}
+                </p>
+              </div>
               <ContactRow
                 label={t.footer.contact.email}
                 value={t.footer.contact.emailValue}
