@@ -42,7 +42,8 @@ export function ParentInterviewPreviewTool() {
   const [passwordError, setPasswordError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  const gatePassword = "admissions.ashshajrah";
+  const gatePassword =
+    process.env.NEXT_PUBLIC_PARENT_INTERVIEW_PREVIEW_PASSWORD;
 
   const EyeIcon = ({ hidden }: { hidden?: boolean }) =>
     hidden ? (
