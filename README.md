@@ -28,7 +28,7 @@ Contact information is configured in `src/lib/data.ts` (WhatsApp, admission emai
 
 ## Contact Form (`/api/contact`)
 
-Inquiries are emailed to `admission.ashshajrah@gmail.com` and appended to a Google Sheet.
+Inquiries are emailed to `admissions@ashshajrah.com` and appended to a Google Sheet.
 
 Copy `.env.example` to `.env.local` and configure **SMTP** and **Google Sheets**:
 
@@ -39,7 +39,7 @@ SMTP_PORT=587
 SMTP_USER=your-smtp-email@gmail.com
 SMTP_PASS=your-app-password
 SMTP_FROM=your-smtp-email@gmail.com
-CONTACT_TO_EMAIL=admission.ashshajrah@gmail.com
+CONTACT_TO_EMAIL=admissions@ashshajrah.com
 
 # Google Sheets
 GOOGLE_SHEET_ID=your-google-sheet-id

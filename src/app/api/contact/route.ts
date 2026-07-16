@@ -88,7 +88,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const toEmail = process.env.CONTACT_TO_EMAIL || "admission.ashshajrah@gmail.com";
+    const toEmail = process.env.CONTACT_TO_EMAIL || "admissions@ashshajrah.com";
     const fromEmail = process.env.SMTP_FROM || smtpConfig.auth.user;
     const submittedAt = new Date().toLocaleString("en-PK", {
       dateStyle: "full",

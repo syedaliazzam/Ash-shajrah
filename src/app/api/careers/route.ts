@@ -46,7 +46,7 @@ function getCareersEmailTo() {
   return (
     process.env.CAREERS_EMAIL_TO ||
     process.env.CONTACT_TO_EMAIL ||
-    "admission.ashshajrah@gmail.com"
+    "admissions@ashshajrah.com"
   );
 }
 

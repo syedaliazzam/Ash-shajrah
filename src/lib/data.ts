@@ -17,8 +17,8 @@ export const SITE = {
     whatsappDisplay: "0336-5409798",
     whatsapp:
       "https://wa.me/923365409798?text=Assalamualaikum%2C%20I%20want%20to%20know%20more%20about%20Ash-Shajrah%20Learning%20Hub%20online%20programs.",
-    email: "admission.ashshajrah@gmail.com",
-    admissionEmail: "admission.ashshajrah@gmail.com",
+    email: "admissions@ashshajrah.com",
+    admissionEmail: "admissions@ashshajrah.com",
     adminOffice: "304, Altura Arcade, Block F Markaz, B-17, Islamabad",
   },
 } as const;

@@ -54,7 +54,7 @@ function getCoordinatorEmail() {
     process.env.COORDINATOR_EMAIL ||
     process.env.REGISTRATION_TO_EMAIL ||
     process.env.CONTACT_TO_EMAIL ||
-    "admission.ashshajrah@gmail.com"
+    "admissions@ashshajrah.com"
   );
 }
 

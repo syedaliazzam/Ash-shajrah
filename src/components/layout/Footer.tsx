@@ -124,7 +124,7 @@ export function Footer() {
                 </p>
                 <p
                   dir="ltr"
-                  className={`mt-1 block break-words text-sm font-medium leading-snug text-cream ${language === 'ur' ? 'text-right font-sans' : 'text-left'}`}
+                  className={`mt-1 block break-words text-sm font-medium leading-snug text-cream/65 ${language === 'ur' ? 'text-right font-sans' : 'text-left'}`}
                 >
                   {t.footer.contact.whatsappValueSecondary}
                 </p>
