@@ -391,12 +391,12 @@ export const translations = {
         message: "Message",
         placeholders: {
           parentName: "Your full name",
-          whatsapp: "+92 300 0000000",
-          email: "you@email.com",
+          whatsapp: "3000000000",
+          email: "yourname@gmail.com",
           childName: "Child's full name",
-          childAge: "e.g. 4 years",
+          childAge: "Select child's age",
           level: "Select a level",
-          cityCountry: "e.g. Islamabad, Pakistan",
+          cityCountry: "Select city and country",
           message: "Any additional details or questions"
         },
         submit: "Submit Registration",

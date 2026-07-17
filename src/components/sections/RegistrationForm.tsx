@@ -2,12 +2,20 @@
 
 import { useState, FormEvent } from "react";
 import {
+  CHILD_AGE_OPTIONS,
   validateRegistrationForm,
   PROGRAMME_LEVELS,
   type RegistrationFormData,
   type RegistrationFormErrors,
 } from "@/lib/register-form";
 import { useLanguage } from "@/contexts/LanguageContext";
+import {
+  COUNTRY_CITY_OPTIONS,
+  CITY_COUNTRY_OPTIONS,
+  COUNTRY_LIST,
+  getPhoneLocalDigitsForCode,
+  PHONE_COUNTRY_CODES,
+} from "@/lib/registration-options";
 
 const INITIAL: RegistrationFormData = {
   parentName: "",
@@ -16,7 +24,7 @@ const INITIAL: RegistrationFormData = {
   childName: "",
   childAge: "",
   level: "",
-  cityCountry: "",
+  cityCountry: "Islamabad, Pakistan",
   message: "",
   website: "",
 };
@@ -53,15 +61,50 @@ function FormLabel({
 export function RegistrationForm() {
   const { t, language } = useLanguage();
   const [form, setForm] = useState<RegistrationFormData>(INITIAL);
+  const [phoneCountryCode, setPhoneCountryCode] = useState("+92");
+  const [phoneLocalNumber, setPhoneLocalNumber] = useState("");
+  const [selectedCountry, setSelectedCountry] = useState("Pakistan");
+  const [selectedCity, setSelectedCity] = useState("Islamabad");
   const [errors, setErrors] = useState<RegistrationFormErrors>({});
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [submitError, setSubmitError] = useState("");
+  const phoneLocalDigits = getPhoneLocalDigitsForCode(phoneCountryCode);
+  const countryOptions = COUNTRY_LIST;
+  const citiesForSelectedCountry = (() => {
+    const record = COUNTRY_CITY_OPTIONS as Record<string, readonly string[]>;
+    const custom = record[selectedCountry];
+    if (custom && custom.length > 0) return custom;
+
+    const suffixes = new Set([selectedCountry]);
+    return CITY_COUNTRY_OPTIONS.filter((entry) =>
+      Array.from(suffixes).some((suffix) => entry.endsWith(`, ${suffix}`))
+    ).map((entry) => entry.split(",")[0].trim());
+  })();
 
   const update = (field: keyof RegistrationFormData, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
     if (errors[field]) setErrors((prev) => ({ ...prev, [field]: undefined }));
     setSubmitError("");
+  };
+
+  const updateWhatsapp = (countryCode: string, localNumber: string) => {
+    const maxDigits = getPhoneLocalDigitsForCode(countryCode);
+    const sanitizedNumber = localNumber.replace(/\D/g, "").slice(0, maxDigits);
+    setPhoneCountryCode(countryCode);
+    setPhoneLocalNumber(sanitizedNumber);
+    update("whatsapp", sanitizedNumber ? `${countryCode} ${sanitizedNumber}` : "");
+  };
+
+  const updateLocation = (country: string, city: string) => {
+    const nextCountry = country || "Pakistan";
+    const cities = (COUNTRY_CITY_OPTIONS as Record<string, readonly string[]>)[
+      nextCountry
+    ] || COUNTRY_CITY_OPTIONS.Pakistan;
+    const nextCity = city && cities.includes(city) ? city : cities[0];
+    setSelectedCountry(nextCountry);
+    setSelectedCity(nextCity);
+    update("cityCountry", `${nextCity}, ${nextCountry}`);
   };
 
   const handleSubmit = async (e: FormEvent) => {
@@ -97,6 +140,10 @@ export function RegistrationForm() {
 
       setSuccess(true);
       setForm(INITIAL);
+      setPhoneCountryCode("+92");
+      setPhoneLocalNumber("");
+      setSelectedCountry("Pakistan");
+      setSelectedCity("Islamabad");
       setErrors({});
     } catch {
       setSubmitError("Something went wrong. Please try again.");
@@ -138,7 +185,7 @@ export function RegistrationForm() {
       <div className="relative">
         {submitError && (
           <div className="mb-5 rounded-xl border border-red-200 bg-red-50/10 px-4 py-3 text-center">
-            <p className={`text-sm font-medium text-red-200 ${language === 'ur' ? 'font-urdu leading-[2]' : ''}`}>{t.register.form.error}</p>
+            <p className={`text-sm font-medium text-red-200 ${language === 'ur' ? 'font-urdu leading-[2]' : ''}`}>{submitError}</p>
           </div>
         )}
 
@@ -162,16 +209,37 @@ export function RegistrationForm() {
           {/* WhatsApp */}
           <div className={language === 'ur' ? 'text-right' : 'text-left'}>
             <FormLabel htmlFor="whatsapp" label={t.register.form.whatsapp} language={language} required />
-            <input
-              id="whatsapp"
-              type="tel"
-              required
-              dir="ltr"
-              value={form.whatsapp}
-              onChange={(e) => update("whatsapp", e.target.value)}
-              className={`${inputClass} ${language === "ur" ? "text-right placeholder:text-right" : "text-left"}`}
-              placeholder={t.register.form.placeholders.whatsapp}
-            />
+            <div className="grid min-w-0 gap-3 sm:grid-cols-[minmax(140px,20%)_minmax(0,80%)]">
+              <select
+                id="whatsapp-country-code"
+                value={phoneCountryCode}
+                onChange={(e) => updateWhatsapp(e.target.value, phoneLocalNumber)}
+                className={`${selectClass} min-w-0 w-full text-center ${language === "ur" ? "text-right" : "text-left"}`}
+              >
+                {PHONE_COUNTRY_CODES.map((option) => (
+                  <option key={`${option.code}-${option.label}`} value={option.code} className="text-[#0d3b2e] bg-cream">
+                    {option.code}
+                  </option>
+                ))}
+              </select>
+              <div className="relative min-w-0 overflow-hidden rounded-xl border border-white/20 bg-white/10 focus-within:border-gold focus-within:bg-white/15 focus-within:shadow-[0_0_0_3px_rgba(201,162,39,0.15)]">
+                <input
+                  id="whatsapp"
+                  type="tel"
+                  required
+                  dir="ltr"
+                  inputMode="numeric"
+                  value={phoneLocalNumber}
+                  onChange={(e) => updateWhatsapp(phoneCountryCode, e.target.value)}
+                  maxLength={phoneLocalDigits}
+                  className={`w-full min-w-0 border-0 bg-transparent px-4 py-3 text-base text-cream outline-none placeholder:text-cream/30 ${language === "ur" ? "text-right placeholder:text-right" : "text-left"}`}
+                  placeholder={`Enter ${phoneLocalDigits} digits`}
+                />
+              </div>
+            </div>
+            <p className="mt-2 text-xs text-cream/80">
+              Remaining digits: {Math.max(phoneLocalDigits - phoneLocalNumber.length, 0)} / {phoneLocalDigits}
+            </p>
             {errors.whatsapp && <p className="mt-1 text-xs text-red-300">{errors.whatsapp}</p>}
           </div>
 
@@ -184,7 +252,7 @@ export function RegistrationForm() {
               required
               dir="ltr"
               value={form.email}
-              onChange={(e) => update("email", e.target.value)}
+              onChange={(e) => update("email", e.target.value.toLowerCase())}
               className={`${inputClass} ${language === "ur" ? "text-right placeholder:text-right" : "text-left"}`}
               placeholder={t.register.form.placeholders.email}
             />
@@ -210,16 +278,23 @@ export function RegistrationForm() {
           {/* Child Age */}
           <div className={language === 'ur' ? 'text-right' : 'text-left'}>
             <FormLabel htmlFor="childAge" label={t.register.form.childAge} language={language} required />
-            <input
+            <select
               id="childAge"
-              type="text"
               required
               dir="ltr"
               value={form.childAge}
               onChange={(e) => update("childAge", e.target.value)}
-              className={`${inputClass} ${language === "ur" ? "text-right placeholder:text-right" : "text-left"}`}
-              placeholder={t.register.form.placeholders.childAge}
-            />
+              className={`${selectClass} ${language === "ur" ? "text-right" : "text-left"}`}
+            >
+              <option value="" className="text-[#0d3b2e] bg-cream">
+                Select age
+              </option>
+              {CHILD_AGE_OPTIONS.map((age) => (
+                <option key={age} value={age} className="text-[#0d3b2e] bg-cream">
+                  {age}
+                </option>
+              ))}
+            </select>
             {errors.childAge && <p className="mt-1 text-xs text-red-300">{errors.childAge}</p>}
           </div>
 
@@ -255,32 +330,56 @@ export function RegistrationForm() {
 
           {/* City / Country */}
           <div className={language === 'ur' ? 'text-right' : 'text-left'}>
-            <FormLabel htmlFor="cityCountry" label={t.register.form.cityCountry} language={language} required />
-            <input
-              id="cityCountry"
-              type="text"
-              required
-              dir={language === "ur" ? "rtl" : "ltr"}
-              value={form.cityCountry}
-              onChange={(e) => update("cityCountry", e.target.value)}
-              className={`${inputClass} ${language === "ur" ? "text-right font-urdu placeholder:text-right" : "text-left"}`}
-              placeholder={t.register.form.placeholders.cityCountry}
-            />
+            <FormLabel htmlFor="cityCountry" label="Country / City" language={language} required />
+            <div className="grid gap-3 sm:grid-cols-2">
+              <select
+                id="cityCountry-country"
+                required
+                dir={language === "ur" ? "rtl" : "ltr"}
+                value={selectedCountry}
+                onChange={(e) => updateLocation(e.target.value, selectedCity)}
+                className={`${selectClass} ${language === "ur" ? "text-right font-urdu" : "text-left"}`}
+              >
+                <option value="" className="text-[#0d3b2e] bg-cream">Select a country</option>
+                {countryOptions.map((country) => (
+                  <option key={country} value={country} className="text-[#0d3b2e] bg-cream">
+                    {country}
+                  </option>
+                ))}
+              </select>
+              <select
+                id="cityCountry-city"
+                required
+                dir={language === "ur" ? "rtl" : "ltr"}
+                value={selectedCity}
+                onChange={(e) => updateLocation(selectedCountry, e.target.value)}
+                className={`${selectClass} ${language === "ur" ? "text-right font-urdu" : "text-left"}`}
+              >
+                <option value="" className="text-[#0d3b2e] bg-cream">Select a city</option>
+                {citiesForSelectedCountry.map((city) => (
+                  <option key={`${selectedCountry}-${city}`} value={city} className="text-[#0d3b2e] bg-cream">
+                    {city}
+                  </option>
+                ))}
+              </select>
+            </div>
             {errors.cityCountry && <p className="mt-1 text-xs text-red-300">{errors.cityCountry}</p>}
           </div>
 
           {/* Message */}
           <div className={`md:col-span-2 ${language === 'ur' ? 'text-right' : 'text-left'}`}>
-            <FormLabel htmlFor="message" label={t.register.form.message} language={language} />
+            <FormLabel htmlFor="message" label={t.register.form.message} language={language} required />
             <textarea
               id="message"
               rows={3}
+              required
               dir={language === "ur" ? "rtl" : "ltr"}
               value={form.message}
               onChange={(e) => update("message", e.target.value)}
               className={`${inputClass} resize-none ${language === "ur" ? "text-right font-urdu placeholder:text-right" : "text-left"}`}
               placeholder={t.register.form.placeholders.message}
             />
+            {errors.message && <p className="mt-1 text-xs text-red-300">{errors.message}</p>}
           </div>
         </div>
 

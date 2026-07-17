@@ -1,3 +1,7 @@
+import {
+  COUNTRY_CITY_OPTIONS,
+} from "@/lib/registration-options";
+
 export type RegistrationFormData = {
   parentName: string;
   whatsapp: string;
@@ -13,7 +17,9 @@ export type RegistrationFormData = {
 
 export type RegistrationFormErrors = Partial<Record<keyof RegistrationFormData, string>>;
 
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const GMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@gmail\.com$/i;
+const NAME_REGEX = /^[A-Za-z][A-Za-z\s'.-]{1,98}[A-Za-z.]$/;
+const WHATSAPP_REGEX = /^\+\d{1,4}\s\d{6,14}$/;
 
 export const PROGRAMME_LEVELS = [
   "Play Group",
@@ -22,22 +28,61 @@ export const PROGRAMME_LEVELS = [
   "Not Sure / Need Guidance",
 ] as const;
 
+export const CHILD_AGE_OPTIONS = ["2", "3", "4", "5", "6", "7", "7+"] as const;
+
+function getCitiesForCountry(country: string): readonly string[] | null {
+  const record = COUNTRY_CITY_OPTIONS as Record<string, readonly string[]>;
+  return record[country] ?? null;
+}
+
 export function validateRegistrationForm(data: RegistrationFormData): RegistrationFormErrors {
   const errors: RegistrationFormErrors = {};
 
-  if (!data.parentName.trim()) errors.parentName = "Parent / Guardian name is required.";
-  if (!data.whatsapp.trim()) errors.whatsapp = "WhatsApp number is required.";
+  if (!data.parentName.trim()) {
+    errors.parentName = "Parent / Guardian name is required.";
+  } else if (!NAME_REGEX.test(data.parentName.trim())) {
+    errors.parentName = "Please enter a valid parent / guardian name.";
+  }
+
+  if (!data.whatsapp.trim()) {
+    errors.whatsapp = "WhatsApp number is required.";
+  } else if (!WHATSAPP_REGEX.test(data.whatsapp.trim())) {
+    errors.whatsapp = "Select a country code and enter a valid WhatsApp number.";
+  }
 
   if (!data.email.trim()) {
     errors.email = "Email address is required.";
-  } else if (!EMAIL_REGEX.test(data.email.trim())) {
-    errors.email = "Please enter a valid email address.";
+  } else if (!GMAIL_REGEX.test(data.email.trim())) {
+    errors.email = "Please enter a valid Gmail address ending in @gmail.com.";
   }
 
-  if (!data.childName.trim()) errors.childName = "Child's name is required.";
-  if (!data.childAge.trim()) errors.childAge = "Child's age is required.";
+  if (!data.childName.trim()) {
+    errors.childName = "Child's name is required.";
+  } else if (!NAME_REGEX.test(data.childName.trim())) {
+    errors.childName = "Please enter a valid child name.";
+  }
+
+  if (!data.childAge.trim()) {
+    errors.childAge = "Child's age is required.";
+  } else if (!CHILD_AGE_OPTIONS.includes(data.childAge.trim() as (typeof CHILD_AGE_OPTIONS)[number])) {
+    errors.childAge = "Please select a valid child age.";
+  }
+
   if (!data.level.trim()) errors.level = "Please select an interested programme level.";
-  if (!data.cityCountry.trim()) errors.cityCountry = "City / Country is required.";
+
+  if (!data.cityCountry.trim()) {
+    errors.cityCountry = "City / Country is required.";
+  } else {
+    const [city, country] = data.cityCountry.split(",").map((part) => part.trim());
+    const cities = country ? getCitiesForCountry(country) : null;
+    if (!city || !country || !cities || !cities.includes(city)) {
+      errors.cityCountry = "Please select a valid city / country.";
+    }
+  }
+
+  if (!data.message.trim()) {
+    errors.message = "Message is required.";
+  }
 
   return errors;
 }

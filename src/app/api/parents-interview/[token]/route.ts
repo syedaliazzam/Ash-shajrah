@@ -43,6 +43,66 @@ function getAdmissionsEmail() {
   );
 }
 
+function buildParentInterviewParentConfirmationText(input: {
+  parentName: string;
+  childName: string | null;
+  interestedProgramme: string | null;
+  submittedAt: string;
+}) {
+  return [
+    "Parents Interview Form Received - Ash-Shajrah Learning Hub",
+    "=".repeat(50),
+    "",
+    `Dear ${input.parentName},`,
+    "",
+    "Thank you for submitting the Parents Interview Form.",
+    "We have received your response successfully.",
+    "",
+    `Submitted: ${input.submittedAt}`,
+    `Child Name: ${input.childName || "-"}`,
+    `Interested Programme: ${input.interestedProgramme || "-"}`,
+    "",
+    "Our admissions team will review the information and contact you if anything further is needed.",
+    "",
+    "Warm regards,",
+    "Ash-Shajrah Learning Hub",
+  ].join("\n");
+}
+
+function buildParentInterviewParentConfirmationHtml(input: {
+  parentName: string;
+  childName: string | null;
+  interestedProgramme: string | null;
+  submittedAt: string;
+}) {
+  return `
+    <div style="font-family:Arial,sans-serif;max-width:640px;margin:0 auto;background:#faf7f0;padding:24px;border-radius:12px">
+      <div style="background:linear-gradient(135deg,#0d3b2e,#1a5c45);padding:28px 24px;border-radius:12px 12px 0 0">
+        <h2 style="color:#faf7f0;margin:0 0 8px">Parents Interview Form Received</h2>
+        <p style="color:#e8d5a3;margin:0;font-size:14px">Ash-Shajrah Learning Hub</p>
+      </div>
+      <div style="background:#ffffff;padding:24px;border:1px solid #e8e4dc;border-top:0;border-radius:0 0 12px 12px">
+        <p style="color:#0d3b2e;line-height:1.7;margin:0 0 16px">Dear ${escapeHtml(input.parentName)},</p>
+        <p style="color:#0d3b2e;line-height:1.7;margin:0 0 16px">
+          Thank you for submitting the Parents Interview Form. We have received your response successfully.
+        </p>
+        <div style="background:#faf7f0;border:1px solid #e8e4dc;border-radius:12px;padding:16px 18px;margin:20px 0">
+          <p style="margin:0 0 8px;color:#5c4a32;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;">Submitted</p>
+          <p style="margin:0;color:#0d3b2e;font-size:14px;">${escapeHtml(input.submittedAt)}</p>
+          <p style="margin:16px 0 8px;color:#5c4a32;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;">Child Name</p>
+          <p style="margin:0;color:#0d3b2e;font-size:14px;">${escapeHtml(input.childName || "-")}</p>
+          <p style="margin:16px 0 8px;color:#5c4a32;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;">Interested Programme</p>
+          <p style="margin:0;color:#0d3b2e;font-size:14px;">${escapeHtml(input.interestedProgramme || "-")}</p>
+        </div>
+        <p style="color:#0d3b2e;line-height:1.7;margin:0">
+          Our admissions team will review the information and contact you if anything further is needed.
+        </p>
+        <p style="color:#0d3b2e;line-height:1.7;margin:20px 0 0">Warm regards,<br/>Ash-Shajrah Learning Hub</p>
+      </div>
+    </div>
+  `;
+}
+
 export async function GET(_request: NextRequest, context: RouteContext) {
   try {
     const { token } = await context.params;
@@ -182,8 +242,28 @@ export async function POST(request: NextRequest, context: RouteContext) {
             </div>
           `,
         });
+
+        await transporter.sendMail({
+          from: `"Ash-Shajrah Learning Hub" <${fromEmail}>`,
+          to: submitted.parentEmail,
+          replyTo: getAdmissionsEmail(),
+          subject:
+            "Parents Interview Form Received - Ash-Shajrah Learning Hub",
+          text: buildParentInterviewParentConfirmationText({
+            parentName: submitted.parentName,
+            childName: submitted.childName,
+            interestedProgramme: submitted.interestedProgramme,
+            submittedAt,
+          }),
+          html: buildParentInterviewParentConfirmationHtml({
+            parentName: submitted.parentName,
+            childName: submitted.childName,
+            interestedProgramme: submitted.interestedProgramme,
+            submittedAt,
+          }),
+        });
       } catch (emailError) {
-        console.error("Parents interview admin email failed:", emailError);
+        console.error("Parents interview email send failed:", emailError);
       }
     }
 

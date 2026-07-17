@@ -137,6 +137,27 @@ export async function insertInterestedStudent(input: {
   return String(id);
 }
 
+export async function hasInterestedStudentDuplicate(input: {
+  email: string;
+  childName: string;
+}): Promise<boolean> {
+  const client = getPgPool();
+
+  const result = await client.query<{ exists: boolean }>(
+    `
+      select exists(
+        select 1
+        from public.interested_students
+        where lower(trim(email)) = lower(trim($1))
+          and lower(trim(child_name)) = lower(trim($2))
+      ) as exists
+    `,
+    [input.email, input.childName]
+  );
+
+  return Boolean(result.rows[0]?.exists);
+}
+
 export type ExistingRegistration = {
   id: string;
   parentName: string;

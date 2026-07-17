@@ -10,6 +10,7 @@ import {
 } from "@/lib/register-form";
 import {
   getActiveCoordinatorEmails,
+  hasInterestedStudentDuplicate,
   insertInterestedStudent,
 } from "@/lib/postgres";
 import { appendRegistrationToGoogleSheet } from "@/lib/google-sheets";
@@ -99,6 +100,24 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: "Validation failed", errors },
         { status: 400 }
+      );
+    }
+
+    const duplicateExists = await hasInterestedStudentDuplicate({
+      email: formData.email.trim().toLowerCase(),
+      childName: formData.childName.trim(),
+    });
+
+    if (duplicateExists) {
+      return NextResponse.json(
+        {
+          error: "This child is already registered with this parent email.",
+          errors: {
+            childName:
+              "This child is already registered with this parent email.",
+          },
+        },
+        { status: 409 }
       );
     }
 
