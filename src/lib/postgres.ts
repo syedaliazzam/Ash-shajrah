@@ -3,8 +3,9 @@ import { Pool } from "pg";
 let pool: Pool | null = null;
 
 /**
- * Runtime queries use DATABASE_URL (Supabase pooled, port 6543 + pgbouncer=true).
- * DIRECT_URL is reserved for migrations/setup scripts — not for the app pool.
+ * Runtime queries prefer DATABASE_URL (pooled connection).
+ * Fall back to DIRECT_URL so production still works when only the direct URL
+ * is configured in Vercel.
  */
 function stripQuotes(url: string): string {
   if (
@@ -17,7 +18,7 @@ function stripQuotes(url: string): string {
 }
 
 function getDatabaseUrl() {
-  const raw = process.env.DATABASE_URL || null;
+  const raw = process.env.DATABASE_URL || process.env.DIRECT_URL || null;
   if (!raw) return null;
 
   const url = stripQuotes(raw.trim());
