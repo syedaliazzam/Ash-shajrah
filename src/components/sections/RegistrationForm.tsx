@@ -24,7 +24,7 @@ const INITIAL: RegistrationFormData = {
   childName: "",
   childAge: "",
   level: "",
-  cityCountry: "Islamabad, Pakistan",
+  cityCountry: "",
   message: "",
   website: "",
 };
@@ -64,7 +64,7 @@ export function RegistrationForm() {
   const [phoneCountryCode, setPhoneCountryCode] = useState("+92");
   const [phoneLocalNumber, setPhoneLocalNumber] = useState("");
   const [selectedCountry, setSelectedCountry] = useState("Pakistan");
-  const [selectedCity, setSelectedCity] = useState("Islamabad");
+  const [selectedCity, setSelectedCity] = useState("");
   const [errors, setErrors] = useState<RegistrationFormErrors>({});
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -101,10 +101,10 @@ export function RegistrationForm() {
     const cities = (COUNTRY_CITY_OPTIONS as Record<string, readonly string[]>)[
       nextCountry
     ] || COUNTRY_CITY_OPTIONS.Pakistan;
-    const nextCity = city && cities.includes(city) ? city : cities[0];
+    const nextCity = city && cities.includes(city) ? city : "";
     setSelectedCountry(nextCountry);
     setSelectedCity(nextCity);
-    update("cityCountry", `${nextCity}, ${nextCountry}`);
+    update("cityCountry", nextCity ? `${nextCity}, ${nextCountry}` : "");
   };
 
   const handleSubmit = async (e: FormEvent) => {
@@ -143,7 +143,7 @@ export function RegistrationForm() {
       setPhoneCountryCode("+92");
       setPhoneLocalNumber("");
       setSelectedCountry("Pakistan");
-      setSelectedCity("Islamabad");
+      setSelectedCity("");
       setErrors({});
     } catch {
       setSubmitError("Something went wrong. Please try again.");
@@ -355,7 +355,9 @@ export function RegistrationForm() {
                 onChange={(e) => updateLocation(selectedCountry, e.target.value)}
                 className={`${selectClass} ${language === "ur" ? "text-right font-urdu" : "text-left"}`}
               >
-                <option value="" className="text-[#0d3b2e] bg-cream">Select a city</option>
+                <option value="" disabled className="text-[#0d3b2e] bg-cream">
+                  Select a city
+                </option>
                 {citiesForSelectedCountry.map((city) => (
                   <option key={`${selectedCountry}-${city}`} value={city} className="text-[#0d3b2e] bg-cream">
                     {city}
