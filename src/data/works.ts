@@ -57,28 +57,6 @@ export const WORK_ITEMS: WorkItem[] = [
     },
   },
   {
-    id: "taleemi-soch-article",
-    image: "/images/works/taleemi-soch-article.jpg",
-    fit: "contain",
-    category: { en: "Educational Insight", ur: "تعلیمی بصیرت" },
-    title: {
-      en: "Educational Mindset Article",
-      ur: "تعلیمی سوچ اور ذہنی رویوں پر تحریر",
-    },
-    description: {
-      en: "A reflective article on educational attitudes, integrity, and the mindset needed for meaningful learning.",
-      ur: "تعلیمی رویوں، دیانت اور بامعنی سیکھنے کے لیے درکار ذہنیت پر ایک تفکر انگیز تحریر۔",
-    },
-    details: {
-      en: "This piece highlights how educational culture, honesty, and thoughtful attitudes shape the quality of learning and student development.",
-      ur: "اس تحریر میں اجاگر کیا گیا کہ تعلیمی ثقافت، دیانت اور سوچ سمجھ بوجھ والا رویہ سیکھنے کے معیار اور طلبہ کی نشوونما کو کیسے متاثر کرتا ہے۔",
-    },
-    alt: {
-      en: "Educational mindset article graphic by Muhammad Azeem Siddiqui",
-      ur: "محمد عظیم صدیقی کی تعلیمی سوچ پر تحریر کا گرافک",
-    },
-  },
-  {
     id: "students-summer-camp-2023",
     image: "/images/works/students-summer-camp-2023.jpg",
     fit: "contain",
