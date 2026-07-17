@@ -58,6 +58,19 @@ function getCoordinatorEmail() {
   );
 }
 
+async function getCoordinatorRecipients(): Promise<string[]> {
+  try {
+    const coordinatorEmails = await getActiveCoordinatorEmails();
+    if (coordinatorEmails.length > 0) {
+      return coordinatorEmails;
+    }
+  } catch (error) {
+    console.error("Coordinator email lookup failed:", error);
+  }
+
+  return [getCoordinatorEmail()];
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = (await request.json()) as RegistrationFormData;
@@ -89,19 +102,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const smtpConfig = getSmtpConfig();
-    if (!smtpConfig) {
-      console.error("SMTP environment variables are not configured.");
-      return NextResponse.json(
-        {
-          error:
-            "Something went wrong. Please try again or contact us on WhatsApp.",
-        },
-        { status: 503 }
-      );
-    }
-
-    const fromEmail = process.env.SMTP_FROM || smtpConfig.auth.user;
     const submittedAt = new Date().toLocaleString("en-PK", {
       dateStyle: "full",
       timeStyle: "short",
@@ -122,8 +122,7 @@ export async function POST(request: NextRequest) {
     const rawToken = createParentInterviewRawToken();
     const tokenHash = hashParentInterviewToken(rawToken);
 
-  // If a pending form already exists for this registration, rotate to the new token.
-  const created = await createParentInterviewForm({
+    await createParentInterviewForm({
       registrationId,
       tokenHash,
       parentName: formData.parentName.trim(),
@@ -133,12 +132,10 @@ export async function POST(request: NextRequest) {
       interestedProgramme: formData.level.trim(),
     });
 
-    if (created.registrationId === registrationId) {
-      await rotateParentInterviewToken({
-        registrationId,
-        tokenHash,
-      });
-    }
+    await rotateParentInterviewToken({
+      registrationId,
+      tokenHash,
+    });
 
     const interviewUrl = buildParentInterviewUrl(rawToken);
 
@@ -158,40 +155,61 @@ export async function POST(request: NextRequest) {
       console.error("Google Sheets append failed:", sheetError);
     }
 
-    const transporter = nodemailer.createTransport(smtpConfig);
-    const coordinatorEmails = await getActiveCoordinatorEmails();
-    const coordinatorRecipients =
-      coordinatorEmails.length > 0
-        ? coordinatorEmails
-        : [getCoordinatorEmail()];
+    const smtpConfig = getSmtpConfig();
+    const coordinatorRecipients = await getCoordinatorRecipients();
+    let confirmationEmailSent = false;
+    let coordinatorEmailSent = false;
 
-    await transporter.sendMail({
-      from: `"Ash-Shajrah Learning Hub" <${fromEmail}>`,
-      to: formData.email.trim(),
-      replyTo: coordinatorRecipients[0],
-      subject: "Registration Confirmed - Ash-Shajrah Learning Hub",
-      text: formatRegistrationConfirmationText(
-        formData,
-        submittedAt,
-        interviewUrl
-      ),
-      html: formatRegistrationConfirmationHtml(
-        formData,
-        submittedAt,
-        interviewUrl
-      ),
+    if (!smtpConfig) {
+      console.error("SMTP environment variables are not configured.");
+    } else {
+      const fromEmail = process.env.SMTP_FROM || smtpConfig.auth.user;
+      const transporter = nodemailer.createTransport(smtpConfig);
+
+      try {
+        await transporter.sendMail({
+          from: `"Ash-Shajrah Learning Hub" <${fromEmail}>`,
+          to: formData.email.trim(),
+          replyTo: coordinatorRecipients[0],
+          subject: "Registration Confirmed - Ash-Shajrah Learning Hub",
+          text: formatRegistrationConfirmationText(
+            formData,
+            submittedAt,
+            interviewUrl
+          ),
+          html: formatRegistrationConfirmationHtml(
+            formData,
+            submittedAt,
+            interviewUrl
+          ),
+        });
+        confirmationEmailSent = true;
+      } catch (error) {
+        console.error("Registration confirmation email failed:", error);
+      }
+
+      try {
+        await transporter.sendMail({
+          from: `"Ash-Shajrah Learning Hub" <${fromEmail}>`,
+          to: coordinatorRecipients,
+          replyTo: formData.email.trim(),
+          subject: "New Student Registration - Ash-Shajrah Learning Hub",
+          text: formatRegistrationCoordinatorText(formData, submittedAt),
+          html: formatRegistrationCoordinatorHtml(formData, submittedAt),
+        });
+        coordinatorEmailSent = true;
+      } catch (error) {
+        console.error("Coordinator registration email failed:", error);
+      }
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: SUCCESS_MESSAGE,
+      interviewUrl,
+      confirmationEmailSent,
+      coordinatorEmailSent,
     });
-
-    await transporter.sendMail({
-      from: `"Ash-Shajrah Learning Hub" <${fromEmail}>`,
-      to: coordinatorRecipients,
-      replyTo: formData.email.trim(),
-      subject: "New Student Registration - Ash-Shajrah Learning Hub",
-      text: formatRegistrationCoordinatorText(formData, submittedAt),
-      html: formatRegistrationCoordinatorHtml(formData, submittedAt),
-    });
-
-    return NextResponse.json({ success: true, message: SUCCESS_MESSAGE });
   } catch (error) {
     console.error("Registration API error:", error);
     return NextResponse.json(
