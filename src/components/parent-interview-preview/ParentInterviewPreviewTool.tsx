@@ -31,6 +31,7 @@ type PendingCandidate = {
 
 export function ParentInterviewPreviewTool() {
   const [email, setEmail] = useState("");
+  const [registrationId, setRegistrationId] = useState("");
   const [selectedRegistrationId, setSelectedRegistrationId] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -148,7 +149,7 @@ export function ParentInterviewPreviewTool() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email,
-          registrationId: selectedRegistrationId,
+          registrationId: registrationId || selectedRegistrationId,
         }),
       });
 
@@ -163,6 +164,7 @@ export function ParentInterviewPreviewTool() {
       setSuccessMessage(
         (data as PreviewResponse).message || "Email sent successfully."
       );
+      setRegistrationId("");
       setSelectedRegistrationId("");
       setEmail("");
       void loadCandidates();
@@ -243,16 +245,37 @@ export function ParentInterviewPreviewTool() {
             Parent Interview Link Preview
           </h1>
           <p className="mt-4 max-w-3xl text-sm leading-7 text-warm-brown sm:text-base">
-            Enter an email address for an already registered user. This will
-            generate or refresh that user&apos;s pending parent interview form
-            link, send the email to that parent, and also show the same message
-            on this page.
+            Enter a registration ID or parent email for an already registered
+            user. This will generate or refresh that user&apos;s pending parent
+            interview form link, send the email to that parent, and also show
+            the same message on this page.
           </p>
         </div>
 
         <div className="grid gap-6 lg:grid-cols-[minmax(0,360px)_minmax(0,1fr)]">
           <section className="rounded-[28px] border border-emerald/10 bg-white/95 p-6 shadow-[0_20px_60px_rgba(13,59,46,0.06)]">
             <form onSubmit={handleSubmit} className="space-y-5">
+              <div>
+                <label
+                  htmlFor="existing-user-registration-id"
+                  className="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-warm-brown"
+                >
+                  Registration ID
+                </label>
+                <input
+                  id="existing-user-registration-id"
+                  type="text"
+                  inputMode="numeric"
+                  value={registrationId}
+                  onChange={(event) => {
+                    setRegistrationId(event.target.value);
+                    setSelectedRegistrationId("");
+                  }}
+                  placeholder="Enter registration ID"
+                  className="min-h-12 w-full rounded-2xl border border-emerald/15 bg-cream px-4 py-3 text-base outline-none transition focus:border-gold focus:bg-white"
+                />
+              </div>
+
               <div>
                 <label
                   htmlFor="existing-user-email"
@@ -264,16 +287,19 @@ export function ParentInterviewPreviewTool() {
                   id="existing-user-email"
                   type="email"
                   value={email}
-                  onChange={(event) => setEmail(event.target.value)}
+                  onChange={(event) => {
+                    setEmail(event.target.value);
+                    setSelectedRegistrationId("");
+                  }}
                   placeholder="parent@example.com"
                   className="min-h-12 w-full rounded-2xl border border-emerald/15 bg-cream px-4 py-3 text-base outline-none transition focus:border-gold focus:bg-white"
-                  required
                 />
                 <select
                   value={selectedRegistrationId}
                   onChange={(event) => {
                     const nextRegistrationId = event.target.value;
                     setSelectedRegistrationId(nextRegistrationId);
+                    setRegistrationId(nextRegistrationId);
                     const selectedCandidate = candidates.find(
                       (candidate) => candidate.registrationId === nextRegistrationId
                     );
@@ -299,8 +325,9 @@ export function ParentInterviewPreviewTool() {
               </div>
 
               <p className="text-xs leading-6 text-warm-brown">
-                All parent emails from interested students appear here. You can
-                also type an email manually if needed.
+                Use either registration ID or email. If a parent has multiple
+                children, registration ID is the safest option. You can also
+                pick a row below to auto-fill both fields.
               </p>
 
               <button
