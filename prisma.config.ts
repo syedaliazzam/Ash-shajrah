@@ -1,6 +1,5 @@
 // Prisma 7 config — connection URLs must not live in schema.prisma.
 // Prefer DIRECT_URL (session, :5432) for migrations; fall back to DATABASE_URL.
-import "dotenv/config";
 import { defineConfig } from "prisma/config";
 
 function stripQuotes(value: string | undefined): string | undefined {
