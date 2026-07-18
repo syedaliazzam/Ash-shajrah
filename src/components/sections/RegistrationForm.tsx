@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, FormEvent } from "react";
+import { useEffect, useState, FormEvent } from "react";
 import {
   CHILD_AGE_OPTIONS,
   validateRegistrationForm,
@@ -65,22 +65,61 @@ export function RegistrationForm() {
   const [phoneLocalNumber, setPhoneLocalNumber] = useState("");
   const [selectedCountry, setSelectedCountry] = useState("Pakistan");
   const [selectedCity, setSelectedCity] = useState("");
+  const [availableCities, setAvailableCities] = useState<string[]>([]);
+  const [cityLoading, setCityLoading] = useState(false);
   const [errors, setErrors] = useState<RegistrationFormErrors>({});
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [submitError, setSubmitError] = useState("");
   const phoneLocalDigits = getPhoneLocalDigitsForCode(phoneCountryCode);
   const countryOptions = COUNTRY_LIST;
-  const citiesForSelectedCountry = (() => {
-    const record = COUNTRY_CITY_OPTIONS as Record<string, readonly string[]>;
-    const custom = record[selectedCountry];
-    if (custom && custom.length > 0) return custom;
 
-    const suffixes = new Set([selectedCountry]);
-    return CITY_COUNTRY_OPTIONS.filter((entry) =>
-      Array.from(suffixes).some((suffix) => entry.endsWith(`, ${suffix}`))
-    ).map((entry) => entry.split(",")[0].trim());
-  })();
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadCities = async () => {
+      if (!selectedCountry) {
+        setAvailableCities([]);
+        return;
+      }
+
+      setCityLoading(true);
+
+      try {
+        const response = await fetch(
+          `/api/cities?country=${encodeURIComponent(selectedCountry)}`,
+          { cache: "no-store" }
+        );
+        const data = (await response.json()) as { cities?: string[] };
+        const cities = Array.isArray(data.cities) ? data.cities : [];
+
+        if (!cancelled) {
+          setAvailableCities(cities);
+          if (selectedCity && !cities.includes(selectedCity)) {
+            setSelectedCity("");
+            setForm((prev) => ({ ...prev, cityCountry: "" }));
+          }
+        }
+      } catch {
+        if (!cancelled) {
+          const record = COUNTRY_CITY_OPTIONS as Record<string, readonly string[]>;
+          const custom = record[selectedCountry];
+          const fallback = custom?.length
+            ? [...custom]
+            : CITY_COUNTRY_OPTIONS.filter((entry) => entry.endsWith(`, ${selectedCountry}`)).map((entry) => entry.split(",")[0].trim());
+          setAvailableCities(fallback);
+        }
+      } finally {
+        if (!cancelled) setCityLoading(false);
+      }
+    };
+
+    void loadCities();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedCountry]);
 
   const update = (field: keyof RegistrationFormData, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -96,15 +135,17 @@ export function RegistrationForm() {
     update("whatsapp", sanitizedNumber ? `${countryCode} ${sanitizedNumber}` : "");
   };
 
-  const updateLocation = (country: string, city: string) => {
+  const handleCountryChange = (country: string) => {
     const nextCountry = country || "Pakistan";
-    const cities = (COUNTRY_CITY_OPTIONS as Record<string, readonly string[]>)[
-      nextCountry
-    ] || COUNTRY_CITY_OPTIONS.Pakistan;
-    const nextCity = city && cities.includes(city) ? city : "";
     setSelectedCountry(nextCountry);
+    setSelectedCity("");
+    update("cityCountry", "");
+  };
+
+  const handleCityChange = (city: string) => {
+    const nextCity = city.trim();
     setSelectedCity(nextCity);
-    update("cityCountry", nextCity ? `${nextCity}, ${nextCountry}` : "");
+    update("cityCountry", nextCity ? `${nextCity}, ${selectedCountry}` : "");
   };
 
   const handleSubmit = async (e: FormEvent) => {
@@ -337,7 +378,7 @@ export function RegistrationForm() {
                 required
                 dir={language === "ur" ? "rtl" : "ltr"}
                 value={selectedCountry}
-                onChange={(e) => updateLocation(e.target.value, selectedCity)}
+                onChange={(e) => handleCountryChange(e.target.value)}
                 className={`${selectClass} ${language === "ur" ? "text-right font-urdu" : "text-left"}`}
               >
                 <option value="" className="text-[#0d3b2e] bg-cream">Select a country</option>
@@ -352,19 +393,27 @@ export function RegistrationForm() {
                 required
                 dir={language === "ur" ? "rtl" : "ltr"}
                 value={selectedCity}
-                onChange={(e) => updateLocation(selectedCountry, e.target.value)}
+                onChange={(e) => handleCityChange(e.target.value)}
                 className={`${selectClass} ${language === "ur" ? "text-right font-urdu" : "text-left"}`}
+                disabled={cityLoading}
               >
                 <option value="" disabled className="text-[#0d3b2e] bg-cream">
-                  Select a city
+                  {cityLoading ? "Loading cities..." : "Select a city"}
                 </option>
-                {citiesForSelectedCountry.map((city) => (
+                {availableCities.map((city) => (
                   <option key={`${selectedCountry}-${city}`} value={city} className="text-[#0d3b2e] bg-cream">
                     {city}
                   </option>
                 ))}
               </select>
             </div>
+            <p className="mt-2 text-xs text-cream/80">
+              {cityLoading
+                ? "Loading cities for the selected country..."
+                : availableCities.length > 0
+                  ? "Please select a city to continue."
+                  : "No cities loaded yet for this country."}
+            </p>
             {errors.cityCountry && <p className="mt-1 text-xs text-red-300">{errors.cityCountry}</p>}
           </div>
 

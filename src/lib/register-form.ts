@@ -1,4 +1,5 @@
 import {
+  COUNTRY_LIST,
   COUNTRY_CITY_OPTIONS,
 } from "@/lib/registration-options";
 
@@ -74,8 +75,8 @@ export function validateRegistrationForm(data: RegistrationFormData): Registrati
     errors.cityCountry = "City / Country is required.";
   } else {
     const [city, country] = data.cityCountry.split(",").map((part) => part.trim());
-    const cities = country ? getCitiesForCountry(country) : null;
-    if (!city || !country || !cities || !cities.includes(city)) {
+    const countryExists = country ? COUNTRY_LIST.includes(country as (typeof COUNTRY_LIST)[number]) : false;
+    if (!city || !country || !countryExists) {
       errors.cityCountry = "Please select a valid city / country.";
     }
   }
