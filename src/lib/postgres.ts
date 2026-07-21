@@ -343,20 +343,20 @@ export async function getLatestInterestedStudentByEmail(
   const row = result.rows[0];
   if (!row) return null;
 
-    return {
-      id: String(row.id),
-      parentName: row.parent_name ?? "",
-      phone: row.phone ?? "",
-      email: row.email ?? email,
-      childName: row.child_name ?? "",
-      childAge: row.child_age ?? "",
-      childDob: row.child_age ?? "",
-      level: row.class_level ?? "",
-      city: row.city ?? "",
-      country: row.country ?? "",
-      message: row.message ?? "",
-    };
-  }
+  return {
+    id: String(row.id),
+    parentName: row.parent_name ?? "",
+    phone: row.phone ?? "",
+    email: row.email ?? email,
+    childName: row.child_name ?? "",
+    childAge: row.child_dob ?? "",
+    childDob: row.child_dob ?? "",
+    level: row.class_level ?? "",
+    city: row.city ?? "",
+    country: row.country ?? "",
+    message: row.message ?? "",
+  };
+}
 
 export async function getInterestedStudentById(
   id: string
@@ -399,20 +399,20 @@ export async function getInterestedStudentById(
   const row = result.rows[0];
   if (!row) return null;
 
-    return {
-      id: String(row.id),
-      parentName: row.parent_name ?? "",
-      phone: row.phone ?? "",
-      email: row.email ?? "",
-      childName: row.child_name ?? "",
-      childAge: row.child_age ?? "",
-      childDob: row.child_age ?? "",
-      level: row.class_level ?? "",
-      city: row.city ?? "",
-      country: row.country ?? "",
-      message: row.message ?? "",
-    };
-  }
+  return {
+    id: String(row.id),
+    parentName: row.parent_name ?? "",
+    phone: row.phone ?? "",
+    email: row.email ?? "",
+    childName: row.child_name ?? "",
+    childAge: row.child_dob ?? "",
+    childDob: row.child_dob ?? "",
+    level: row.class_level ?? "",
+    city: row.city ?? "",
+    country: row.country ?? "",
+    message: row.message ?? "",
+  };
+}
 
 export type PendingParentInterviewCandidate = {
   registrationId: string;
