@@ -371,6 +371,28 @@ export const WORK_ITEMS: WorkItem[] = [
     },
   },
   {
+    id: "stress-management-work",
+    image: "/images/works/stress-management-work.jpeg",
+    fit: "contain",
+    category: { en: "Personal Development", ur: "شخصی نشوونما" },
+    title: {
+      en: "Stress Management Workshop",
+      ur: "اسٹریس مینجمنٹ ورکشاپ",
+    },
+    description: {
+      en: "A supportive session on handling pressure, restoring calm, and building healthier daily habits.",
+      ur: "دباؤ کو سنبھالنے، ذہنی سکون واپس لانے اور صحت مند روزمرہ عادات بنانے پر ایک معاون نشست۔",
+    },
+    details: {
+      en: "This workshop focuses on practical stress-management tools, emotional balance, self-awareness, and simple routines that help children and adults respond to pressure in healthier ways.",
+      ur: "یہ ورکشاپ عملی اسٹریس مینجمنٹ ٹولز، جذباتی توازن، خود آگاہی اور ایسی سادہ روزمرہ روٹینز پر مرکوز ہے جو بچوں اور بڑوں کو دباؤ کا بہتر انداز میں سامنا کرنے میں مدد دیتی ہیں۔",
+    },
+    alt: {
+      en: "Stress management workshop poster",
+      ur: "اسٹریس مینجمنٹ ورکشاپ کا پوسٹر",
+    },
+  },
+  {
     id: "stress-management-session",
     image: "/images/works/stress-management-session.jpg",
     fit: "contain",
