@@ -30,7 +30,7 @@ export function LogoPhilosophySection() {
       <section
         ref={sectionRef}
         id="logo-philosophy"
-        className="relative overflow-hidden bg-white px-6 py-24 lg:px-8 lg:py-32"
+        className="relative overflow-hidden bg-cream px-6 py-24 lg:px-8 lg:py-32"
       >
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(45,138,106,0.03),transparent_70%)]" />
 

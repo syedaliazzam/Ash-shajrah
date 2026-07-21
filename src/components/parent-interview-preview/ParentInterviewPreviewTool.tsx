@@ -15,8 +15,10 @@ type PreviewResponse = {
     parentName: string;
     email: string;
     childName: string;
-    childAge: string;
+    childDob: string;
     level: string;
+    city: string;
+    country: string;
   };
 };
 
@@ -27,6 +29,8 @@ type PendingCandidate = {
   childName: string;
   childAge: string;
   level: string;
+  city: string;
+  country: string;
 };
 
 export function ParentInterviewPreviewTool() {
@@ -317,8 +321,7 @@ export function ParentInterviewPreviewTool() {
                       key={candidate.registrationId}
                       value={candidate.registrationId}
                     >
-                      {candidate.parentName} - {candidate.email} - {candidate.childName} -{" "}
-                      {candidate.level}
+                      {candidate.registrationId} - {candidate.parentName} - {candidate.childName} - {candidate.level}
                     </option>
                   ))}
                 </select>
@@ -390,6 +393,21 @@ export function ParentInterviewPreviewTool() {
                       Child
                     </p>
                     <p className="mt-1">{result.registration.childName}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-warm-brown">
+                      Date of Birth
+                    </p>
+                    <p className="mt-1">{result.registration.childDob || "-"}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-warm-brown">
+                      Country / City
+                    </p>
+                    <p className="mt-1">
+                      {result.registration.country}
+                      {result.registration.city ? `, ${result.registration.city}` : ""}
+                    </p>
                   </div>
                 </div>
               </div>

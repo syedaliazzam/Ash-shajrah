@@ -3,7 +3,9 @@ import { SITE } from "./data";
 export const REGISTER_URL = "/register";
 export const CAREERS_URL = "/careers";
 
-export const WHATSAPP_URL = SITE.contact.whatsapp;
+export const WHATSAPP_URL = resolveAshShajrahWhatsAppUrl(
+  process.env.NEXT_PUBLIC_ASH_SHAJRAH_WHATSAPP_URL || SITE.contact.whatsapp
+);
 
 export const EDI_FACEBOOK_URL =
   "https://www.facebook.com/EducatorsDevelopmentInstitute/";
@@ -13,6 +15,32 @@ export const DEFAULT_ASH_SHAJRAH_FACEBOOK_URL =
   "https://www.facebook.com/profile.php?id=61591189181962";
 
 const FACEBOOK_ENV_KEY_PREFIX = "NEXT_PUBLIC_ASH_SHAJRAH_FACEBOOK_URL=";
+
+function resolveAshShajrahWhatsAppUrl(raw: string | undefined): string {
+  const WHATSAPP_ENV_KEY_PREFIX = "NEXT_PUBLIC_ASH_SHAJRAH_WHATSAPP_URL=";
+  let value = (raw ?? "").trim();
+
+  if (!value) {
+    return SITE.contact.whatsapp;
+  }
+
+  while (value.startsWith(WHATSAPP_ENV_KEY_PREFIX)) {
+    value = value.slice(WHATSAPP_ENV_KEY_PREFIX.length).trim();
+  }
+
+  value = value.replace(/^https:\/(?!\/)/i, "https://");
+  value = value.replace(/^http:\/(?!\/)/i, "http://");
+
+  const waMatch = value.match(/https:\/\/wa\.me\/\d+(?:\?text=[^\s"'<>]*)?/i);
+  if (waMatch) return waMatch[0].replace(/[,;.]+$/g, "");
+
+  const phoneDigits = value.replace(/\D/g, "");
+  if (phoneDigits.length >= 10) {
+    return `https://wa.me/${phoneDigits}`;
+  }
+
+  return SITE.contact.whatsapp;
+}
 
 /**
  * Resolve and sanitize the public Facebook URL.
@@ -62,4 +90,8 @@ function resolveAshShajrahFacebookUrl(raw: string | undefined): string {
 
 export const ASH_SHAJRAH_FACEBOOK_URL = resolveAshShajrahFacebookUrl(
   process.env.NEXT_PUBLIC_ASH_SHAJRAH_FACEBOOK_URL
+);
+
+export const ASH_SHAJRAH_WHATSAPP_URL = resolveAshShajrahWhatsAppUrl(
+  process.env.NEXT_PUBLIC_ASH_SHAJRAH_WHATSAPP_URL || SITE.contact.whatsapp
 );

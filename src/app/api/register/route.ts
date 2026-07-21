@@ -12,6 +12,7 @@ import {
   getActiveCoordinatorEmails,
   hasInterestedStudentDuplicate,
   insertInterestedStudent,
+  markInterestedStudentInterviewLinkSent,
 } from "@/lib/postgres";
 import { appendRegistrationToGoogleSheet } from "@/lib/google-sheets";
 import {
@@ -89,11 +90,15 @@ export async function POST(request: NextRequest) {
       email: body.email ?? "",
       childName: body.childName ?? "",
       childAge: body.childAge ?? "",
+      childDob: (body as { childDob?: string }).childDob ?? "",
       level: body.level ?? "",
       cityCountry: body.cityCountry ?? "",
       message: body.message ?? "",
       preferredLanguage: preferredLanguage?.trim(),
     };
+    const [city, country] = formData.cityCountry
+      .split(",")
+      .map((part) => part.trim());
 
     const errors = validateRegistrationForm(formData);
     if (Object.keys(errors).length > 0) {
@@ -133,8 +138,10 @@ export async function POST(request: NextRequest) {
       email: formData.email.trim(),
       childName: formData.childName.trim(),
       childAge: formData.childAge.trim(),
+      childDob: (formData as { childDob?: string }).childDob?.trim() || formData.childAge.trim(),
       level: formData.level.trim(),
-      cityCountry: formData.cityCountry.trim(),
+      city,
+      country,
       message: formData.message.trim(),
     });
 
@@ -148,6 +155,7 @@ export async function POST(request: NextRequest) {
       parentEmail: formData.email.trim().toLowerCase(),
       childName: formData.childName.trim(),
       childAge: formData.childAge.trim(),
+      childDob: (formData as { childDob?: string }).childDob?.trim() || null,
       interestedProgramme: formData.level.trim(),
     });
 
@@ -157,6 +165,10 @@ export async function POST(request: NextRequest) {
     });
 
     const interviewUrl = buildParentInterviewUrl(rawToken);
+    await markInterestedStudentInterviewLinkSent({
+      registrationId,
+      interviewUrl,
+    });
 
     try {
       await appendRegistrationToGoogleSheet({
@@ -166,7 +178,8 @@ export async function POST(request: NextRequest) {
         childName: formData.childName.trim(),
         childAge: formData.childAge.trim(),
         level: formData.level.trim(),
-        cityCountry: formData.cityCountry.trim(),
+        city,
+        country,
         message: formData.message.trim(),
         preferredLanguage: formData.preferredLanguage,
       });

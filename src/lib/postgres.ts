@@ -1,6 +1,7 @@
 import { Pool } from "pg";
 
 let pool: Pool | null = null;
+let ensuredInterestedStudentsRegistrationCode = false;
 
 /**
  * Runtime queries prefer DATABASE_URL (pooled connection).
@@ -83,10 +84,13 @@ export async function insertInterestedStudent(input: {
   email: string;
   childName: string;
   childAge: string;
+  childDob: string;
   level: string;
-  cityCountry: string;
+  city: string;
+  country: string;
   message: string;
 }): Promise<string> {
+  await ensureInterestedStudentsRegistrationCode();
   const client = getPgPool();
 
   const result = await client.query<{ id: string | number }>(
@@ -97,25 +101,27 @@ export async function insertInterestedStudent(input: {
         phone,
         email,
         child_name,
-        child_age,
+        child_dob,
         class_level,
-        city_country,
+        city,
+        country,
         message,
         website,
         registration_source,
         parent_relation,
         gender,
-        child_dob,
         current_school,
-        class_applying_for,
         why_interested,
         heard_about,
         questions_comments
       ) values (
-        $1, $2, $3, $4, $5, $6, $7, $8, $9,
-        '', 'website', null, null, null, null, $6, null, null, null
+        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10,
+        '', 'website', null, null, null, null, null, null
       )
-      returning id::text as id
+      returning coalesce(
+        registration_code,
+        'ALHA-' || lpad(id::text, 4, '0')
+      ) as id
     `,
     [
       input.childName,
@@ -123,9 +129,10 @@ export async function insertInterestedStudent(input: {
       input.phone,
       input.email,
       input.childName,
-      input.childAge,
+      input.childDob || input.childAge,
       input.level,
-      input.cityCountry,
+      input.city,
+      input.country,
       input.message || null,
     ]
   );
@@ -135,6 +142,129 @@ export async function insertInterestedStudent(input: {
     throw new Error("Registration insert did not return an id.");
   }
   return String(id);
+}
+
+export async function markInterestedStudentInterviewLinkSent(input: {
+  registrationId: string;
+  interviewUrl?: string | null;
+}): Promise<void> {
+  await ensureInterestedStudentsRegistrationCode();
+  const client = getPgPool();
+
+  await client.query(`
+    ALTER TABLE public.interested_students
+      ADD COLUMN IF NOT EXISTS parent_interview_link_sent_at TIMESTAMPTZ;
+  `);
+  await client.query(`
+    ALTER TABLE public.interested_students
+      ADD COLUMN IF NOT EXISTS parent_interview_url TEXT;
+  `);
+  await client.query(`
+    ALTER TABLE public.interested_students
+      ADD COLUMN IF NOT EXISTS parent_interview_status TEXT;
+  `);
+
+  await client.query(
+    `
+      UPDATE public.interested_students
+      SET
+        parent_interview_status = 'link_sent',
+        parent_interview_link_sent_at = NOW(),
+        parent_interview_url = COALESCE($1, parent_interview_url)
+      WHERE coalesce(registration_code, 'ALHA-' || lpad(id::text, 4, '0')) = $2
+         OR id::text = $2
+    `,
+    [input.interviewUrl || null, input.registrationId]
+  );
+}
+
+export async function markInterestedStudentInterviewSubmitted(input: {
+  registrationId: string;
+}): Promise<void> {
+  await ensureInterestedStudentsRegistrationCode();
+  const client = getPgPool();
+
+  await client.query(`
+    ALTER TABLE public.interested_students
+      ADD COLUMN IF NOT EXISTS parent_interview_submitted_at TIMESTAMPTZ;
+  `);
+  await client.query(`
+    ALTER TABLE public.interested_students
+      ADD COLUMN IF NOT EXISTS parent_interview_status TEXT;
+  `);
+  await client.query(
+    `
+      UPDATE public.interested_students
+      SET
+        parent_interview_status = 'submitted',
+        parent_interview_submitted_at = NOW()
+      WHERE coalesce(registration_code, 'ALHA-' || lpad(id::text, 4, '0')) = $1
+         OR id::text = $1
+    `,
+    [input.registrationId]
+  );
+}
+
+async function ensureInterestedStudentsRegistrationCode(): Promise<void> {
+  if (ensuredInterestedStudentsRegistrationCode) return;
+  const client = getPgPool();
+
+  await client.query(`
+    CREATE SEQUENCE IF NOT EXISTS public.interested_students_registration_code_seq;
+  `);
+
+  await client.query(`
+    ALTER TABLE public.interested_students
+      ADD COLUMN IF NOT EXISTS registration_code TEXT;
+  `);
+  await client.query(`
+    ALTER TABLE public.interested_students
+      ADD COLUMN IF NOT EXISTS city TEXT;
+  `);
+  await client.query(`
+    ALTER TABLE public.interested_students
+      ADD COLUMN IF NOT EXISTS country TEXT;
+  `);
+
+  await client.query(`
+    DO $$
+    DECLARE
+      max_suffix bigint;
+    BEGIN
+      SELECT COALESCE(
+        MAX(NULLIF(regexp_replace(registration_code, '^ALHA-', ''), '')::bigint),
+        0
+      )
+      INTO max_suffix
+      FROM public.interested_students
+      WHERE registration_code ~ '^ALHA-[0-9]+$';
+
+      PERFORM setval(
+        'public.interested_students_registration_code_seq',
+        GREATEST(max_suffix, 0) + 1,
+        false
+      );
+    END $$;
+  `);
+
+  await client.query(`
+    UPDATE public.interested_students
+    SET registration_code = 'ALHA-' || lpad(nextval('public.interested_students_registration_code_seq')::text, 4, '0')
+    WHERE registration_code IS NULL OR registration_code = '';
+  `);
+
+  await client.query(`
+    ALTER TABLE public.interested_students
+      ALTER COLUMN registration_code
+      SET DEFAULT ('ALHA-' || lpad(nextval('public.interested_students_registration_code_seq')::text, 4, '0'));
+  `);
+
+  await client.query(`
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_interested_students_registration_code
+      ON public.interested_students(registration_code);
+  `);
+
+  ensuredInterestedStudentsRegistrationCode = true;
 }
 
 export async function hasInterestedStudentDuplicate(input: {
@@ -165,8 +295,10 @@ export type ExistingRegistration = {
   email: string;
   childName: string;
   childAge: string;
+  childDob: string;
   level: string;
-  cityCountry: string;
+  city: string;
+  country: string;
   message: string;
 };
 
@@ -177,25 +309,28 @@ export async function getLatestInterestedStudentByEmail(
 
   const result = await client.query<{
     id: string | number;
+    registration_code: string | null;
     parent_name: string | null;
     phone: string | null;
     email: string | null;
     child_name: string | null;
-    child_age: string | null;
+    child_dob: string | null;
     class_level: string | null;
-    city_country: string | null;
+    city: string | null;
+    country: string | null;
     message: string | null;
   }>(
     `
       select
-        id::text as id,
+        coalesce(registration_code, 'ALHA-' || lpad(id::text, 4, '0')) as id,
         parent_name,
         phone,
         email,
         child_name,
-        child_age,
+        child_dob as child_age,
         class_level,
-        city_country,
+        city,
+        country,
         message
       from public.interested_students
       where lower(trim(email)) = lower(trim($1))
@@ -208,18 +343,20 @@ export async function getLatestInterestedStudentByEmail(
   const row = result.rows[0];
   if (!row) return null;
 
-  return {
-    id: String(row.id),
-    parentName: row.parent_name ?? "",
-    phone: row.phone ?? "",
-    email: row.email ?? email,
-    childName: row.child_name ?? "",
-    childAge: row.child_age ?? "",
-    level: row.class_level ?? "",
-    cityCountry: row.city_country ?? "",
-    message: row.message ?? "",
-  };
-}
+    return {
+      id: String(row.id),
+      parentName: row.parent_name ?? "",
+      phone: row.phone ?? "",
+      email: row.email ?? email,
+      childName: row.child_name ?? "",
+      childAge: row.child_age ?? "",
+      childDob: row.child_age ?? "",
+      level: row.class_level ?? "",
+      city: row.city ?? "",
+      country: row.country ?? "",
+      message: row.message ?? "",
+    };
+  }
 
 export async function getInterestedStudentById(
   id: string
@@ -228,28 +365,32 @@ export async function getInterestedStudentById(
 
   const result = await client.query<{
     id: string | number;
+    registration_code: string | null;
     parent_name: string | null;
     phone: string | null;
     email: string | null;
     child_name: string | null;
-    child_age: string | null;
+    child_dob: string | null;
     class_level: string | null;
-    city_country: string | null;
+    city: string | null;
+    country: string | null;
     message: string | null;
   }>(
     `
       select
-        id::text as id,
+        coalesce(registration_code, 'ALHA-' || lpad(id::text, 4, '0')) as id,
         parent_name,
         phone,
         email,
         child_name,
-        child_age,
+        child_dob as child_age,
         class_level,
-        city_country,
+        city,
+        country,
         message
       from public.interested_students
       where id::text = $1
+         or registration_code = $1
       limit 1
     `,
     [id]
@@ -258,18 +399,20 @@ export async function getInterestedStudentById(
   const row = result.rows[0];
   if (!row) return null;
 
-  return {
-    id: String(row.id),
-    parentName: row.parent_name ?? "",
-    phone: row.phone ?? "",
-    email: row.email ?? "",
-    childName: row.child_name ?? "",
-    childAge: row.child_age ?? "",
-    level: row.class_level ?? "",
-    cityCountry: row.city_country ?? "",
-    message: row.message ?? "",
-  };
-}
+    return {
+      id: String(row.id),
+      parentName: row.parent_name ?? "",
+      phone: row.phone ?? "",
+      email: row.email ?? "",
+      childName: row.child_name ?? "",
+      childAge: row.child_age ?? "",
+      childDob: row.child_age ?? "",
+      level: row.class_level ?? "",
+      city: row.city ?? "",
+      country: row.country ?? "",
+      message: row.message ?? "",
+    };
+  }
 
 export type PendingParentInterviewCandidate = {
   registrationId: string;
@@ -278,6 +421,8 @@ export type PendingParentInterviewCandidate = {
   childName: string;
   childAge: string;
   level: string;
+  city: string;
+  country: string;
 };
 
 export async function listPendingParentInterviewCandidates(): Promise<
@@ -290,23 +435,27 @@ export async function listPendingParentInterviewCandidates(): Promise<
     parent_name: string | null;
     email: string | null;
     child_name: string | null;
-    child_age: string | null;
+    child_dob: string | null;
     class_level: string | null;
+    city: string | null;
+    country: string | null;
   }>(`
     select
-      i.id::text as registration_id,
+      coalesce(i.registration_code, 'ALHA-' || lpad(i.id::text, 4, '0')) as registration_id,
       i.parent_name,
       i.email,
       i.child_name,
-      i.child_age,
-      i.class_level
+      i.child_dob as child_age,
+      i.class_level,
+      i.city,
+      i.country
     from public.interested_students i
     where i.email is not null
       and trim(i.email) <> ''
       and not exists (
         select 1
         from public.parent_interview_forms p
-        where p.registration_id = i.id::text
+        where p.registration_id = coalesce(i.registration_code, 'ALHA-' || lpad(i.id::text, 4, '0'))
       )
     order by i.id desc
   `);
@@ -318,5 +467,7 @@ export async function listPendingParentInterviewCandidates(): Promise<
     childName: row.child_name ?? "",
     childAge: row.child_age ?? "",
     level: row.class_level ?? "",
+    city: row.city ?? "",
+    country: row.country ?? "",
   }));
 }

@@ -15,7 +15,8 @@ export type RegistrationRow = {
   childName: string;
   childAge: string;
   level: string;
-  cityCountry: string;
+  city: string;
+  country: string;
   message?: string;
   preferredLanguage?: string;
 };
@@ -86,7 +87,8 @@ export async function appendRegistrationToGoogleSheet({
   childName,
   childAge,
   level,
-  cityCountry,
+  city,
+  country,
   message,
   preferredLanguage,
 }: RegistrationRow): Promise<void> {
@@ -107,7 +109,8 @@ export async function appendRegistrationToGoogleSheet({
           childName,
           childAge,
           level,
-          cityCountry,
+          city,
+          country,
           message || "",
           preferredLanguage || "",
         ],

@@ -55,7 +55,7 @@ export function ParentsInterviewForm({ token, initialMeta }: Props) {
       { label: "Parent Name", value: initialMeta.parentName },
       { label: "Parent Email", value: initialMeta.parentEmail },
       { label: "Child Name", value: initialMeta.childName },
-      { label: "Child Age", value: initialMeta.childAge },
+      { label: "Child Date of Birth", value: initialMeta.childAge },
       {
         label: "Interested Programme",
         value: initialMeta.interestedProgramme,

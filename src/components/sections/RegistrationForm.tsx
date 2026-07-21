@@ -2,7 +2,6 @@
 
 import { useEffect, useState, FormEvent } from "react";
 import {
-  CHILD_AGE_OPTIONS,
   validateRegistrationForm,
   PROGRAMME_LEVELS,
   type RegistrationFormData,
@@ -23,6 +22,7 @@ const INITIAL: RegistrationFormData = {
   email: "",
   childName: "",
   childAge: "",
+  childDob: "",
   level: "",
   cityCountry: "",
   message: "",
@@ -148,6 +148,11 @@ export function RegistrationForm() {
     update("cityCountry", nextCity ? `${nextCity}, ${selectedCountry}` : "");
   };
 
+  const handleLevelChange = (level: string) => {
+    update("level", level);
+    update("childAge", "");
+  };
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (loading) return;
@@ -167,7 +172,9 @@ export function RegistrationForm() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...form,
-          preferredLanguage: language
+          childAge: form.childDob?.trim() || "",
+          childDob: form.childDob?.trim() || "",
+          preferredLanguage: language,
         }),
       });
 
@@ -316,40 +323,34 @@ export function RegistrationForm() {
             {errors.childName && <p className="mt-1 text-xs text-red-300">{errors.childName}</p>}
           </div>
 
-          {/* Child Age */}
+          {/* Child Date of Birth */}
           <div className={language === 'ur' ? 'text-right' : 'text-left'}>
-            <FormLabel htmlFor="childAge" label={t.register.form.childAge} language={language} required />
-            <select
-              id="childAge"
-              required
-              dir="ltr"
-              value={form.childAge}
-              onChange={(e) => update("childAge", e.target.value)}
-              className={`${selectClass} ${language === "ur" ? "text-right" : "text-left"}`}
-            >
-              <option value="" className="text-[#0d3b2e] bg-cream">
-                Select age
-              </option>
-              {CHILD_AGE_OPTIONS.map((age) => (
-                <option key={age} value={age} className="text-[#0d3b2e] bg-cream">
-                  {age}
-                </option>
-              ))}
-            </select>
-            {errors.childAge && <p className="mt-1 text-xs text-red-300">{errors.childAge}</p>}
+            <FormLabel htmlFor="childDob" label="Date of Birth" language={language} required />
+            <div className="relative">
+              <input
+                id="childDob"
+                type="date"
+                required
+                dir="ltr"
+                value={form.childDob || ""}
+                onChange={(e) => update("childDob", e.target.value)}
+                className={`${selectClass} appearance-none pr-4 [color-scheme:dark] ${language === "ur" ? "text-right" : "text-left"}`}
+              />
+            </div>
+            {errors.childDob && <p className="mt-1 text-xs text-red-300">{errors.childDob}</p>}
           </div>
 
           {/* Programme Level */}
           <div className={language === 'ur' ? 'text-right' : 'text-left'}>
             <FormLabel htmlFor="level" label={t.register.form.interestedLevel} language={language} required />
-            <select
-              id="level"
-              required
-              dir={language === "ur" ? "rtl" : "ltr"}
-              value={form.level}
-              onChange={(e) => update("level", e.target.value)}
-              className={`${selectClass} ${language === "ur" ? "text-right font-urdu" : "text-left"}`}
-            >
+              <select
+                id="level"
+                required
+                dir={language === "ur" ? "rtl" : "ltr"}
+                value={form.level}
+                onChange={(e) => handleLevelChange(e.target.value)}
+                className={`${selectClass} ${language === "ur" ? "text-right font-urdu" : "text-left"}`}
+              >
               <option value="" className="text-[#0d3b2e] bg-cream">{t.register.form.placeholders.level}</option>
               {PROGRAMME_LEVELS.map((level) => {
                 const levelKey = {

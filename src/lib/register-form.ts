@@ -9,6 +9,7 @@ export type RegistrationFormData = {
   email: string;
   childName: string;
   childAge: string;
+  childDob?: string;
   level: string;
   cityCountry: string;
   message: string;
@@ -30,6 +31,7 @@ export const PROGRAMME_LEVELS = [
 ] as const;
 
 export const CHILD_AGE_OPTIONS = ["2", "3", "4", "5", "6", "7", "7+"] as const;
+const CHILD_DOB_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 
 function getCitiesForCountry(country: string): readonly string[] | null {
   const record = COUNTRY_CITY_OPTIONS as Record<string, readonly string[]>;
@@ -63,10 +65,10 @@ export function validateRegistrationForm(data: RegistrationFormData): Registrati
     errors.childName = "Please enter a valid child name.";
   }
 
-  if (!data.childAge.trim()) {
-    errors.childAge = "Child's age is required.";
-  } else if (!CHILD_AGE_OPTIONS.includes(data.childAge.trim() as (typeof CHILD_AGE_OPTIONS)[number])) {
-    errors.childAge = "Please select a valid child age.";
+  if (!data.childDob?.trim()) {
+    errors.childDob = "Child's date of birth is required.";
+  } else if (!CHILD_DOB_REGEX.test(data.childDob.trim())) {
+    errors.childDob = "Please select a valid date of birth.";
   }
 
   if (!data.level.trim()) errors.level = "Please select an interested programme level.";
@@ -96,6 +98,34 @@ function escapeHtml(value: string): string {
     .replace(/"/g, "&quot;");
 }
 
+function toPlainText(value: unknown): string {
+  if (value === null || value === undefined) return "";
+  if (typeof value === "string") return value;
+  if (value instanceof Date) return value.toISOString();
+  return String(value);
+}
+
+function formatDateOnly(value: unknown): string {
+  const text = toPlainText(value).trim();
+  if (!text) return "";
+
+  if (/^\d{4}-\d{2}-\d{2}$/.test(text)) {
+    return text;
+  }
+
+  const parsed = new Date(text);
+  if (Number.isNaN(parsed.getTime())) {
+    return text;
+  }
+
+  return new Intl.DateTimeFormat("en-CA", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    timeZone: "Asia/Karachi",
+  }).format(parsed);
+}
+
 export function formatRegistrationEmailText(
   data: RegistrationFormData,
   submittedAt: string
@@ -118,8 +148,8 @@ export function formatRegistrationEmailText(
     "Child Name:",
     data.childName.trim(),
     "",
-    "Child Age:",
-    data.childAge.trim(),
+    "Child Age / DOB:",
+    data.childDob?.trim() || "(Not provided)",
     "",
     "Interested Level:",
     data.level.trim(),
@@ -157,7 +187,7 @@ export function formatRegistrationEmailHtml(
         ${row("WhatsApp Number", data.whatsapp.trim())}
         ${row("Email Address", data.email.trim())}
         ${row("Child Name", data.childName.trim())}
-        ${row("Child Age", data.childAge.trim())}
+        ${row("Child Date of Birth", data.childDob?.trim() || "(Not provided)")}
         ${row("Interested Level", data.level.trim())}
         ${row("City / Country", data.cityCountry.trim())}
         ${row("Message", data.message.trim() || "(Not provided)")}
@@ -176,6 +206,9 @@ export function formatRegistrationConfirmationText(
   submittedAt: string,
   interviewUrl?: string
 ): string {
+  const childDob = formatDateOnly(data.childDob);
+  const cityCountry = toPlainText(data.cityCountry).trim();
+
   const lines = [
     "Registration Confirmed - Ash-Shajrah Learning Hub",
     "=".repeat(50),
@@ -190,9 +223,10 @@ export function formatRegistrationConfirmationText(
     "",
     "Summary:",
     `Child Name: ${data.childName.trim()}`,
-    `Child Age: ${data.childAge.trim()}`,
+    `Child Date of Birth: ${childDob || "(Not provided)"}`,
     `Interested Level: ${data.level.trim()}`,
-    `City / Country: ${data.cityCountry.trim()}`,
+    `Country: ${cityCountry ? cityCountry.split(",").pop()?.trim() || cityCountry : ""}`,
+    `City: ${cityCountry.includes(",") ? cityCountry.split(",")[0].trim() : ""}`,
   ];
 
   if (interviewUrl) {
@@ -225,6 +259,12 @@ export function formatRegistrationConfirmationHtml(
   submittedAt: string,
   interviewUrl?: string
 ): string {
+  const childDob = formatDateOnly(data.childDob);
+  const cityCountry = toPlainText(data.cityCountry).trim();
+  const [city, country] = cityCountry.includes(",")
+    ? cityCountry.split(",").map((part) => part.trim())
+    : ["", cityCountry];
+
   const interviewSection = interviewUrl
     ? `
       <div style="background:#faf7f0;border:1px solid #e8e4dc;border-radius:12px;padding:20px 18px;margin:24px 0;">
@@ -273,6 +313,12 @@ export function formatRegistrationConfirmationHtml(
         <p style="margin:0;color:#0d3b2e;font-size:14px;">${escapeHtml(data.childName.trim())}</p>
         <p style="margin:16px 0 8px;color:#5c4a32;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;">Programme</p>
         <p style="margin:0;color:#0d3b2e;font-size:14px;">${escapeHtml(data.level.trim())}</p>
+        <p style="margin:16px 0 8px;color:#5c4a32;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;">Child Date of Birth</p>
+        <p style="margin:0;color:#0d3b2e;font-size:14px;">${escapeHtml(childDob || "(Not provided)")}</p>
+        <p style="margin:16px 0 8px;color:#5c4a32;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;">Country</p>
+        <p style="margin:0;color:#0d3b2e;font-size:14px;">${escapeHtml(country || "(Not provided)")}</p>
+        <p style="margin:16px 0 8px;color:#5c4a32;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;">City</p>
+        <p style="margin:0;color:#0d3b2e;font-size:14px;">${escapeHtml(city || "(Not provided)")}</p>
       </div>
       ${interviewSection}
       <p style="margin:0;color:#0d3b2e;font-size:15px;line-height:1.7;">
@@ -289,6 +335,12 @@ export function formatRegistrationCoordinatorText(
   data: RegistrationFormData,
   submittedAt: string
 ): string {
+  const childDob = formatDateOnly(data.childDob);
+  const cityCountry = toPlainText(data.cityCountry).trim();
+  const [city, country] = cityCountry.includes(",")
+    ? cityCountry.split(",").map((part) => part.trim())
+    : ["", cityCountry];
+
   return [
     "New Student Registration - Ash-Shajrah Learning Hub",
     "=".repeat(50),
@@ -299,9 +351,10 @@ export function formatRegistrationCoordinatorText(
     `WhatsApp Number: ${data.whatsapp.trim()}`,
     `Email Address: ${data.email.trim()}`,
     `Child Name: ${data.childName.trim()}`,
-    `Child Age: ${data.childAge.trim()}`,
+    `Child Date of Birth: ${childDob || "(Not provided)"}`,
     `Interested Level: ${data.level.trim()}`,
-    `City / Country: ${data.cityCountry.trim()}`,
+    `Country: ${country || "(Not provided)"}`,
+    `City: ${city || "(Not provided)"}`,
     `Message: ${data.message.trim() || "(Not provided)"}`,
   ].join("\n");
 }
@@ -310,6 +363,11 @@ export function formatRegistrationCoordinatorHtml(
   data: RegistrationFormData,
   submittedAt: string
 ): string {
+  const childDob = formatDateOnly(data.childDob);
+  const cityCountry = toPlainText(data.cityCountry).trim();
+  const [city, country] = cityCountry.includes(",")
+    ? cityCountry.split(",").map((part) => part.trim())
+    : ["", cityCountry];
   const row = (label: string, value: string) =>
     `<tr><td style="padding:10px 12px;border-bottom:1px solid #e8e4dc;color:#5c4a32;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;width:36%;vertical-align:top;">${label}</td><td style="padding:10px 12px;border-bottom:1px solid #e8e4dc;color:#0d3b2e;font-size:15px;">${escapeHtml(value)}</td></tr>`;
 
@@ -328,9 +386,10 @@ export function formatRegistrationCoordinatorHtml(
         ${row("WhatsApp Number", data.whatsapp.trim())}
         ${row("Email Address", data.email.trim())}
         ${row("Child Name", data.childName.trim())}
-        ${row("Child Age", data.childAge.trim())}
+        ${row("Child Date of Birth", childDob || "(Not provided)")}
         ${row("Interested Level", data.level.trim())}
-        ${row("City / Country", data.cityCountry.trim())}
+        ${row("Country", country || "(Not provided)")}
+        ${row("City", city || "(Not provided)")}
         ${row("Message", data.message.trim() || "(Not provided)")}
       </table>
     </div>

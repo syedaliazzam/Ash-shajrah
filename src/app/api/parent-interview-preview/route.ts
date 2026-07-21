@@ -21,6 +21,22 @@ import {
 
 export const runtime = "nodejs";
 
+function normalizeRegistrationId(value: string) {
+  const trimmed = value.trim();
+  if (!trimmed) return "";
+
+  const upper = trimmed.toUpperCase();
+  if (upper.startsWith("ALHA-")) {
+    return `ALHA-${upper.slice(5).trim().padStart(4, "0")}`;
+  }
+
+  if (/^\d+$/.test(trimmed)) {
+    return `ALHA-${trimmed.padStart(4, "0")}`;
+  }
+
+  return trimmed;
+}
+
 function getSmtpConfig() {
   const host = process.env.SMTP_HOST;
   const port = process.env.SMTP_PORT;
@@ -53,9 +69,16 @@ function getCoordinatorEmail() {
 
 export async function POST(request: NextRequest) {
   try {
-    const body = (await request.json()) as { email?: string; registrationId?: string };
+    const body = (await request.json()) as {
+      email?: string;
+      registrationId?: string;
+      registrationNumber?: string;
+      registrationCode?: string;
+    };
     const email = body.email?.trim().toLowerCase() || "";
-    const registrationId = body.registrationId?.trim() || "";
+    const registrationId = normalizeRegistrationId(
+      body.registrationId || body.registrationNumber || body.registrationCode || ""
+    );
 
     if (!email && !registrationId) {
       return NextResponse.json(
@@ -69,7 +92,11 @@ export async function POST(request: NextRequest) {
       : await getLatestInterestedStudentByEmail(email);
     if (!registration) {
       return NextResponse.json(
-        { error: "No registered user was found for the selected row." },
+        {
+          error: registrationId
+            ? `No registered user was found for registration number ${registrationId}.`
+            : "No registered user was found for the entered email.",
+        },
         { status: 404 }
       );
     }
@@ -77,7 +104,7 @@ export async function POST(request: NextRequest) {
     const rawToken = createParentInterviewRawToken();
     const tokenHash = hashParentInterviewToken(rawToken);
 
-    await createParentInterviewForm({
+    const interviewRecord = await createParentInterviewForm({
       registrationId: registration.id,
       tokenHash,
       parentName: registration.parentName,
@@ -87,10 +114,20 @@ export async function POST(request: NextRequest) {
       interestedProgramme: registration.level,
     });
 
-    await rotateParentInterviewToken({
+    const rotated = await rotateParentInterviewToken({
       registrationId: registration.id,
       tokenHash,
     });
+
+    if (!rotated) {
+      console.warn(
+        "Parent interview token was not rotated, likely because the form is not in pending state.",
+        {
+          registrationId: registration.id,
+          existingRecordId: interviewRecord.id,
+        }
+      );
+    }
 
     const interviewUrl = buildParentInterviewUrl(rawToken);
     const submittedAt = new Date().toLocaleString("en-PK", {
@@ -104,9 +141,13 @@ export async function POST(request: NextRequest) {
       whatsapp: registration.phone,
       email: registration.email,
       childName: registration.childName,
-      childAge: registration.childAge,
+      childAge: registration.childDob,
+      childDob: registration.childDob,
       level: registration.level,
-      cityCountry: registration.cityCountry,
+      cityCountry:
+        registration.city && registration.country
+          ? `${registration.city}, ${registration.country}`
+          : registration.city || registration.country || "",
       message: registration.message,
       website: "",
     };
@@ -130,15 +171,21 @@ export async function POST(request: NextRequest) {
       const fromEmail = process.env.SMTP_FROM || smtpConfig.auth.user;
       const transporter = nodemailer.createTransport(smtpConfig);
 
-      await transporter.sendMail({
-        from: `"Ash-Shajrah Learning Hub" <${fromEmail}>`,
-        to: registration.email.trim(),
-        replyTo: getCoordinatorEmail(),
-        subject: "Registration Confirmed - Ash-Shajrah Learning Hub",
-        text: emailText,
-        html: emailHtml,
-      });
-      emailSent = true;
+      try {
+        await transporter.sendMail({
+          from: `"Ash-Shajrah Learning Hub" <${fromEmail}>`,
+          to: registration.email.trim(),
+          replyTo: getCoordinatorEmail(),
+          subject: "Registration Confirmed - Ash-Shajrah Learning Hub",
+          text: emailText,
+          html: emailHtml,
+        });
+        emailSent = true;
+      } catch (sendError) {
+        console.error("Parent interview preview email send failed:", sendError);
+        sendWarning =
+          "The preview was generated, but the email could not be sent.";
+      }
     } else {
       sendWarning =
         "SMTP is not configured, so the email was not sent. The preview was still generated.";
@@ -159,14 +206,21 @@ export async function POST(request: NextRequest) {
         parentName: registration.parentName,
         email: registration.email,
         childName: registration.childName,
-        childAge: registration.childAge,
+        childDob: registration.childDob,
         level: registration.level,
+        city: registration.city,
+        country: registration.country,
       },
     });
   } catch (error) {
     console.error("Parent interview preview API error:", error);
     return NextResponse.json(
-      { error: "Something went wrong while generating the preview." },
+      {
+        error:
+          error instanceof Error
+            ? `Something went wrong while generating the preview: ${error.message}`
+            : "Something went wrong while generating the preview.",
+      },
       { status: 500 }
     );
   }

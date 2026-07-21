@@ -6,9 +6,11 @@ import {
 import {
   hashParentInterviewToken,
   validateParentInterviewResponses,
+  type ParentInterviewResponsePayload,
 } from "@/lib/parents-interview/validation";
 import { getLmsParentsInterviewAdminUrl } from "@/lib/lms-url";
 import nodemailer from "nodemailer";
+import { markInterestedStudentInterviewSubmitted } from "@/lib/postgres";
 
 export const runtime = "nodejs";
 
@@ -103,6 +105,128 @@ function buildParentInterviewParentConfirmationHtml(input: {
   `;
 }
 
+function escapePdfText(value: string): string {
+  return value.replace(/\\/g, "\\\\").replace(/\(/g, "\\(").replace(/\)/g, "\\)");
+}
+
+function wrapPdfLines(lines: string[], maxChars = 92): string[] {
+  const wrapped: string[] = [];
+  for (const line of lines) {
+    if (!line) {
+      wrapped.push("");
+      continue;
+    }
+    let remaining = line;
+    while (remaining.length > maxChars) {
+      let breakIndex = remaining.lastIndexOf(" ", maxChars);
+      if (breakIndex < 20) breakIndex = maxChars;
+      wrapped.push(remaining.slice(0, breakIndex).trim());
+      remaining = remaining.slice(breakIndex).trimStart();
+    }
+    wrapped.push(remaining);
+  }
+  return wrapped;
+}
+
+function buildInterviewSummaryLines(input: {
+  parentName: string;
+  parentEmail: string;
+  childName: string | null;
+  childAge: string | null;
+  interestedProgramme: string | null;
+  submittedAt: string;
+  responses: ParentInterviewResponsePayload;
+}): string[] {
+  const lines: string[] = [
+    "Parents Interview Form Submitted",
+    "",
+    `Submitted At: ${input.submittedAt}`,
+    `Parent Name: ${input.parentName}`,
+    `Parent Email: ${input.parentEmail}`,
+    `Child Name: ${input.childName || "-"}`,
+    `Child Age / DOB: ${input.childAge || "-"}`,
+    `Interested Programme: ${input.interestedProgramme || "-"}`,
+    "",
+    "Responses:",
+  ];
+
+  for (const [questionId, answer] of Object.entries(input.responses.answers)) {
+    const question = input.responses.questions[questionId];
+    const label = question ? `${question.number}. ${question.label}` : questionId;
+    lines.push(`- ${label}`);
+
+    if (typeof answer === "string") {
+      lines.push(`  Answer: ${answer}`);
+      continue;
+    }
+
+    for (const [key, value] of Object.entries(answer)) {
+      lines.push(`  ${key}: ${typeof value === "boolean" ? String(value) : value || "-"}`);
+    }
+  }
+
+  return lines;
+}
+
+function buildPdfBuffer(lines: string[]): Buffer {
+  const wrapped = wrapPdfLines(lines);
+  const pages: string[][] = [];
+  const linesPerPage = 34;
+  for (let i = 0; i < wrapped.length; i += linesPerPage) {
+    pages.push(wrapped.slice(i, i + linesPerPage));
+  }
+
+  const fontObjNum = 3 + pages.length * 2;
+  const contentObjNums = pages.map((_, i) => 4 + i * 2);
+  const pageObjNums = pages.map((_, i) => 3 + i * 2);
+
+  const contentStreams = pages.map((pageLines) => {
+    const commands: string[] = [
+      "BT",
+      "/F1 12 Tf",
+      "14 TL",
+      "50 760 Td",
+    ];
+    pageLines.forEach((line, index) => {
+      if (index > 0) commands.push("T*");
+      commands.push(`(${escapePdfText(line)}) Tj`);
+    });
+    commands.push("ET");
+    return commands.join("\n");
+  });
+
+  const objects: Record<number, string> = {
+    1: "<< /Type /Catalog /Pages 2 0 R >>",
+    2: `<< /Type /Pages /Kids [${pageObjNums.map((n) => `${n} 0 R`).join(" ")}] /Count ${pages.length} >>`,
+    [fontObjNum]: "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
+  };
+
+  pages.forEach((pageLines, index) => {
+    const pageObjNum = pageObjNums[index];
+    const contentObjNum = contentObjNums[index];
+    objects[pageObjNum] =
+      `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 ${fontObjNum} 0 R >> >> /Contents ${contentObjNum} 0 R >>`;
+    objects[contentObjNum] =
+      `<< /Length ${contentStreams[index].length} >>\nstream\n${contentStreams[index]}\nendstream`;
+  });
+
+  let pdf = "%PDF-1.4\n";
+  const offsets: number[] = [0];
+  const objectCount = fontObjNum;
+  for (let i = 1; i <= objectCount; i++) {
+    offsets.push(pdf.length);
+    pdf += `${i} 0 obj\n${objects[i]}\nendobj\n`;
+  }
+  const xrefStart = pdf.length;
+  pdf += `xref\n0 ${objectCount + 1}\n`;
+  pdf += "0000000000 65535 f \n";
+  for (let i = 1; i < offsets.length; i++) {
+    pdf += `${String(offsets[i]).padStart(10, "0")} 00000 n \n`;
+  }
+  pdf += `trailer\n<< /Size ${objectCount + 1} /Root 1 0 R >>\nstartxref\n${xrefStart}\n%%EOF`;
+  return Buffer.from(pdf, "utf8");
+}
+
 export async function GET(_request: NextRequest, context: RouteContext) {
   try {
     const { token } = await context.params;
@@ -189,6 +313,10 @@ export async function POST(request: NextRequest, context: RouteContext) {
       );
     }
 
+    await markInterestedStudentInterviewSubmitted({
+      registrationId: submitted.registrationId,
+    });
+
     const smtpConfig = getSmtpConfig();
     if (smtpConfig) {
       const adminUrl = getLmsParentsInterviewAdminUrl();
@@ -203,6 +331,17 @@ export async function POST(request: NextRequest, context: RouteContext) {
 
       try {
         const transporter = nodemailer.createTransport(smtpConfig);
+        const parentPdf = buildPdfBuffer(
+          buildInterviewSummaryLines({
+            parentName: submitted.parentName,
+            parentEmail: submitted.parentEmail,
+            childName: submitted.childName,
+            childAge: submitted.childAge,
+            interestedProgramme: submitted.interestedProgramme,
+            submittedAt,
+            responses: validated.payload,
+          })
+        );
         await transporter.sendMail({
           from: `"Ash-Shajrah Learning Hub" <${fromEmail}>`,
           to: getAdmissionsEmail(),
@@ -215,7 +354,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
             `Parent Name: ${submitted.parentName}`,
             `Parent Email: ${submitted.parentEmail}`,
             `Child Name: ${submitted.childName || "—"}`,
-            `Child Age: ${submitted.childAge || "—"}`,
+            `Child Date of Birth: ${submitted.childAge || "—"}`,
             `Interested Programme: ${submitted.interestedProgramme || "—"}`,
             `Submitted At: ${submittedAt}`,
             "",
@@ -230,7 +369,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
                 <li><strong>Parent Name:</strong> ${escapeHtml(submitted.parentName)}</li>
                 <li><strong>Parent Email:</strong> ${escapeHtml(submitted.parentEmail)}</li>
                 <li><strong>Child Name:</strong> ${escapeHtml(submitted.childName || "—")}</li>
-                <li><strong>Child Age:</strong> ${escapeHtml(submitted.childAge || "—")}</li>
+                <li><strong>Child Date of Birth:</strong> ${escapeHtml(submitted.childAge || "—")}</li>
                 <li><strong>Interested Programme:</strong> ${escapeHtml(submitted.interestedProgramme || "—")}</li>
                 <li><strong>Submitted At:</strong> ${escapeHtml(submittedAt)}</li>
               </ul>
@@ -261,6 +400,13 @@ export async function POST(request: NextRequest, context: RouteContext) {
             interestedProgramme: submitted.interestedProgramme,
             submittedAt,
           }),
+          attachments: [
+            {
+              filename: "parents-interview-form.pdf",
+              content: parentPdf,
+              contentType: "application/pdf",
+            },
+          ],
         });
       } catch (emailError) {
         console.error("Parents interview email send failed:", emailError);

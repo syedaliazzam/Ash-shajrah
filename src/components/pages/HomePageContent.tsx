@@ -18,6 +18,7 @@ import { LeadershipSection } from "@/components/sections/LeadershipSection";
 import { OurWorksSection } from "@/components/sections/OurWorksSection";
 import { OurEventsSection } from "@/components/sections/OurEventsSection";
 import { VisionSection } from "@/components/sections/VisionSection";
+import { NeedBasedScholarshipSection } from "@/components/sections/NeedBasedScholarshipSection";
 import { LogoPhilosophySection } from "@/components/sections/LogoPhilosophySection";
 
 export function HomePageContent() {
@@ -45,6 +46,7 @@ export function HomePageContent() {
         <OurWorksSection />
         <OurEventsSection />
         <VisionSection />
+        <NeedBasedScholarshipSection />
         <LogoPhilosophySection />
       </main>
       <Footer />

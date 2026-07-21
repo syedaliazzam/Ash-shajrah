@@ -379,7 +379,7 @@ export const translations = {
         whatsapp: "WhatsApp Number",
         email: "Email Address",
         childName: "Child Name",
-        childAge: "Child Age",
+        childAge: "Child Date of Birth",
         interestedLevel: "Interested Level",
         levels: {
           playgroup: "Play Group",
