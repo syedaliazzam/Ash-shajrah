@@ -155,7 +155,6 @@ export async function POST(request: NextRequest) {
       parentEmail: formData.email.trim().toLowerCase(),
       childName: formData.childName.trim(),
       childAge: formData.childAge.trim(),
-      childDob: (formData as { childDob?: string }).childDob?.trim() || null,
       interestedProgramme: formData.level.trim(),
     });
 
