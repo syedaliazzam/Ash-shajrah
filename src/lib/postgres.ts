@@ -465,7 +465,7 @@ export async function listPendingParentInterviewCandidates(): Promise<
     parentName: row.parent_name ?? "",
     email: row.email ?? "",
     childName: row.child_name ?? "",
-    childAge: row.child_age ?? "",
+    childAge: row.child_dob ?? "",
     level: row.class_level ?? "",
     city: row.city ?? "",
     country: row.country ?? "",
