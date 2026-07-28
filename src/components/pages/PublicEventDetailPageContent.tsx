@@ -21,23 +21,23 @@ export function PublicEventDetailPageContent({ event }: { event: PublicEvent }) 
   const joinDisabled = isPast || deadlinePassed;
 
   const uiText = {
-    backToEvents: isUrdu ? "ØªÙ…Ø§Ù… Ø§ÛŒÙˆÙ†Ù¹Ø³" : "All Events",
-    joinEvent: isUrdu ? "Ø§ÛŒÙˆÙ†Ù¹ Ø¬ÙˆØ§Ø¦Ù† Ú©Ø±ÛŒÚº" : "Join Event",
-    closed: isUrdu ? "Ø±Ø¬Ø³Ù¹Ø±ÛŒØ´Ù† Ø¨Ù†Ø¯ ÛÛ’" : "Registration Closed",
-    current: isUrdu ? "Ù…ÙˆØ¬ÙˆØ¯Û" : "Current",
-    upcoming: isUrdu ? "Ø¢Ù†Û’ ÙˆØ§Ù„Ø§" : "Upcoming",
-    past: isUrdu ? "Ú¯Ø²Ø´ØªÛ" : "Past",
-    start: isUrdu ? "Ø¢ØºØ§Ø²" : "Start",
-    end: isUrdu ? "Ø§Ø®ØªØªØ§Ù…" : "End",
-    startDate: isUrdu ? "Ø¢ØºØ§Ø² Ú©ÛŒ ØªØ§Ø±ÛŒØ®" : "Start Date",
-    startTime: isUrdu ? "Ø¢ØºØ§Ø² Ú©Ø§ ÙˆÙ‚Øª" : "Start Time",
-    endDate: isUrdu ? "Ø§Ø®ØªØªØ§Ù… Ú©ÛŒ ØªØ§Ø±ÛŒØ®" : "End Date",
-    endTime: isUrdu ? "Ø§Ø®ØªØªØ§Ù… Ú©Ø§ ÙˆÙ‚Øª" : "End Time",
-    fee: isUrdu ? "ÙÛŒØ³" : "Fee",
-    deadlineDate: isUrdu ? "Ø±Ø¬Ø³Ù¹Ø±ÛŒØ´Ù† Ø¢Ø®Ø±ÛŒ ØªØ§Ø±ÛŒØ®" : "Registration Deadline Date",
-    deadlineTime: isUrdu ? "Ø±Ø¬Ø³Ù¹Ø±ÛŒØ´Ù† Ø¢Ø®Ø±ÛŒ ÙˆÙ‚Øª" : "Registration Deadline Time",
-    fullDetails: isUrdu ? "ØªÙØµÛŒÙ„" : "Description",
-    descriptionFallback: isUrdu ? "Ù…Ø²ÛŒØ¯ ØªÙØµÛŒÙ„Ø§Øª Ø¬Ù„Ø¯ Ø´ÛŒØ¦Ø± Ú©ÛŒ Ø¬Ø§Ø¦ÛŒÚº Ú¯ÛŒÛ”" : "More details will be shared soon.",
+    backToEvents: isUrdu ? "تمام ایونٹس" : "All Events",
+    joinEvent: isUrdu ? "ایونٹ جوائن کریں" : "Join Event",
+    closed: isUrdu ? "رجسٹریشن بند ہے" : "Registration Closed",
+    current: isUrdu ? "موجودہ" : "Current",
+    upcoming: isUrdu ? "آنے والا" : "Upcoming",
+    past: isUrdu ? "گزشتہ" : "Past",
+    startDate: isUrdu ? "آغاز کی تاریخ" : "Start Date",
+    startTime: isUrdu ? "آغاز کا وقت" : "Start Time",
+    endDate: isUrdu ? "اختتام کی تاریخ" : "End Date",
+    endTime: isUrdu ? "اختتام کا وقت" : "End Time",
+    fee: isUrdu ? "فیس" : "Fee",
+    deadlineDate: isUrdu ? "رجسٹریشن آخری تاریخ" : "Registration Deadline Date",
+    deadlineTime: isUrdu ? "رجسٹریشن آخری وقت" : "Registration Deadline Time",
+    description: isUrdu ? "تفصیل" : "Description",
+    descriptionFallback: isUrdu
+      ? "مزید تفصیلات جلد شیئر کی جائیں گی۔"
+      : "More details will be shared soon.",
   };
 
   const badgeLabel =
@@ -97,7 +97,7 @@ export function PublicEventDetailPageContent({ event }: { event: PublicEvent }) 
 
                 <div className="mt-6 min-w-0 rounded-[28px] border border-emerald/10 bg-white/80 p-5">
                   <h2 className="font-display text-2xl font-bold tracking-tight text-emerald-deep">
-                    {uiText.fullDetails}
+                    {uiText.description}
                   </h2>
                   <div className="mt-3 whitespace-pre-line break-words [overflow-wrap:anywhere] text-sm leading-8 text-emerald-deep/80 sm:text-base">
                     {event.description || uiText.descriptionFallback}
@@ -130,4 +130,3 @@ export function PublicEventDetailPageContent({ event }: { event: PublicEvent }) 
     </>
   );
 }
-
