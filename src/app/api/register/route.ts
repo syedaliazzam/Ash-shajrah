@@ -114,12 +114,15 @@ export async function POST(request: NextRequest) {
     });
 
     if (duplicateExists) {
+      const duplicateMessage =
+        formData.preferredLanguage === "ur"
+          ? "یہ بچہ اس والدین کے ای میل کے ساتھ پہلے سے رجسٹرڈ ہے۔"
+          : "This child is already registered with this parent email.";
       return NextResponse.json(
         {
-          error: "This child is already registered with this parent email.",
+          error: duplicateMessage,
           errors: {
-            childName:
-              "This child is already registered with this parent email.",
+            childName: duplicateMessage,
           },
         },
         { status: 409 }

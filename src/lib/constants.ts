@@ -1,6 +1,7 @@
 import { SITE } from "./data";
 
 export const REGISTER_URL = "/register";
+export const EVENTS_URL = "/events";
 export const CAREERS_URL = "/careers";
 
 export const WHATSAPP_URL = resolveAshShajrahWhatsAppUrl(

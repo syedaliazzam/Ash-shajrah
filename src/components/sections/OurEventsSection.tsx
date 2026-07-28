@@ -1,12 +1,61 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useGSAP } from "@/lib/gsap";
 import { scrollReveal } from "@/lib/animations";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { EVENT_ITEMS } from "@/data/events";
+import { EVENT_ITEMS, type EventItem } from "@/data/events";
 import { EventsGlobeCarousel } from "@/components/sections/EventsGlobeCarousel";
 import { FacebookIcon } from "@/components/ui/FacebookIcon";
+import { normalizePublicEventsResponse, type PublicEvent } from "@/lib/public-events";
+
+function formatPastEventDate(value: string) {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+
+  return new Intl.DateTimeFormat("en-PK", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    timeZone: "Asia/Karachi",
+  }).format(date);
+}
+
+function mapPublicEventToEventItem(event: PublicEvent): EventItem {
+  const fallbackDescription = event.description || "Public event details are available on the events page.";
+  return {
+    id: `public-event-${event.id}`,
+    facebookUrl: "/events",
+    buttonHref: `/events/${event.slug}`,
+    buttonExternal: false,
+    showFacebookIcon: false,
+    buttonLabel: {
+      en: "View Details",
+      ur: "ویو ڈیٹیلز",
+    },
+    showButton: true,
+    thumbnail: event.imageUrl || "/images/events/facebook-event-fallback.jpg",
+    fit: "cover",
+    date: formatPastEventDate(event.startAt),
+    category: {
+      en: "Past Public Event",
+      ur: "گزشتہ عوامی ایونٹ",
+    },
+    title: {
+      en: event.title || "Past Public Event",
+      ur: event.title || "گزشتہ عوامی ایونٹ",
+    },
+    description: {
+      en: fallbackDescription,
+      ur: fallbackDescription,
+    },
+    alt: {
+      en: event.title || "Past public event thumbnail",
+      ur: event.title || "گزشتہ عوامی ایونٹ تھمب نیل",
+    },
+  };
+}
 
 function EventsEmptyState({ message, isUrdu }: { message: string; isUrdu: boolean }) {
   return (
@@ -27,7 +76,44 @@ export function OurEventsSection() {
   const { t, language } = useLanguage();
   const sectionRef = useRef<HTMLElement>(null);
   const isUrdu = language === "ur";
-  const hasEvents = EVENT_ITEMS.length > 0;
+  const [publicPastEvents, setPublicPastEvents] = useState<EventItem[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadPastPublicEvents = async () => {
+      try {
+        const response = await fetch("/api/public-events", {
+          method: "GET",
+          cache: "no-store",
+        });
+        if (!response.ok) return;
+
+        const payload = await response.json().catch(() => ({}));
+        const normalized = normalizePublicEventsResponse(payload);
+        if (cancelled) return;
+
+        setPublicPastEvents(normalized.past.map(mapPublicEventToEventItem));
+      } catch {
+        if (!cancelled) {
+          setPublicPastEvents([]);
+        }
+      }
+    };
+
+    void loadPastPublicEvents();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const allEvents = useMemo(() => {
+    const dynamicIds = new Set(publicPastEvents.map((event) => event.id));
+    return [...EVENT_ITEMS.filter((event) => !dynamicIds.has(event.id)), ...publicPastEvents];
+  }, [publicPastEvents]);
+
+  const hasEvents = allEvents.length > 0;
 
   useGSAP(
     () => {
@@ -89,7 +175,7 @@ export function OurEventsSection() {
         ) : (
           <div data-events-globe>
             <EventsGlobeCarousel
-              events={EVENT_ITEMS}
+              events={allEvents}
               language={language}
               buttonLabel={t.events.button}
               fallbackBadge={t.events.fallbackBadge}

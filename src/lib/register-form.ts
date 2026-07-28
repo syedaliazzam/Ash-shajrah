@@ -40,51 +40,97 @@ function getCitiesForCountry(country: string): readonly string[] | null {
 
 export function validateRegistrationForm(data: RegistrationFormData): RegistrationFormErrors {
   const errors: RegistrationFormErrors = {};
+  const isUrdu = data.preferredLanguage === "ur";
+
+  const messages = {
+    parentRequired: isUrdu
+      ? "والد / سرپرست کا نام ضروری ہے۔"
+      : "Parent / Guardian name is required.",
+    parentInvalid: isUrdu
+      ? "براہ کرم والد / سرپرست کا درست نام درج کریں۔"
+      : "Please enter a valid parent / guardian name.",
+    whatsappRequired: isUrdu
+      ? "واٹس ایپ نمبر ضروری ہے۔"
+      : "WhatsApp number is required.",
+    whatsappInvalid: isUrdu
+      ? "براہ کرم کنٹری کوڈ منتخب کریں اور درست واٹس ایپ نمبر درج کریں۔"
+      : "Select a country code and enter a valid WhatsApp number.",
+    emailRequired: isUrdu
+      ? "ای میل ایڈریس ضروری ہے۔"
+      : "Email address is required.",
+    emailInvalid: isUrdu
+      ? "براہ کرم @gmail.com پر ختم ہونے والا درست جی میل ایڈریس درج کریں۔"
+      : "Please enter a valid Gmail address ending in @gmail.com.",
+    childRequired: isUrdu
+      ? "بچے کا نام ضروری ہے۔"
+      : "Child's name is required.",
+    childInvalid: isUrdu
+      ? "براہ کرم بچے کا درست نام درج کریں۔"
+      : "Please enter a valid child name.",
+    dobRequired: isUrdu
+      ? "بچے کی تاریخ پیدائش ضروری ہے۔"
+      : "Child's date of birth is required.",
+    dobInvalid: isUrdu
+      ? "براہ کرم درست تاریخ پیدائش منتخب کریں۔"
+      : "Please select a valid date of birth.",
+    levelRequired: isUrdu
+      ? "براہ کرم مطلوبہ پروگرام کی سطح منتخب کریں۔"
+      : "Please select an interested programme level.",
+    cityRequired: isUrdu
+      ? "شہر / ملک ضروری ہے۔"
+      : "City / Country is required.",
+    cityInvalid: isUrdu
+      ? "براہ کرم درست شہر / ملک منتخب کریں۔"
+      : "Please select a valid city / country.",
+    messageRequired: isUrdu
+      ? "پیغام ضروری ہے۔"
+      : "Message is required.",
+  };
 
   if (!data.parentName.trim()) {
-    errors.parentName = "Parent / Guardian name is required.";
+    errors.parentName = messages.parentRequired;
   } else if (!NAME_REGEX.test(data.parentName.trim())) {
-    errors.parentName = "Please enter a valid parent / guardian name.";
+    errors.parentName = messages.parentInvalid;
   }
 
   if (!data.whatsapp.trim()) {
-    errors.whatsapp = "WhatsApp number is required.";
+    errors.whatsapp = messages.whatsappRequired;
   } else if (!WHATSAPP_REGEX.test(data.whatsapp.trim())) {
-    errors.whatsapp = "Select a country code and enter a valid WhatsApp number.";
+    errors.whatsapp = messages.whatsappInvalid;
   }
 
   if (!data.email.trim()) {
-    errors.email = "Email address is required.";
+    errors.email = messages.emailRequired;
   } else if (!GMAIL_REGEX.test(data.email.trim())) {
-    errors.email = "Please enter a valid Gmail address ending in @gmail.com.";
+    errors.email = messages.emailInvalid;
   }
 
   if (!data.childName.trim()) {
-    errors.childName = "Child's name is required.";
+    errors.childName = messages.childRequired;
   } else if (!NAME_REGEX.test(data.childName.trim())) {
-    errors.childName = "Please enter a valid child name.";
+    errors.childName = messages.childInvalid;
   }
 
   if (!data.childDob?.trim()) {
-    errors.childDob = "Child's date of birth is required.";
+    errors.childDob = messages.dobRequired;
   } else if (!CHILD_DOB_REGEX.test(data.childDob.trim())) {
-    errors.childDob = "Please select a valid date of birth.";
+    errors.childDob = messages.dobInvalid;
   }
 
-  if (!data.level.trim()) errors.level = "Please select an interested programme level.";
+  if (!data.level.trim()) errors.level = messages.levelRequired;
 
   if (!data.cityCountry.trim()) {
-    errors.cityCountry = "City / Country is required.";
+    errors.cityCountry = messages.cityRequired;
   } else {
     const [city, country] = data.cityCountry.split(",").map((part) => part.trim());
     const countryExists = country ? COUNTRY_LIST.includes(country as (typeof COUNTRY_LIST)[number]) : false;
     if (!city || !country || !countryExists) {
-      errors.cityCountry = "Please select a valid city / country.";
+      errors.cityCountry = messages.cityInvalid;
     }
   }
 
   if (!data.message.trim()) {
-    errors.message = "Message is required.";
+    errors.message = messages.messageRequired;
   }
 
   return errors;

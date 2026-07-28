@@ -1,6 +1,14 @@
 export type EventItem = {
   id: string;
   facebookUrl: string;
+  showButton?: boolean;
+  buttonHref?: string;
+  buttonLabel?: {
+    en: string;
+    ur: string;
+  };
+  buttonExternal?: boolean;
+  showFacebookIcon?: boolean;
   /** Local verified thumbnail under public/images/events — never use raw FB OG URLs */
   thumbnail: string;
   fit?: "cover" | "contain";

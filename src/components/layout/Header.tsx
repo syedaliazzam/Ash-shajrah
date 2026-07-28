@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { BrandLogo } from "@/components/ui/BrandLogo";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { REGISTER_URL, WHATSAPP_URL } from "@/lib/constants";
+import { EVENTS_URL, REGISTER_URL, WHATSAPP_URL } from "@/lib/constants";
 import { NAV_ITEMS } from "@/lib/nav";
 
 const navLinkClass =
@@ -50,12 +50,18 @@ export function Header() {
           ))}
         </nav>
 
-        <div className="hidden shrink-0 items-center xl:flex">
+        <div className="hidden shrink-0 items-center gap-3 xl:flex">
           <Link
             href={REGISTER_URL}
             className="inline-flex min-h-[44px] items-center rounded-full bg-emerald px-4 py-2 text-xs font-semibold text-cream shadow-md shadow-emerald/20 transition-all hover:bg-emerald-light hover:shadow-emerald/30 2xl:px-5 2xl:py-2.5 2xl:text-sm"
           >
             {t.nav.enroll}
+          </Link>
+          <Link
+            href={EVENTS_URL}
+            className="inline-flex min-h-[44px] items-center rounded-full border border-gold/40 bg-gold/10 px-4 py-2 text-xs font-semibold text-emerald-deep shadow-sm transition-all hover:bg-gold/20 2xl:px-5 2xl:py-2.5 2xl:text-sm"
+          >
+            {language === "ur" ? "تقریبات میں شامل ہوں" : "Join Events"}
           </Link>
         </div>
 
@@ -107,6 +113,13 @@ export function Header() {
               className={`flex min-h-[48px] items-center justify-center rounded-full bg-emerald px-5 py-3 text-center text-sm font-semibold text-cream ${language === "ur" ? "font-urdu" : ""}`}
             >
               {t.nav.enroll}
+            </Link>
+            <Link
+              href={EVENTS_URL}
+              onClick={() => setMenuOpen(false)}
+              className={`flex min-h-[48px] items-center justify-center rounded-full border border-gold/40 bg-gold/10 px-5 py-3 text-center text-sm font-semibold text-emerald-deep ${language === "ur" ? "font-urdu" : ""}`}
+            >
+              {language === "ur" ? "تقریبات میں شامل ہوں" : "Join Events"}
             </Link>
           </div>
         </nav>

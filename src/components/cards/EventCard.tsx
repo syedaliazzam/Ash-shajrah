@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import type { EventItem } from "@/data/events";
 import { EVENT_THUMBNAIL_FALLBACK } from "@/data/events";
@@ -30,6 +31,10 @@ export function EventCard({
   const isUrdu = language === "ur";
   const [imageFailed, setImageFailed] = useState(false);
   const thumbnail = item.thumbnail || EVENT_THUMBNAIL_FALLBACK;
+  const buttonHref = item.buttonHref || item.facebookUrl;
+  const buttonLabelText = item.buttonLabel?.[language] || buttonLabel;
+  const showFacebookIcon = item.showFacebookIcon !== false;
+  const isExternal = item.buttonExternal !== false && !item.buttonHref;
   const imageFitClass =
     item.fit === "contain"
       ? "object-contain p-3 transition duration-500 group-hover:scale-[1.03]"
@@ -79,17 +84,31 @@ export function EventCard({
         >
           {item.description[language]}
         </p>
-        <a
-          href={item.facebookUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className={`mt-5 inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-full border border-emerald/20 bg-emerald px-5 py-2.5 text-sm font-semibold text-cream transition-all duration-300 hover:border-gold/40 hover:bg-emerald-light sm:w-auto ${
-            isUrdu ? "sm:self-end font-urdu" : "sm:self-start"
-          }`}
-        >
-          <FacebookIcon className="h-4 w-4 shrink-0" />
-          {buttonLabel}
-        </a>
+        {item.showButton !== false ? (
+          isExternal ? (
+            <a
+              href={buttonHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`mt-5 inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-full border border-emerald/20 bg-emerald px-5 py-2.5 text-sm font-semibold text-cream transition-all duration-300 hover:border-gold/40 hover:bg-emerald-light sm:w-auto ${
+                isUrdu ? "sm:self-end font-urdu" : "sm:self-start"
+              }`}
+            >
+              {showFacebookIcon ? <FacebookIcon className="h-4 w-4 shrink-0" /> : null}
+              {buttonLabelText}
+            </a>
+          ) : (
+            <Link
+              href={buttonHref}
+              className={`mt-5 inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-full border border-emerald/20 bg-emerald px-5 py-2.5 text-sm font-semibold text-cream transition-all duration-300 hover:border-gold/40 hover:bg-emerald-light sm:w-auto ${
+                isUrdu ? "sm:self-end font-urdu" : "sm:self-start"
+              }`}
+            >
+              {showFacebookIcon ? <FacebookIcon className="h-4 w-4 shrink-0" /> : null}
+              {buttonLabelText}
+            </Link>
+          )
+        ) : null}
       </div>
     </article>
   );

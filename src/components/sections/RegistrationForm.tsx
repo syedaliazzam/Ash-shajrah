@@ -60,6 +60,7 @@ function FormLabel({
 
 export function RegistrationForm() {
   const { t, language } = useLanguage();
+  const isUrdu = language === "ur";
   const [form, setForm] = useState<RegistrationFormData>(INITIAL);
   const [phoneCountryCode, setPhoneCountryCode] = useState("+92");
   const [phoneLocalNumber, setPhoneLocalNumber] = useState("");
@@ -73,6 +74,33 @@ export function RegistrationForm() {
   const [submitError, setSubmitError] = useState("");
   const phoneLocalDigits = getPhoneLocalDigitsForCode(phoneCountryCode);
   const countryOptions = COUNTRY_LIST;
+  const uiText = {
+    dobLabel: isUrdu ? "تاریخ پیدائش" : "Date of Birth",
+    countryCityLabel: isUrdu ? "ملک / شہر" : "Country / City",
+    selectCountry: isUrdu ? "ملک منتخب کریں" : "Select a country",
+    selectCity: isUrdu ? "شہر منتخب کریں" : "Select a city",
+    loadingCities: isUrdu ? "شہر لوڈ ہو رہے ہیں..." : "Loading cities...",
+    loadingCitiesForCountry: isUrdu
+      ? "منتخب ملک کے شہر لوڈ ہو رہے ہیں..."
+      : "Loading cities for the selected country...",
+    selectCityContinue: isUrdu
+      ? "جاری رکھنے کے لیے شہر منتخب کریں۔"
+      : "Please select a city to continue.",
+    noCitiesLoaded: isUrdu
+      ? "اس ملک کے لیے ابھی شہر لوڈ نہیں ہوئے۔"
+      : "No cities loaded yet for this country.",
+    enterDigits: (count: number) =>
+      isUrdu ? `${count} ہندسے درج کریں` : `Enter ${count} digits`,
+    remainingDigits: (remaining: number, total: number) =>
+      isUrdu
+        ? `باقی ہندسے: ${remaining} / ${total}`
+        : `Remaining digits: ${remaining} / ${total}`,
+    genericError: isUrdu
+      ? "کچھ خرابی پیش آئی۔ براہ کرم دوبارہ کوشش کریں۔"
+      : "Something went wrong. Please try again.",
+    submitAnother: isUrdu ? "مزید رجسٹریشن جمع کریں" : "Submit another registration",
+    submitting: isUrdu ? "جمع کر رہا ہے..." : "Submitting...",
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -157,7 +185,10 @@ export function RegistrationForm() {
     e.preventDefault();
     if (loading) return;
 
-    const validationErrors = validateRegistrationForm(form);
+      const validationErrors = validateRegistrationForm({
+        ...form,
+        preferredLanguage: language,
+      });
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       return;
@@ -182,7 +213,7 @@ export function RegistrationForm() {
 
       if (!res.ok) {
         if (data.errors) setErrors(data.errors);
-        setSubmitError(data.error || "Something went wrong. Please try again.");
+        setSubmitError(data.error || uiText.genericError);
         return;
       }
 
@@ -194,7 +225,7 @@ export function RegistrationForm() {
       setSelectedCity("");
       setErrors({});
     } catch {
-      setSubmitError("Something went wrong. Please try again.");
+      setSubmitError(uiText.genericError);
     } finally {
       setLoading(false);
     }
@@ -214,7 +245,7 @@ export function RegistrationForm() {
           onClick={() => setSuccess(false)}
           className={`mt-6 text-sm font-semibold text-gold transition-colors hover:text-cream ${language === 'ur' ? 'font-sans' : ''}`}
         >
-          {language === 'ur' ? 'مزید رجسٹریشن جمع کریں' : 'Submit another registration'}
+          {uiText.submitAnother}
         </button>
       </div>
     );
@@ -281,12 +312,15 @@ export function RegistrationForm() {
                   onChange={(e) => updateWhatsapp(phoneCountryCode, e.target.value)}
                   maxLength={phoneLocalDigits}
                   className={`w-full min-w-0 border-0 bg-transparent px-4 py-3 text-base text-cream outline-none placeholder:text-cream/30 ${language === "ur" ? "text-right placeholder:text-right" : "text-left"}`}
-                  placeholder={`Enter ${phoneLocalDigits} digits`}
+                  placeholder={uiText.enterDigits(phoneLocalDigits)}
                 />
               </div>
             </div>
             <p className="mt-2 text-xs text-cream/80">
-              Remaining digits: {Math.max(phoneLocalDigits - phoneLocalNumber.length, 0)} / {phoneLocalDigits}
+              {uiText.remainingDigits(
+                Math.max(phoneLocalDigits - phoneLocalNumber.length, 0),
+                phoneLocalDigits
+              )}
             </p>
             {errors.whatsapp && <p className="mt-1 text-xs text-red-300">{errors.whatsapp}</p>}
           </div>
@@ -325,7 +359,7 @@ export function RegistrationForm() {
 
           {/* Child Date of Birth */}
           <div className={language === 'ur' ? 'text-right' : 'text-left'}>
-            <FormLabel htmlFor="childDob" label="Date of Birth" language={language} required />
+            <FormLabel htmlFor="childDob" label={uiText.dobLabel} language={language} required />
             <div className="relative">
               <input
                 id="childDob"
@@ -372,7 +406,7 @@ export function RegistrationForm() {
 
           {/* City / Country */}
           <div className={language === 'ur' ? 'text-right' : 'text-left'}>
-            <FormLabel htmlFor="cityCountry" label="Country / City" language={language} required />
+            <FormLabel htmlFor="cityCountry" label={uiText.countryCityLabel} language={language} required />
             <div className="grid gap-3 sm:grid-cols-2">
               <select
                 id="cityCountry-country"
@@ -382,7 +416,7 @@ export function RegistrationForm() {
                 onChange={(e) => handleCountryChange(e.target.value)}
                 className={`${selectClass} ${language === "ur" ? "text-right font-urdu" : "text-left"}`}
               >
-                <option value="" className="text-[#0d3b2e] bg-cream">Select a country</option>
+                <option value="" className="text-[#0d3b2e] bg-cream">{uiText.selectCountry}</option>
                 {countryOptions.map((country) => (
                   <option key={country} value={country} className="text-[#0d3b2e] bg-cream">
                     {country}
@@ -399,7 +433,7 @@ export function RegistrationForm() {
                 disabled={cityLoading}
               >
                 <option value="" disabled className="text-[#0d3b2e] bg-cream">
-                  {cityLoading ? "Loading cities..." : "Select a city"}
+                  {cityLoading ? uiText.loadingCities : uiText.selectCity}
                 </option>
                 {availableCities.map((city) => (
                   <option key={`${selectedCountry}-${city}`} value={city} className="text-[#0d3b2e] bg-cream">
@@ -410,10 +444,10 @@ export function RegistrationForm() {
             </div>
             <p className="mt-2 text-xs text-cream/80">
               {cityLoading
-                ? "Loading cities for the selected country..."
+                ? uiText.loadingCitiesForCountry
                 : availableCities.length > 0
-                  ? "Please select a city to continue."
-                  : "No cities loaded yet for this country."}
+                  ? uiText.selectCityContinue
+                  : uiText.noCitiesLoaded}
             </p>
             {errors.cityCountry && <p className="mt-1 text-xs text-red-300">{errors.cityCountry}</p>}
           </div>
@@ -455,7 +489,7 @@ export function RegistrationForm() {
             disabled={loading}
             className={`min-h-12 w-full rounded-full bg-gold px-8 py-3.5 text-sm font-semibold tracking-wide text-[#0d3b2e] shadow-lg shadow-gold/25 transition-all duration-300 hover:bg-gold-soft hover:shadow-gold/40 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:min-w-[280px] ${language === 'ur' ? 'font-urdu' : ''}`}
           >
-            {loading ? (language === 'ur' ? "جمع کر رہا ہے..." : "Submitting...") : t.register.form.submit}
+            {loading ? uiText.submitting : t.register.form.submit}
           </button>
         </div>
       </div>
