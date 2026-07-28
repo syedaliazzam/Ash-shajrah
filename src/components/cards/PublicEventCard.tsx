@@ -45,6 +45,7 @@ export function PublicEventCard({
   const resolvedHref = event.ctaHref || ctaHref;
   const isExternal = event.ctaExternal === true;
   const showFacebookIcon = event.showFacebookIcon === true;
+  const showMetaFields = !isExternal;
 
   return (
     <article className="group flex h-full w-full flex-col overflow-hidden rounded-3xl border border-emerald/12 bg-white text-left shadow-[0_20px_50px_rgba(13,59,46,0.14)] transition-all duration-500 hover:border-gold/35 hover:shadow-[0_28px_60px_rgba(13,59,46,0.18)]">
@@ -81,24 +82,26 @@ export function PublicEventCard({
           {event.description || "Details will be shared soon."}
         </p>
 
-        <div className="mt-4 grid gap-2 text-xs text-emerald-deep/80 sm:text-sm">
-          <div>
-            <span className="font-semibold text-emerald-deep">Start:</span>{" "}
-            {formatEventDateTime(event.startAt)}
+        {showMetaFields ? (
+          <div className="mt-4 grid gap-2 text-xs text-emerald-deep/80 sm:text-sm">
+            <div>
+              <span className="font-semibold text-emerald-deep">Start:</span>{" "}
+              {formatEventDateTime(event.startAt)}
+            </div>
+            <div>
+              <span className="font-semibold text-emerald-deep">End:</span>{" "}
+              {formatEventDateTime(event.endAt)}
+            </div>
+            <div>
+              <span className="font-semibold text-emerald-deep">Fee:</span>{" "}
+              {event.fee || "Contact for details"}
+            </div>
+            <div>
+              <span className="font-semibold text-emerald-deep">Registration Deadline:</span>{" "}
+              {formatEventDateTime(event.registrationDeadline)}
+            </div>
           </div>
-          <div>
-            <span className="font-semibold text-emerald-deep">End:</span>{" "}
-            {formatEventDateTime(event.endAt)}
-          </div>
-          <div>
-            <span className="font-semibold text-emerald-deep">Fee:</span>{" "}
-            {event.fee || "Contact for details"}
-          </div>
-          <div>
-            <span className="font-semibold text-emerald-deep">Registration Deadline:</span>{" "}
-            {formatEventDateTime(event.registrationDeadline)}
-          </div>
-        </div>
+        ) : null}
 
         {resolvedLabel && resolvedHref ? (
           <div className="mt-5">
