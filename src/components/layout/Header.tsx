@@ -37,7 +37,7 @@ export function Header() {
           : "border-b border-white/10 bg-cream/55 py-2.5 shadow-sm shadow-emerald-deep/5 backdrop-blur-md sm:py-3"
       }`}
     >
-      <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
+      <div className="flex w-full max-w-full items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
         <Link href="/" className="group shrink-0 transition-opacity hover:opacity-90">
           <BrandLogo variant="header" priority />
         </Link>

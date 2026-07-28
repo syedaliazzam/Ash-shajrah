@@ -1,11 +1,9 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useState } from "react";
-import {
-  formatEventDateTime,
-  type PublicEvent,
-} from "@/lib/public-events";
+import { FacebookIcon } from "@/components/ui/FacebookIcon";
+import { formatEventDateTime, type PublicEvent } from "@/lib/public-events";
 
 function getLifecycleLabel(value: PublicEvent["lifecycle"]) {
   if (value === "current") return "Current";
@@ -43,6 +41,10 @@ export function PublicEventCard({
   ctaHref?: string;
 }) {
   const [imageFailed, setImageFailed] = useState(false);
+  const resolvedLabel = event.ctaLabel || ctaLabel;
+  const resolvedHref = event.ctaHref || ctaHref;
+  const isExternal = event.ctaExternal === true;
+  const showFacebookIcon = event.showFacebookIcon === true;
 
   return (
     <article className="group flex h-full w-full flex-col overflow-hidden rounded-3xl border border-emerald/12 bg-white text-left shadow-[0_20px_50px_rgba(13,59,46,0.14)] transition-all duration-500 hover:border-gold/35 hover:shadow-[0_28px_60px_rgba(13,59,46,0.18)]">
@@ -98,14 +100,26 @@ export function PublicEventCard({
           </div>
         </div>
 
-        {ctaLabel && ctaHref ? (
+        {resolvedLabel && resolvedHref ? (
           <div className="mt-5">
-            <Link
-              href={ctaHref}
-              className="inline-flex min-h-11 items-center justify-center rounded-full border border-emerald-deep bg-emerald-deep px-5 py-2 text-sm font-semibold text-cream transition hover:border-gold hover:bg-gold hover:text-emerald-deep"
-            >
-              {ctaLabel}
-            </Link>
+            {isExternal ? (
+              <a
+                href={resolvedHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-emerald-deep bg-emerald-deep px-5 py-2 text-sm font-semibold text-cream transition hover:border-gold hover:bg-gold hover:text-emerald-deep"
+              >
+                {showFacebookIcon ? <FacebookIcon className="h-4 w-4 shrink-0" /> : null}
+                {resolvedLabel}
+              </a>
+            ) : (
+              <Link
+                href={resolvedHref}
+                className="inline-flex min-h-11 items-center justify-center rounded-full border border-emerald-deep bg-emerald-deep px-5 py-2 text-sm font-semibold text-cream transition hover:border-gold hover:bg-gold hover:text-emerald-deep"
+              >
+                {resolvedLabel}
+              </Link>
+            )}
           </div>
         ) : null}
       </div>

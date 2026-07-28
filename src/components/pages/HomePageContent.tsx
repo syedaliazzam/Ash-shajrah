@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect } from "react";
 import { ScrollTrigger, ensurePlugins } from "@/lib/gsap";
@@ -20,6 +20,7 @@ import { OurEventsSection } from "@/components/sections/OurEventsSection";
 import { VisionSection } from "@/components/sections/VisionSection";
 import { NeedBasedScholarshipSection } from "@/components/sections/NeedBasedScholarshipSection";
 import { LogoPhilosophySection } from "@/components/sections/LogoPhilosophySection";
+import { UpcomingEventAlert } from "@/components/sections/UpcomingEventAlert";
 
 export function HomePageContent() {
   useEffect(() => {
@@ -32,6 +33,7 @@ export function HomePageContent() {
   return (
     <ReducedMotionProvider>
       <Header />
+      <UpcomingEventAlert />
       <main>
         <HeroSection />
         <AboutSection />

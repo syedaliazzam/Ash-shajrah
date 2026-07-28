@@ -1,9 +1,10 @@
-"use client";
+﻿"use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Header } from "@/components/layout/Header";
 import { PublicEventsGlobeCarousel } from "@/components/sections/PublicEventsGlobeCarousel";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { EVENT_ITEMS } from "@/data/events";
 import { normalizePublicEventsResponse, type PublicEvent } from "@/lib/public-events";
 
 function extractApiError(payload: unknown, fallback: string) {
@@ -13,6 +14,41 @@ function extractApiError(payload: unknown, fallback: string) {
     if (typeof record.message === "string" && record.message.trim()) return record.message;
   }
   return fallback;
+}
+
+function slugifyEventTitle(value: string) {
+  return (
+    value
+      .toLowerCase()
+      .trim()
+      .replace(/&/g, " and ")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "") || "event"
+  );
+}
+
+function mapStaticEventToPublicEvent(item: (typeof EVENT_ITEMS)[number], index: number): PublicEvent {
+  const title = item.title.en || item.title.ur || `Past Event ${index + 1}`;
+  const description = item.description.en || item.description.ur || "Details will be shared soon.";
+  const staticDate = item.date?.trim() || "2024-01-01";
+
+  return {
+    id: `static-event-${item.id}`,
+    slug: slugifyEventTitle(title),
+    title,
+    description,
+    imageUrl: item.thumbnail,
+    startAt: staticDate,
+    endAt: staticDate,
+    fee: "",
+    capacity: "",
+    registrationDeadline: staticDate,
+    lifecycle: "past",
+    ctaHref: item.facebookUrl,
+    ctaLabel: "Facebook",
+    ctaExternal: true,
+    showFacebookIcon: true,
+  };
 }
 
 function EventSlider({
@@ -88,6 +124,20 @@ export function PublicEventsPageContent() {
   const [currentUpcoming, setCurrentUpcoming] = useState<PublicEvent[]>([]);
   const [past, setPast] = useState<PublicEvent[]>([]);
 
+  const staticPastEvents = useMemo(
+    () => EVENT_ITEMS.map((item, index) => mapStaticEventToPublicEvent(item, index)),
+    []
+  );
+
+  const mergedPastEvents = useMemo(() => {
+    const existingIds = new Set(past.map((item) => item.id));
+    const existingTitles = new Set(past.map((item) => item.title.trim().toLowerCase()));
+    const dedupedStatic = staticPastEvents.filter(
+      (item) => !existingIds.has(item.id) && !existingTitles.has(item.title.trim().toLowerCase())
+    );
+    return [...past, ...dedupedStatic];
+  }, [past, staticPastEvents]);
+
   const uiText = {
     loadError: isUrdu ? "اس وقت عوامی ایونٹس لوڈ نہیں ہو سکے۔" : "Unable to load public events right now.",
     publicEvents: isUrdu ? "عوامی ایونٹس" : "Public Events",
@@ -103,8 +153,8 @@ export function PublicEventsPageContent() {
       : "Open events are listed here for new registrations. Use View Details to open the full event page.",
     pastEvents: isUrdu ? "گزشتہ ایونٹس" : "Past Events",
     pastEventsBody: isUrdu
-      ? "مکمل ہو چکے عوامی ایونٹس اور ورکشاپس کا ریکارڈ۔"
-      : "A record of recently completed public events and workshops.",
+      ? "مکمل ہو چکے عوامی ایونٹس اور ورکشاپس کے ساتھ ہماری منتخب تقاریب بھی یہاں شامل ہیں۔"
+      : "A record of recently completed public events and workshops, along with selected past events from our archive.",
     noEvents: isUrdu ? "اس حصے میں ابھی کوئی ایونٹس دستیاب نہیں ہیں۔" : "No events are available in this section yet.",
     viewDetails: isUrdu ? "ویو ڈیٹیلز" : "View Details",
   };
@@ -194,7 +244,7 @@ export function PublicEventsPageContent() {
                 <EventSlider
                   title={uiText.pastEvents}
                   description={uiText.pastEventsBody}
-                  events={past}
+                  events={mergedPastEvents}
                   emptyText={uiText.noEvents}
                   viewDetailsLabel={uiText.viewDetails}
                 />

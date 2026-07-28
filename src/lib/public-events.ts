@@ -1,4 +1,4 @@
-export type RawPublicEvent = Record<string, unknown>;
+﻿export type RawPublicEvent = Record<string, unknown>;
 
 export type PublicEvent = {
   id: string;
@@ -12,6 +12,10 @@ export type PublicEvent = {
   capacity: string;
   registrationDeadline: string;
   lifecycle: "current" | "upcoming" | "past";
+  ctaHref?: string;
+  ctaLabel?: string;
+  ctaExternal?: boolean;
+  showFacebookIcon?: boolean;
 };
 
 export type PublicEventsResponse = {
@@ -65,7 +69,9 @@ export function normalizePublicEvent(
 
   return {
     id: pickString(getValue(item, ["id", "event_id"])),
-    slug: pickString(getValue(item, ["slug"])) || slugifyPublicEventTitle(pickString(getValue(item, ["title", "name"]))),
+    slug:
+      pickString(getValue(item, ["slug"])) ||
+      slugifyPublicEventTitle(pickString(getValue(item, ["title", "name"]))),
     title: pickString(getValue(item, ["title", "name"])),
     description: pickString(
       getValue(item, ["description", "summary", "details", "short_description"])
@@ -74,38 +80,21 @@ export function normalizePublicEvent(
       getValue(item, ["image_url", "imageUrl", "poster_url", "thumbnail_url"])
     ),
     startAt: pickString(
-      getValue(item, [
-        "startAt",
-        "start_at",
-        "start_datetime",
-        "start_date",
-        "starts_at",
-      ])
+      getValue(item, ["startAt", "start_at", "start_datetime", "start_date", "starts_at"])
     ),
     endAt: pickString(
-      getValue(item, [
-        "endAt",
-        "end_at",
-        "end_datetime",
-        "end_date",
-        "ends_at",
-      ])
+      getValue(item, ["endAt", "end_at", "end_datetime", "end_date", "ends_at"])
     ),
-    fee: pickString(
-      getValue(item, ["event_fee", "event_fee_amount", "fee", "price"])
-    ),
-    capacity: pickString(
-      getValue(item, ["capacity", "max_capacity", "seats"])
-    ),
+    fee: pickString(getValue(item, ["event_fee", "event_fee_amount", "fee", "price"])),
+    capacity: pickString(getValue(item, ["capacity", "max_capacity", "seats"])),
     registrationDeadline: pickString(
-      getValue(item, [
-        "registrationDeadline",
-        "registration_deadline",
-        "deadline",
-        "registration_closes_at",
-      ])
+      getValue(item, ["registrationDeadline", "registration_deadline", "deadline", "registration_closes_at"])
     ),
     lifecycle,
+    ctaHref: pickString(getValue(item, ["ctaHref", "cta_href"])),
+    ctaLabel: pickString(getValue(item, ["ctaLabel", "cta_label"])),
+    ctaExternal: Boolean(getValue(item, ["ctaExternal", "cta_external"])),
+    showFacebookIcon: Boolean(getValue(item, ["showFacebookIcon", "show_facebook_icon"])),
   };
 }
 
