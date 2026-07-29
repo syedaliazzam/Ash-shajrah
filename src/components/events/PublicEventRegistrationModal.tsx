@@ -119,6 +119,7 @@ export function PublicEventRegistrationModal({ event, open, onClose }: Props) {
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState<{ registrationNumber: string; message: string } | null>(null);
   const countryMenuRef = useRef<HTMLDivElement | null>(null);
+  const labelClassName = "mb-2 block text-xs font-bold uppercase tracking-[0.16em] text-emerald-deep/90";
 
   const localDigits = getPhoneLocalDigitsForCode(countryCode);
   const selectedCountry = PHONE_COUNTRY_CODES.find((option) => option.code === countryCode) || PHONE_COUNTRY_CODES[0];
@@ -140,7 +141,7 @@ export function PublicEventRegistrationModal({ event, open, onClose }: Props) {
     submitting: isUrdu ? "رجسٹریشن جمع ہو رہی ہے..." : "Submitting registration...",
     registrationSuccessful: isUrdu ? "رجسٹریشن کامیابی سے مکمل ہو گئی۔" : "Registration successful.",
     registrationNumber: isUrdu ? "رجسٹریشن نمبر" : "Registration Number",
-    successMessage: isUrdu ? "آپ کی ایونٹ رجسٹریشن موصول ہو گئی ہے۔ ادائیگی کے بعد اپنی نشست کی تصدیق کے لیے کوآرڈینیٹر سے رابطہ کریں۔" : "Your event registration has been received. After payment, contact the coordinator to confirm your seat.",
+    successMessage: isUrdu ? "آپ کی ایونٹ رجسٹریشن موصول ہو گئی ہے۔ ادائیگی کے بعد اپنی نشست کی تصدیق کے لیے کوآرڈینیٹر سے رابطہ کریں۔ (ادائیگی کی تفصیلات آپ کو ای میل کر دی گئی ہیں)" : "Your event registration has been received. After payment, contact the coordinator to confirm your seat. (Payment details are in the email already sent to you.)",
     coordinator: isUrdu ? "کوآرڈینیٹر" : "Coordinator",
     submitError: isUrdu ? "ایونٹ رجسٹریشن جمع نہیں ہو سکی۔" : "Unable to submit event registration.",
     pastClosed: isUrdu ? "ماضی کے ایونٹس کے لیے رجسٹریشن بند ہے۔" : "Registration is closed for past events.",
@@ -165,6 +166,13 @@ export function PublicEventRegistrationModal({ event, open, onClose }: Props) {
     document.addEventListener("mousedown", handleOutsideClick);
     return () => document.removeEventListener("mousedown", handleOutsideClick);
   }, []);
+
+  useEffect(() => {
+    if (open) {
+      setSuccess(null);
+      resetForm();
+    }
+  }, [open]);
 
   if (!open) return null;
 
@@ -309,15 +317,16 @@ export function PublicEventRegistrationModal({ event, open, onClose }: Props) {
             <p className="mt-2 leading-7">{success.message}</p>
             <div className="mt-4 rounded-2xl border border-gold/20 bg-white/70 px-4 py-4 text-sm leading-7">
               <p><span className="font-semibold">{uiText.coordinator}:</span> Shoaib Ul Din</p>
-              <p><span className="font-semibold">{uiText.email}:</span> admissions@ashshajrah.com</p>
+              <p><span className="font-semibold">{uiText.email}:</span> coordinator@ashshajrah.com</p>
               <p><span className="font-semibold">{uiText.whatsapp}:</span> +923473547036</p>
             </div>
           </div>
         ) : null}
 
+        {!success ? (
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">
           <div>
-            <label className="mb-2 block text-xs font-bold uppercase tracking-[0.16em] text-emerald-deep/90">{uiText.participantName} *</label>
+            <label className={labelClassName}>{uiText.participantName} *</label>
             <input
               value={form.participantName}
               onChange={(eventChange) => updateField("participantName", eventChange.target.value)}
@@ -329,7 +338,7 @@ export function PublicEventRegistrationModal({ event, open, onClose }: Props) {
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label className="mb-2 block text-xs font-bold uppercase tracking-[0.16em] text-emerald-deep/90">{uiText.email} *</label>
+              <label className={labelClassName}>{uiText.email} *</label>
               <input
                 type="email"
                 value={form.email}
@@ -341,7 +350,7 @@ export function PublicEventRegistrationModal({ event, open, onClose }: Props) {
             </div>
 
             <div>
-              <label className="mb-2 block text-xs font-bold uppercase tracking-[0.16em] text-emerald-deep/90">{uiText.whatsapp} *</label>
+              <label className={labelClassName}>{uiText.whatsapp} *</label>
               <div className="flex gap-3">
                 <div ref={countryMenuRef} className="relative w-[34%] min-w-[140px]">
                   <button
@@ -390,7 +399,7 @@ export function PublicEventRegistrationModal({ event, open, onClose }: Props) {
           </div>
 
           <div>
-            <label className="mb-2 block text-xs font-bold uppercase tracking-[0.16em] text-emerald-deep/90">{uiText.notes}</label>
+            <label className={labelClassName}>{uiText.notes}</label>
             <textarea
               value={form.notes}
               onChange={(eventChange) => updateField("notes", eventChange.target.value)}
@@ -408,6 +417,7 @@ export function PublicEventRegistrationModal({ event, open, onClose }: Props) {
             {submitting ? uiText.submitting : uiText.registerButton}
           </button>
         </form>
+        ) : null}
       </div>
     </div>
   );

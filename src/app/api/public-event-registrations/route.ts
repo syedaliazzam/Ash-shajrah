@@ -33,6 +33,10 @@ function getAdmissionsEmail() {
   );
 }
 
+function getPublicEventsFromEmail(smtpUser?: string) {
+  return process.env.PUBLIC_EVENTS_SMTP_FROM || smtpUser || "admissions@ashshajrah.com";
+}
+
 function formatDateTime(value: string) {
   if (!value) return "To be announced";
   const date = new Date(value);
@@ -98,7 +102,7 @@ function buildPaymentMethodsHtml(
   if (paymentMethods.length === 0) {
     return `
       <div style="margin-top:20px;padding:16px 18px;border:1px solid #e8e4dc;border-radius:12px;background:#faf7f0">
-        <p style="margin:0;color:#0d3b2e;font-weight:800">Payment Details</p>
+        <p style="margin:10px 0 0;color:#0d3b2e;font-size:14px;line-height:1.7;font-weight:900;"><strong>Payment Details</strong></p>
         <p style="margin:10px 0 0;color:#0d3b2e;line-height:1.7">Please contact the coordinator for payment instructions.</p>
       </div>
     `;
@@ -106,17 +110,17 @@ function buildPaymentMethodsHtml(
 
   return `
     <div style="margin-top:20px;padding:16px 18px;border:1px solid #e8e4dc;border-radius:12px;background:#faf7f0">
-      <p style="margin:0 0 12px;color:#0d3b2e;font-weight:800">Payment Details</p>
+      <p style="margin:10px 0 0;color:#0d3b2e;font-size:14px;line-height:1.7;font-weight:900;"><strong>Payment Details</strong></p>
       ${paymentMethods
         .map(
           (method) => `
             <div style="padding:14px 0;border-top:1px solid #e8e4dc">
-              <p style="margin:0 0 8px;color:#0d3b2e;font-weight:800">${escapeHtml(method.name)}</p>
-              ${method.accountTitle ? `<p style="margin:4px 0;color:#0d3b2e"><strong>Account Title:</strong> ${escapeHtml(method.accountTitle)}</p>` : ""}
-              ${method.accountNumber ? `<p style="margin:4px 0;color:#0d3b2e"><strong>Account Number:</strong> ${escapeHtml(method.accountNumber)}</p>` : ""}
-              ${method.iban ? `<p style="margin:4px 0 0;color:#0d3b2e"><strong>IBAN:</strong> ${escapeHtml(method.iban)}</p>` : ""}
-              ${method.bankName ? `<p style="margin:4px 0;color:#0d3b2e"><strong>Bank Name:</strong> ${escapeHtml(method.bankName)}</p>` : ""}
-              ${method.branchCode ? `<p style="margin:4px 0;color:#0d3b2e"><strong>Branch Code:</strong> ${escapeHtml(method.branchCode)}</p>` : ""}
+              <p style="margin:10px 0 0;color:#0d3b2e;font-size:14px;line-height:1.7;font-weight:900;"><strong>${escapeHtml(method.name)}</strong></p>
+              ${method.accountTitle ? `<p style="margin:10px 0 0;color:#0d3b2e;font-size:14px;line-height:1.7"><strong>Account Title:</strong> ${escapeHtml(method.accountTitle)}</p>` : ""}
+              ${method.accountNumber ? `<p style="margin:10px 0 0;color:#0d3b2e;font-size:14px;line-height:1.7"><strong>Account Number:</strong> ${escapeHtml(method.accountNumber)}</p>` : ""}
+              ${method.iban ? `<p style="margin:10px 0 0;color:#0d3b2e;font-size:14px;line-height:1.7"><strong>IBAN:</strong> ${escapeHtml(method.iban)}</p>` : ""}
+              ${method.bankName ? `<p style="margin:10px 0 0;color:#0d3b2e;font-size:14px;line-height:1.7"><strong>Bank Name:</strong> ${escapeHtml(method.bankName)}</p>` : ""}
+              ${method.branchCode ? `<p style="margin:10px 0 0;color:#0d3b2e;font-size:14px;line-height:1.7"><strong>Branch Code:</strong> ${escapeHtml(method.branchCode)}</p>` : ""}
             </div>
           `
         )
@@ -146,25 +150,27 @@ export async function POST(request: NextRequest) {
 
     if (smtpConfig) {
       try {
-        const fromEmail = process.env.SMTP_FROM || smtpConfig.auth.user;
+        const publicEventsFromEmail = getPublicEventsFromEmail(smtpConfig.auth.user);
         const transporter = nodemailer.createTransport(smtpConfig);
         const eventStart = formatDateTime(registration.eventStartAt);
         const eventEnd = formatDateTime(registration.eventEndAt);
         const deadline = formatDateTime(registration.registrationDeadline);
         const paymentText = buildPaymentMethodsText(paymentMethods);
         const paymentHtml = buildPaymentMethodsHtml(paymentMethods);
+        const emailSubject = `${registration.eventTitle} | Ash-Shajrah Learning Hub`;
 
         await transporter.sendMail({
-          from: `"Ash-Shajrah Learning Hub" <${fromEmail}>`,
+          from: `"Ash-Shajrah Learning Hub" <${publicEventsFromEmail}>`,
           to: String(body.email ?? "").trim(),
           replyTo: getAdmissionsEmail(),
-          subject: "Public Event Registration Confirmed - Ash-Shajrah Learning Hub",
+          subject: emailSubject,
           text: [
-            "Public Event Registration Confirmed - Ash-Shajrah Learning Hub",
+            emailSubject,
             "",
             `Dear ${String(body.participantName ?? "").trim()},`,
             "",
             "Thank you for registering for an Ash-Shajrah public event.",
+            "After payment, kindly share your payment screenshot with the coordinator on WhatsApp to confirm your seat.",
             "",
             `Registration Number: ${registration.registrationNumber}`,
             `Event: ${registration.eventTitle}`,
@@ -179,48 +185,39 @@ export async function POST(request: NextRequest) {
             "",
             "Coordinator Details:",
             "Name: Shoaib Ul Din",
-            "Email: admissions@ashshajrah.com",
+            "Email: coordinator@ashshajrah.com",
             "WhatsApp: +923473547036",
             "",
             "Warm regards,",
-            "Ash-Shajrah Learning Hub",
+            "Ash-Shajrah Learning Hub Admissions Team",
           ].join("\n"),
           html: `
             <div style="font-family:Arial,sans-serif;max-width:640px;margin:0 auto;background:#faf7f0;padding:24px;border-radius:12px">
               <div style="background:linear-gradient(135deg,#0d3b2e,#1a5c45);padding:28px 24px;border-radius:12px 12px 0 0">
-                <h2 style="color:#faf7f0;margin:0 0 8px">Public Event Registration Confirmed</h2>
-                <p style="color:#e8d5a3;margin:0;font-size:14px">Ash-Shajrah Learning Hub (ALH)</p>
+                <p style="margin:10px 0 0;color:#e8d5a3;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;line-height:1.7">Registration Number</p>
+                <h2 style="color:#faf7f0;margin:0;font-size:28px;line-height:1.25">${escapeHtml(registration.registrationNumber)}</h2>
+                <p style="color:#e8d5a3;margin:10px 0 0;font-size:14px;font-weight:700">${escapeHtml(registration.eventTitle)}</p>
               </div>
               <div style="background:#ffffff;padding:24px;border:1px solid #e8e4dc;border-top:0;border-radius:0 0 12px 12px">
-                <p style="color:#0d3b2e;line-height:1.7;margin:0 0 16px">Dear ${escapeHtml(String(body.participantName ?? "").trim())},</p>
-                <p style="color:#0d3b2e;line-height:1.7;margin:0 0 16px">
-                  Thank you for registering for an Ash-Shajrah public event.
-                </p>
-                <p style="margin:0 0 16px;color:#0d3b2e;font-size:15px;font-weight:700;line-height:1.7">
-                  After payment, kindly share your payment screenshot with the coordinator on WhatsApp to confirm your seat.
-                </p>
+                <p style="color:#0d3b2e;line-height:1.7;margin:0 0 16px;font-size:15px">Dear ${escapeHtml(String(body.participantName ?? "").trim())},</p>
+                <p style="color:#0d3b2e;line-height:1.7;margin:0 0 16px;font-size:15px">Thank you for registering for an Ash-Shajrah public event.</p>
+                <p style="margin:0 0 16px;color:#0d3b2e;font-size:15px;font-weight:700;line-height:1.7">After making the payment, please send a screenshot to the coordinator on WhatsApp to confirm your seat. Payment details are below.</p>
                 <div style="background:#faf7f0;border:1px solid #e8e4dc;border-radius:12px;padding:16px 18px;margin:20px 0">
-                  <p style="margin:0 0 8px;color:#5c4a32;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:0.06em;">Registration Number</p>
-                  <p style="margin:0;color:#0d3b2e;font-size:16px;font-weight:700">${escapeHtml(registration.registrationNumber)}</p>
-                  <p style="margin:16px 0 8px;color:#5c4a32;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:0.06em;">Event</p>
-                  <p style="margin:0;color:#0d3b2e;font-size:14px;">${escapeHtml(registration.eventTitle)}</p>
-                  <p style="margin:16px 0 8px;color:#5c4a32;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:0.06em;">Participant Name</p>
-                  <p style="margin:0;color:#0d3b2e;font-size:14px;">${escapeHtml(String(body.participantName ?? "").trim())}</p>
-                  <p style="margin:16px 0 8px;color:#5c4a32;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:0.06em;">Start</p>
-                  <p style="margin:0;color:#0d3b2e;font-size:14px;">${escapeHtml(eventStart)}</p>
-                  <p style="margin:16px 0 8px;color:#5c4a32;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:0.06em;">End</p>
-                  <p style="margin:0;color:#0d3b2e;font-size:14px;">${escapeHtml(eventEnd)}</p>
-                  <p style="margin:16px 0 8px;color:#5c4a32;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:0.06em;">Amount Due</p>
-                  <p style="margin:0;color:#0d3b2e;font-size:14px;">${escapeHtml(registration.amountDue)}</p>
+                  <p style="margin:10px 0 0;color:#0d3b2e;font-size:14px;line-height:1.7;font-weight:900;"><strong>Registration Details</strong></p>
+                  <p style="margin:10px 0 0;color:#0d3b2e;font-size:14px;line-height:1.7"><strong>Event:</strong> ${escapeHtml(registration.eventTitle)}</p>
+                  <p style="margin:8px 0 0;color:#0d3b2e;font-size:14px;line-height:1.7"><strong>Participant Name:</strong> ${escapeHtml(String(body.participantName ?? "").trim())}</p>
+                  <p style="margin:8px 0 0;color:#0d3b2e;font-size:14px;line-height:1.7"><strong>Start:</strong> ${escapeHtml(eventStart)}</p>
+                  <p style="margin:8px 0 0;color:#0d3b2e;font-size:14px;line-height:1.7"><strong>End:</strong> ${escapeHtml(eventEnd)}</p>
+                  <p style="margin:8px 0 0;color:#0d3b2e;font-size:14px;line-height:1.7"><strong>Amount Due:</strong> ${escapeHtml(registration.amountDue)}</p>
                 </div>
                 ${paymentHtml}
                 <div style="margin-top:20px;padding:16px 18px;border:1px solid #e8e4dc;border-radius:12px;background:#faf7f0">
-                  <p style="margin:0 0 8px;color:#5c4a32;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:0.06em;">Coordinator Details</p>
-                  <p style="margin:0;color:#0d3b2e;font-size:14px;"><strong>Name:</strong> Shoaib Ul Din</p>
-                  <p style="margin:8px 0 0;color:#0d3b2e;font-size:14px;"><strong>Email:</strong> admissions@ashshajrah.com</p>
-                  <p style="margin:8px 0 0;color:#0d3b2e;font-size:14px;"><strong>WhatsApp:</strong> +923473547036</p>
+                  <p style="margin:10px 0 0;color:#0d3b2e;font-size:14px;line-height:1.7;font-weight:900;"><strong>Coordinator Details</strong></p>
+                  <p style="margin:10px 0 0;color:#0d3b2e;font-size:14px;line-height:1.7"><strong>Name:</strong> Shoaib Ul Din</p>
+                  <p style="margin:10px 0 0;color:#0d3b2e;font-size:14px;line-height:1.7"><strong>Email:</strong> coordinator@ashshajrah.com</p>
+                  <p style="margin:10px 0 0;color:#0d3b2e;font-size:14px;line-height:1.7"><strong>WhatsApp:</strong> +923473547036</p>
                 </div>
-                <p style="color:#0d3b2e;line-height:1.7;margin:20px 0 0">Warm regards,<br/>Ash-Shajrah Learning Hub</p>
+                <p style="color:#0d3b2e;line-height:1.7;margin:20px 0 0">Warm regards,<br/><strong>Ash-Shajrah Learning Hub Admissions Team</strong></p>
               </div>
             </div>
           `,
