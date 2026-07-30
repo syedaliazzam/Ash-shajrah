@@ -85,7 +85,3 @@ Or via CLI:
 npm i -g vercel
 vercel
 ```
-
-## Live Site
-
-[ash-shajrah.vercel.app](https://ash-shajrah.vercel.app)
