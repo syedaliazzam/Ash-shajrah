@@ -12,6 +12,7 @@ type PublicEventRow = {
   image_bucket: string | null;
   image_object_path: string | null;
   image_stored_path: string | null;
+  event_category: string | null;
 };
 
 type PublicEventRegistrationRow = {
@@ -126,6 +127,18 @@ function toPublicEvent(row: PublicEventRow): PublicEvent {
   const start = startDate.getTime();
   const end = endDate.getTime();
 
+  const categoryRaw = (row.event_category || "").toLowerCase().trim();
+  const eventCategory: PublicEvent["eventCategory"] =
+    categoryRaw === "alh-students"
+      ? "alh-students"
+      : categoryRaw === "alh-parents"
+        ? "alh-parents"
+        : categoryRaw === "general-students"
+          ? "general-students"
+          : categoryRaw === "general-parents"
+            ? "general-parents"
+            : undefined;
+
   return {
     id: row.id,
     slug: slugifyPublicEventTitle(row.title),
@@ -143,6 +156,7 @@ function toPublicEvent(row: PublicEventRow): PublicEvent {
       ? String(row.registration_deadline)
       : registrationDeadline.toISOString(),
     lifecycle: end < now ? "past" : start <= now ? "current" : "upcoming",
+    eventCategory,
   };
 }
 
@@ -164,7 +178,8 @@ export async function listPublicEventsFromDb() {
       registration_deadline,
       image_bucket,
       image_object_path,
-      image_stored_path
+      image_stored_path,
+      event_category
     from public.public_events
     where publication_status = 'published'
     order by start_at asc
@@ -183,6 +198,11 @@ export async function createPublicEventRegistrationInDb(input: {
   email: string;
   whatsapp: string;
   notes: string;
+  studentName?: string;
+  parentName?: string;
+  schoolName?: string;
+  classInput?: string;
+  studentNames?: string[];
 }) {
   const client = getPgPool();
 
@@ -252,8 +272,13 @@ export async function createPublicEventRegistrationInDb(input: {
         email,
         whatsapp,
         notes,
+        student_name,
+        parent_name,
+        school_name,
+        class_input,
+        student_names,
         amount_due
-      ) values ($1, $2, $3, $4, $5, $6)
+      ) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
       returning registration_no
     `,
     [
@@ -262,6 +287,11 @@ export async function createPublicEventRegistrationInDb(input: {
       input.email,
       input.whatsapp,
       input.notes || null,
+      input.studentName || null,
+      input.parentName || null,
+      input.schoolName || null,
+      input.classInput || null,
+      input.studentNames && input.studentNames.length > 0 ? JSON.stringify(input.studentNames) : null,
       event.event_fee_amount ?? 0,
     ]
   );

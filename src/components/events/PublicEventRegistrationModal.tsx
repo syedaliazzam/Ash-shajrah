@@ -23,6 +23,11 @@ type FormState = {
   email: string;
   whatsapp: string;
   notes: string;
+  studentName?: string;
+  parentName?: string;
+  schoolName?: string;
+  classInput?: string;
+  studentNames?: string[];
 };
 
 type FormErrors = Partial<Record<keyof FormState, string>>;
@@ -32,6 +37,11 @@ const INITIAL_FORM: FormState = {
   email: "",
   whatsapp: "",
   notes: "",
+  studentName: "",
+  parentName: "",
+  schoolName: "",
+  classInput: "",
+  studentNames: [""],
 };
 
 function extractApiError(payload: unknown, fallback: string) {
@@ -136,6 +146,18 @@ export function PublicEventRegistrationModal({ event, open, onClose }: Props) {
     whatsapp: isUrdu ? "واٹس ایپ" : "WhatsApp",
     notes: isUrdu ? "تبصرے" : "Comments",
     notesPlaceholder: isUrdu ? "اگر آپ کوآرڈینیٹر کے ساتھ پہلے سے کچھ شیئر کرنا چاہتے ہیں" : "If you want to share anything in advance with the coordinator",
+    studentName: isUrdu ? "طالب علم کا نام" : "Student Name",
+    studentNamePlaceholder: isUrdu ? "طالب علم کا مکمل نام" : "Student full name",
+    parentName: isUrdu ? "والدین کا نام" : "Parent Name",
+    parentNamePlaceholder: isUrdu ? "والدین کا مکمل نام" : "Parent full name",
+    enterStudentNames: isUrdu ? "طالبعلم کے نام درج کریں" : "Enter Student Names",
+    enterStudentNamesPlaceholder: isUrdu ? "طالب علم کا نام" : "Student name",
+    schoolName: isUrdu ? "اسکول کا نام" : "School Name",
+    schoolNamePlaceholder: isUrdu ? "اسکول کا نام" : "School name",
+    classInput: isUrdu ? "کلاس" : "Class",
+    classInputPlaceholder: isUrdu ? "جماعت کا نام" : "Class name",
+    addStudent: isUrdu ? "+" : "+",
+    removeStudent: isUrdu ? "−" : "−",
     eventFee: isUrdu ? "ایونٹ فیس" : "Event Fee",
     registerButton: isUrdu ? "ایونٹ کے لیے رجسٹر کریں" : "Register for Event",
     submitting: isUrdu ? "رجسٹریشن جمع ہو رہی ہے..." : "Submitting registration...",
@@ -180,6 +202,7 @@ export function PublicEventRegistrationModal({ event, open, onClose }: Props) {
     const nextErrors: FormErrors = {};
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const whatsappDigits = form.whatsapp.replace(/\D/g, "");
+    const category = event.eventCategory;
 
     if (!form.participantName.trim()) {
       nextErrors.participantName = isUrdu ? "شرکت کنندہ کا نام ضروری ہے۔" : "Participant name is required.";
@@ -199,15 +222,72 @@ export function PublicEventRegistrationModal({ event, open, onClose }: Props) {
       nextErrors.whatsapp = isUrdu ? "درست واٹس ایپ نمبر درج کریں۔" : "Select a country code and enter a valid WhatsApp number.";
     }
 
+    // Category-specific validations
+    if (category === "alh-students" || category === "general-students") {
+      if (!form.studentName?.trim()) {
+        nextErrors.studentName = isUrdu ? "طالب علم کا نام ضروری ہے۔" : "Student name is required.";
+      } else if (!isValidName(form.studentName)) {
+        nextErrors.studentName = isUrdu ? "درست نام درج کریں۔" : "Please enter a valid student name.";
+      }
+    }
+
+    if (category === "general-students") {
+      if (!form.schoolName?.trim()) {
+        nextErrors.schoolName = isUrdu ? "اسکول کا نام ضروری ہے۔" : "School name is required.";
+      }
+      if (!form.classInput?.trim()) {
+        nextErrors.classInput = isUrdu ? "کلاس ضروری ہے۔" : "Class is required.";
+      }
+    }
+
+    if (category === "alh-parents" || category === "general-parents") {
+      const studentNames = form.studentNames?.filter(name => name.trim()) || [];
+      if (studentNames.length === 0) {
+        nextErrors.studentNames = isUrdu ? "کم از کم ایک طالب علم کا نام ضروری ہے۔" : "At least one student name is required.";
+      }
+      for (const name of studentNames) {
+        if (!isValidName(name)) {
+          nextErrors.studentNames = isUrdu ? "درست نام درج کریں۔" : "Please enter valid student names.";
+          break;
+        }
+      }
+    }
+
     return nextErrors;
   };
 
-  const updateField = (field: keyof FormState, value: string) => {
+  const updateField = (field: keyof FormState, value: string | string[]) => {
     setForm((prev) => ({ ...prev, [field]: value }));
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: undefined }));
     }
     setSubmitError("");
+  };
+
+  const updateStudentName = (index: number, value: string) => {
+    setForm((prev) => {
+      const newStudentNames = [...(prev.studentNames || [])];
+      newStudentNames[index] = value;
+      return { ...prev, studentNames: newStudentNames };
+    });
+    if (errors.studentNames) {
+      setErrors((prev) => ({ ...prev, studentNames: undefined }));
+    }
+    setSubmitError("");
+  };
+
+  const addStudentName = () => {
+    setForm((prev) => ({
+      ...prev,
+      studentNames: [...(prev.studentNames || []), ""],
+    }));
+  };
+
+  const removeStudentName = (index: number) => {
+    setForm((prev) => {
+      const newStudentNames = (prev.studentNames || []).filter((_, i) => i !== index);
+      return { ...prev, studentNames: newStudentNames.length > 0 ? newStudentNames : [""] };
+    });
   };
 
   const handlePhoneChange = (nextCode: string, nextNumber: string) => {
@@ -220,7 +300,10 @@ export function PublicEventRegistrationModal({ event, open, onClose }: Props) {
   };
 
   const resetForm = () => {
-    setForm(INITIAL_FORM);
+    setForm({
+      ...INITIAL_FORM,
+      studentNames: [""],
+    });
     setCountryCode("+92");
     setCountryMenuOpen(false);
     setLocalNumber("");
@@ -243,16 +326,33 @@ export function PublicEventRegistrationModal({ event, open, onClose }: Props) {
     setSubmitError("");
 
     try {
+      const category = event.eventCategory;
+      const requestPayload: Record<string, unknown> = {
+        eventId: event.id,
+        participantName: form.participantName.trim(),
+        parentName: form.participantName.trim(),
+        email: form.email.trim(),
+        whatsapp: form.whatsapp.trim(),
+        notes: form.notes.trim(),
+      };
+
+      if (category === "alh-students" || category === "general-students") {
+        requestPayload.studentName = form.studentName?.trim();
+      }
+
+      if (category === "general-students") {
+        requestPayload.schoolName = form.schoolName?.trim();
+        requestPayload.classInput = form.classInput?.trim();
+      }
+
+      if (category === "alh-parents" || category === "general-parents") {
+        requestPayload.studentNames = (form.studentNames || []).filter(name => name.trim());
+      }
+
       const response = await fetch("/api/public-event-registrations", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          eventId: event.id,
-          participantName: form.participantName.trim(),
-          email: form.email.trim(),
-          whatsapp: form.whatsapp.trim(),
-          notes: form.notes.trim(),
-        }),
+        body: JSON.stringify(requestPayload),
       });
 
       const payload = await response.json().catch(() => ({}));
@@ -325,16 +425,68 @@ export function PublicEventRegistrationModal({ event, open, onClose }: Props) {
 
         {!success ? (
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+          {(event.eventCategory === "alh-students" || event.eventCategory === "general-students") && (
+            <div>
+              <label className={labelClassName}>{uiText.studentName} *</label>
+              <input
+                value={form.studentName || ""}
+                onChange={(eventChange) => updateField("studentName", eventChange.target.value)}
+                placeholder={uiText.studentNamePlaceholder}
+                className="min-h-12 w-full rounded-2xl border border-emerald/12 bg-white px-4 py-3 outline-none transition focus:border-gold"
+              />
+              {errors.studentName ? <p className="mt-2 text-sm text-red-700">{errors.studentName}</p> : null}
+            </div>
+          )}
+
           <div>
-            <label className={labelClassName}>{uiText.participantName} *</label>
+            <label className={labelClassName}>{uiText.parentName} *</label>
             <input
               value={form.participantName}
               onChange={(eventChange) => updateField("participantName", eventChange.target.value)}
-              placeholder={uiText.participantPlaceholder}
+              placeholder={uiText.parentNamePlaceholder}
               className="min-h-12 w-full rounded-2xl border border-emerald/12 bg-white px-4 py-3 outline-none transition focus:border-gold"
             />
             {errors.participantName ? <p className="mt-2 text-sm text-red-700">{errors.participantName}</p> : null}
           </div>
+
+          {(event.eventCategory === "alh-parents" || event.eventCategory === "general-parents") && (
+            <div>
+              <label className={labelClassName}>{uiText.enterStudentNames} *</label>
+              <div className="space-y-2">
+                {(form.studentNames || []).map((studentName, index) => (
+                  <div key={index} className="flex gap-2">
+                    <input
+                      value={studentName}
+                      onChange={(eventChange) => updateStudentName(index, eventChange.target.value)}
+                      placeholder={uiText.enterStudentNamesPlaceholder}
+                      className="min-h-12 flex-1 rounded-2xl border border-emerald/12 bg-white px-4 py-3 outline-none transition focus:border-gold"
+                    />
+                    <div className="flex gap-1">
+                      {index === (form.studentNames || []).length - 1 && (
+                        <button
+                          type="button"
+                          onClick={addStudentName}
+                          className="inline-flex min-h-12 min-w-12 items-center justify-center rounded-2xl border border-emerald/12 bg-white px-3 py-3 font-semibold text-emerald-deep transition hover:border-gold hover:text-gold"
+                        >
+                          {uiText.addStudent}
+                        </button>
+                      )}
+                      {(form.studentNames || []).length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => removeStudentName(index)}
+                          className="inline-flex min-h-12 min-w-12 items-center justify-center rounded-2xl border border-red-200 bg-red-50 px-3 py-3 font-semibold text-red-600 transition hover:border-red-400 hover:text-red-700"
+                        >
+                          {uiText.removeStudent}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              {errors.studentNames ? <p className="mt-2 text-sm text-red-700">{errors.studentNames}</p> : null}
+            </div>
+          )}
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
@@ -397,6 +549,32 @@ export function PublicEventRegistrationModal({ event, open, onClose }: Props) {
               {errors.whatsapp ? <p className="mt-2 text-sm text-red-700">{errors.whatsapp}</p> : null}
             </div>
           </div>
+
+          {event.eventCategory === "general-students" && (
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div>
+                <label className={labelClassName}>{uiText.schoolName} *</label>
+                <input
+                  value={form.schoolName || ""}
+                  onChange={(eventChange) => updateField("schoolName", eventChange.target.value)}
+                  placeholder={uiText.schoolNamePlaceholder}
+                  className="min-h-12 w-full rounded-2xl border border-emerald/12 bg-white px-4 py-3 outline-none transition focus:border-gold"
+                />
+                {errors.schoolName ? <p className="mt-2 text-sm text-red-700">{errors.schoolName}</p> : null}
+              </div>
+
+              <div>
+                <label className={labelClassName}>{uiText.classInput} *</label>
+                <input
+                  value={form.classInput || ""}
+                  onChange={(eventChange) => updateField("classInput", eventChange.target.value)}
+                  placeholder={uiText.classInputPlaceholder}
+                  className="min-h-12 w-full rounded-2xl border border-emerald/12 bg-white px-4 py-3 outline-none transition focus:border-gold"
+                />
+                {errors.classInput ? <p className="mt-2 text-sm text-red-700">{errors.classInput}</p> : null}
+              </div>
+            </div>
+          )}
 
           <div>
             <label className={labelClassName}>{uiText.notes}</label>

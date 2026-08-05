@@ -139,6 +139,11 @@ export async function POST(request: NextRequest) {
       email: String(body.email ?? "").trim(),
       whatsapp: String(body.whatsapp ?? "").trim(),
       notes: String(body.notes ?? "").trim(),
+      studentName: body.studentName ? String(body.studentName).trim() : undefined,
+      parentName: body.parentName ? String(body.parentName).trim() : undefined,
+      schoolName: body.schoolName ? String(body.schoolName).trim() : undefined,
+      classInput: body.classInput ? String(body.classInput).trim() : undefined,
+      studentNames: Array.isArray(body.studentNames) ? body.studentNames.map((name: unknown) => String(name).trim()).filter((name: string) => name) : undefined,
     });
 
     const smtpConfig = getSmtpConfig();

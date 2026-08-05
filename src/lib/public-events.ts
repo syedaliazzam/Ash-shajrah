@@ -12,6 +12,7 @@ export type PublicEvent = {
   capacity: string;
   registrationDeadline: string;
   lifecycle: "current" | "upcoming" | "past";
+  eventCategory?: "alh-students" | "alh-parents" | "general-students" | "general-parents";
   ctaHref?: string;
   ctaLabel?: string;
   ctaExternal?: boolean;
@@ -67,6 +68,21 @@ export function normalizePublicEvent(
           ? "upcoming"
           : fallbackLifecycle || "upcoming";
 
+  const categoryRaw = pickString(
+    getValue(item, ["eventCategory", "event_category"])
+  ).toLowerCase();
+
+  const eventCategory: PublicEvent["eventCategory"] =
+    categoryRaw === "alh-students"
+      ? "alh-students"
+      : categoryRaw === "alh-parents"
+        ? "alh-parents"
+        : categoryRaw === "general-students"
+          ? "general-students"
+          : categoryRaw === "general-parents"
+            ? "general-parents"
+            : undefined;
+
   return {
     id: pickString(getValue(item, ["id", "event_id"])),
     slug:
@@ -91,6 +107,7 @@ export function normalizePublicEvent(
       getValue(item, ["registrationDeadline", "registration_deadline", "deadline", "registration_closes_at"])
     ),
     lifecycle,
+    eventCategory,
     ctaHref: pickString(getValue(item, ["ctaHref", "cta_href"])),
     ctaLabel: pickString(getValue(item, ["ctaLabel", "cta_label"])),
     ctaExternal: Boolean(getValue(item, ["ctaExternal", "cta_external"])),
