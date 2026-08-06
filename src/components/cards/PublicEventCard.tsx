@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { FacebookIcon } from "@/components/ui/FacebookIcon";
-import { formatEventDateTime, formatEventFee, type PublicEvent } from "@/lib/public-events";
+import { formatEventDate, formatEventFee, formatEventTime, type PublicEvent } from "@/lib/public-events";
 
 function getLifecycleLabel(value: PublicEvent["lifecycle"]) {
   if (value === "current") return "Current";
@@ -63,7 +63,7 @@ export function PublicEventCard({
         )}
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-emerald-deep/15 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
         <span className="absolute left-4 top-4 rounded-full border border-white bg-white px-3 py-1 text-xs font-semibold text-emerald-deep shadow-md">
-          {formatEventDateTime(event.startAt)}
+          {formatEventDate(event.startAt)}
         </span>
       </div>
 
@@ -85,20 +85,28 @@ export function PublicEventCard({
         {showMetaFields ? (
           <div className="mt-4 grid gap-2 text-xs text-emerald-deep/80 sm:text-sm">
             <div>
-              <span className="font-semibold text-emerald-deep">Start:</span>{" "}
-              {formatEventDateTime(event.startAt)}
+              <span className="font-semibold text-emerald-deep">Start Date:</span>{" "}
+              {formatEventDate(event.startAt)}
             </div>
             <div>
-              <span className="font-semibold text-emerald-deep">End:</span>{" "}
-              {formatEventDateTime(event.endAt)}
+              <span className="font-semibold text-emerald-deep">Start Time:</span>{" "}
+              {formatEventTime(event.startAt)}
+            </div>
+            <div>
+              <span className="font-semibold text-emerald-deep">End Time:</span>{" "}
+              {formatEventTime(event.endAt)}
             </div>
             <div>
               <span className="font-semibold text-emerald-deep">Fee:</span>{" "}
               {formatEventFee(event.fee, "Contact for details")}
             </div>
             <div>
-              <span className="font-semibold text-emerald-deep">Registration Deadline:</span>{" "}
-              {formatEventDateTime(event.registrationDeadline)}
+              <span className="font-semibold text-emerald-deep">Registration Deadline Date:</span>{" "}
+              {formatEventDate(event.registrationDeadline)}
+            </div>
+            <div>
+              <span className="font-semibold text-emerald-deep">Registration Deadline Time:</span>{" "}
+              {formatEventTime(event.registrationDeadline)}
             </div>
           </div>
         ) : null}
