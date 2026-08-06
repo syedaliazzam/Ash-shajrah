@@ -173,6 +173,18 @@ export function formatEventTime(value: string) {
   }).format(date);
 }
 
+export function formatEventFee(value: string, fallback = "0") {
+  const trimmedValue = value?.trim();
+  if (!trimmedValue) return fallback;
+
+  const numericValue = Number(trimmedValue);
+  if (Number.isNaN(numericValue)) return trimmedValue;
+
+  return new Intl.NumberFormat("en-PK", {
+    maximumFractionDigits: 0,
+  }).format(numericValue);
+}
+
 export function hasRegistrationDeadlinePassed(value: string) {
   if (!value) return false;
   const deadline = new Date(value);

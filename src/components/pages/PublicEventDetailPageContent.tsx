@@ -6,6 +6,7 @@ import { Header } from "@/components/layout/Header";
 import { useLanguage } from "@/contexts/LanguageContext";
 import {
   formatEventDate,
+  formatEventFee,
   formatEventTime,
   hasRegistrationDeadlinePassed,
   type PublicEvent,
@@ -65,12 +66,16 @@ export function PublicEventDetailPageContent({ event }: { event: PublicEvent }) 
 
             <div className="mt-6 grid items-start gap-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
               <div className="min-w-0 overflow-hidden rounded-[32px] border border-emerald/10 bg-white/90 shadow-[0_24px_70px_rgba(13,59,46,0.08)]">
-                <div className="relative h-[240px] bg-[#fff8ea] sm:h-[300px] lg:h-[540px]">
+                <div className="relative flex w-full items-start justify-center overflow-hidden bg-[#fff8ea] p-0 sm:p-0 lg:p-0">
                   {event.imageUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={event.imageUrl} alt={event.title} className="block h-full w-full object-contain" />
+                    <img
+                      src={event.imageUrl}
+                      alt={event.title}
+                      className="block w-full max-w-full object-contain"
+                    />
                   ) : (
-                    <div className="flex h-full items-center justify-center bg-gradient-to-br from-emerald-deep via-emerald to-gold/70 px-6 text-center text-white">
+                    <div className="flex h-[220px] w-full items-center justify-center bg-gradient-to-br from-emerald-deep via-emerald to-gold/70 px-6 text-center text-white sm:h-[260px] lg:h-[360px]">
                       <span className="font-display text-2xl font-bold">{event.title}</span>
                     </div>
                   )}
@@ -88,9 +93,8 @@ export function PublicEventDetailPageContent({ event }: { event: PublicEvent }) 
                 <div className="mt-6 grid gap-4 rounded-[28px] border border-emerald/10 bg-cream/65 p-5 text-sm text-emerald-deep sm:grid-cols-2">
                   <div><span className="font-semibold">{uiText.startDate}:</span> {formatEventDate(event.startAt)}</div>
                   <div><span className="font-semibold">{uiText.startTime}:</span> {formatEventTime(event.startAt)}</div>
-                  <div><span className="font-semibold">{uiText.endDate}:</span> {formatEventDate(event.endAt)}</div>
                   <div><span className="font-semibold">{uiText.endTime}:</span> {formatEventTime(event.endAt)}</div>
-                  <div><span className="font-semibold">{uiText.fee}:</span> {event.fee || "0"}</div>
+                  <div><span className="font-semibold">{uiText.fee}:</span> {formatEventFee(event.fee)}</div>
                   <div><span className="font-semibold">{uiText.deadlineDate}:</span> {formatEventDate(event.registrationDeadline)}</div>
                   <div><span className="font-semibold">{uiText.deadlineTime}:</span> {formatEventTime(event.registrationDeadline)}</div>
                 </div>

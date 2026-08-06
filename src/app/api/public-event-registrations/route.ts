@@ -37,6 +37,36 @@ function getPublicEventsFromEmail(smtpUser?: string) {
   return process.env.PUBLIC_EVENTS_SMTP_FROM || smtpUser || "admissions@ashshajrah.com";
 }
 
+function formatEventDate(value: string) {
+  if (!value) return "To be announced";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return new Intl.DateTimeFormat("en-PK", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: "Asia/Karachi",
+  }).format(date);
+}
+
+function formatEventTime(value: string) {
+  if (!value) return "To be announced";
+
+  const rawValue = String(value).trim();
+  const date = new Date(rawValue);
+  if (Number.isNaN(date.getTime())) {
+    const timeMatch = rawValue.match(/(\d{1,2}):(\d{2})/);
+    return timeMatch ? `${timeMatch[1]}:${timeMatch[2]}` : rawValue;
+  }
+
+  return new Intl.DateTimeFormat("en-PK", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+    timeZone: "Asia/Karachi",
+  }).format(date);
+}
+
 function formatDateTime(value: string) {
   if (!value) return "To be announced";
   const date = new Date(value);
@@ -46,6 +76,15 @@ function formatDateTime(value: string) {
     timeStyle: "short",
     timeZone: "Asia/Karachi",
   }).format(date);
+}
+
+function formatAmount(value: string | number | null | undefined) {
+  if (value === null || value === undefined || value === "") return "0";
+  const numericValue = typeof value === "string" ? Number(value) : value;
+  if (Number.isNaN(numericValue)) return "0";
+  return new Intl.NumberFormat("en-PK", {
+    maximumFractionDigits: 0,
+  }).format(numericValue);
 }
 
 function escapeHtml(value: string) {
@@ -157,9 +196,11 @@ export async function POST(request: NextRequest) {
       try {
         const publicEventsFromEmail = getPublicEventsFromEmail(smtpConfig.auth.user);
         const transporter = nodemailer.createTransport(smtpConfig);
-        const eventStart = formatDateTime(registration.eventStartAt);
-        const eventEnd = formatDateTime(registration.eventEndAt);
+        const eventStartDate = formatEventDate(registration.eventStartAt);
+        const eventStartTime = formatEventTime(registration.eventStartAt);
+        const eventEndTime = formatEventTime(registration.eventEndAt);
         const deadline = formatDateTime(registration.registrationDeadline);
+        const formattedAmountDue = formatAmount(registration.amountDue);
         const paymentText = buildPaymentMethodsText(paymentMethods);
         const paymentHtml = buildPaymentMethodsHtml(paymentMethods);
         const emailSubject = `${registration.eventTitle} | Ash-Shajrah Learning Hub`;
@@ -174,17 +215,19 @@ export async function POST(request: NextRequest) {
             "",
             `Dear ${String(body.participantName ?? "").trim()},`,
             "",
-            "Thank you for registering for an Ash-Shajrah public event.",
-            "After payment, kindly share your payment screenshot with the coordinator on WhatsApp to confirm your seat.",
+            "Thank you for registering for an Ash-Shajrah event.",
+            `Kindly complete a payment of ${formattedAmountDue}, then send your payment details to the coordinator on WhatsApp to confirm your seat. Payment details are provided below.`,
             "",
             `Registration Number: ${registration.registrationNumber}`,
             `Event: ${registration.eventTitle}`,
             `Participant Name: ${String(body.participantName ?? "").trim()}`,
             `WhatsApp: ${String(body.whatsapp ?? "").trim()}`,
-            `Start: ${eventStart}`,
-            `End: ${eventEnd}`,
+            `Event Timing:`,
+            `- Start Date: ${eventStartDate}`,
+            `- Start Time: ${eventStartTime || "To be announced"}`,
+            `- End Time: ${eventEndTime || "To be announced"}`,
             `Registration Deadline: ${deadline}`,
-            `Amount Due: ${registration.amountDue}`,
+            `Amount Due: ${formattedAmountDue}`,
             "",
             paymentText,
             "",
@@ -206,14 +249,15 @@ export async function POST(request: NextRequest) {
               <div style="background:#ffffff;padding:24px;border:1px solid #e8e4dc;border-top:0;border-radius:0 0 12px 12px">
                 <p style="color:#0d3b2e;line-height:1.7;margin:0 0 16px;font-size:15px">Dear ${escapeHtml(String(body.participantName ?? "").trim())},</p>
                 <p style="color:#0d3b2e;line-height:1.7;margin:0 0 16px;font-size:15px">Thank you for registering for an Ash-Shajrah public event.</p>
-                <p style="margin:0 0 16px;color:#0d3b2e;font-size:15px;font-weight:700;line-height:1.7">After making the payment, please send a screenshot to the coordinator on WhatsApp to confirm your seat. Payment details are below.</p>
+                <p style="margin:0 0 16px;color:#0d3b2e;font-size:15px;font-weight:700;line-height:1.7">Kindly complete a payment of ${escapeHtml(formattedAmountDue)}, then send your payment details to the coordinator on WhatsApp to confirm your seat. Payment details are given below.</p>
                 <div style="background:#faf7f0;border:1px solid #e8e4dc;border-radius:12px;padding:16px 18px;margin:20px 0">
                   <p style="margin:10px 0 0;color:#0d3b2e;font-size:14px;line-height:1.7;font-weight:900;"><strong>Registration Details</strong></p>
                   <p style="margin:10px 0 0;color:#0d3b2e;font-size:14px;line-height:1.7"><strong>Event:</strong> ${escapeHtml(registration.eventTitle)}</p>
                   <p style="margin:8px 0 0;color:#0d3b2e;font-size:14px;line-height:1.7"><strong>Participant Name:</strong> ${escapeHtml(String(body.participantName ?? "").trim())}</p>
-                  <p style="margin:8px 0 0;color:#0d3b2e;font-size:14px;line-height:1.7"><strong>Start:</strong> ${escapeHtml(eventStart)}</p>
-                  <p style="margin:8px 0 0;color:#0d3b2e;font-size:14px;line-height:1.7"><strong>End:</strong> ${escapeHtml(eventEnd)}</p>
-                  <p style="margin:8px 0 0;color:#0d3b2e;font-size:14px;line-height:1.7"><strong>Amount Due:</strong> ${escapeHtml(registration.amountDue)}</p>
+                  <p style="margin:8px 0 0;color:#0d3b2e;font-size:14px;line-height:1.7"><strong>Start Date:</strong> ${escapeHtml(eventStartDate)}</p>
+                  <p style="margin:8px 0 0;color:#0d3b2e;font-size:14px;line-height:1.7"><strong>Start Time:</strong> ${escapeHtml(eventStartTime || "To be announced")}</p>
+                  <p style="margin:8px 0 0;color:#0d3b2e;font-size:14px;line-height:1.7"><strong>End Time:</strong> ${escapeHtml(eventEndTime || "To be announced")}</p>
+                  <p style="margin:8px 0 0;color:#0d3b2e;font-size:14px;line-height:1.7"><strong>Amount Due:</strong> ${escapeHtml(formattedAmountDue)}</p>
                 </div>
                 ${paymentHtml}
                 <div style="margin-top:20px;padding:16px 18px;border:1px solid #e8e4dc;border-radius:12px;background:#faf7f0">

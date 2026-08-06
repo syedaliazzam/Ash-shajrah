@@ -2,7 +2,9 @@
 
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import {
-  formatEventDateTime,
+  formatEventDate,
+  formatEventFee,
+  formatEventTime,
   hasRegistrationDeadlinePassed,
   type PublicEvent,
 } from "@/lib/public-events";
@@ -138,7 +140,7 @@ export function PublicEventRegistrationModal({ event, open, onClose }: Props) {
   const uiText = {
     close: isUrdu ? "بند کریں" : "Close",
     reserveSeat: isUrdu ? "اپنی نشست محفوظ کریں" : "Reserve your seat",
-    reserveSeatBody: isUrdu ? "نیچے فارم مکمل کریں۔ یہ ایونٹ پہلے سے منتخب ہے۔" : "Complete the form below. This event is already selected for you.",
+    reserveSeatBody: isUrdu ? "نیچے فارم مکمل کریں۔" : "Complete the form below.",
     participantName: isUrdu ? "شرکت کنندہ کا نام" : "Participant Name",
     participantPlaceholder: isUrdu ? "مکمل نام" : "Full name",
     email: isUrdu ? "ای میل" : "Email",
@@ -393,17 +395,21 @@ export function PublicEventRegistrationModal({ event, open, onClose }: Props) {
         <h2 className="mt-3 font-display text-3xl font-bold tracking-tight text-emerald-deep">
           {uiText.reserveSeat}
         </h2>
-        <p className="mt-3 max-w-2xl text-sm leading-7 text-emerald-deep/75">
-          {uiText.reserveSeatBody}
-        </p>
+        {!success ? (
+          <p className="mt-3 max-w-2xl text-sm leading-7 text-emerald-deep/75">
+            {uiText.reserveSeatBody}
+          </p>
+        ) : null}
 
         <div className="mt-6 rounded-[24px] border border-emerald/10 bg-white/80 p-5 text-sm text-emerald-deep/85">
           <h3 className="font-display text-xl font-bold text-emerald-deep">{event.title}</h3>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
-            <div><span className="font-semibold">Start:</span> {formatEventDateTime(event.startAt)}</div>
-            <div><span className="font-semibold">End:</span> {formatEventDateTime(event.endAt)}</div>
-            <div><span className="font-semibold">Registration Deadline:</span> {formatEventDateTime(event.registrationDeadline)}</div>
-            <div><span className="font-semibold">{uiText.eventFee}:</span> {event.fee || "0"}</div>
+            <div><span className="font-semibold">Start Date:</span> {formatEventDate(event.startAt)}</div>
+            <div><span className="font-semibold">Start Time:</span> {formatEventTime(event.startAt)}</div>
+            <div><span className="font-semibold">End Time:</span> {formatEventTime(event.endAt)}</div>
+            <div><span className="font-semibold">{uiText.eventFee}:</span> {formatEventFee(event.fee)}</div>
+            <div><span className="font-semibold">Registration Deadline Date:</span> {formatEventDate(event.registrationDeadline)}</div>
+            <div><span className="font-semibold">Registration Deadline Time:</span> {formatEventTime(event.registrationDeadline)}</div>
           </div>
         </div>
 
@@ -416,6 +422,7 @@ export function PublicEventRegistrationModal({ event, open, onClose }: Props) {
             <p className="mt-2">{uiText.registrationNumber}: <span className="font-semibold">{success.registrationNumber}</span></p>
             <p className="mt-2 leading-7">{success.message}</p>
             <div className="mt-4 rounded-2xl border border-gold/20 bg-white/70 px-4 py-4 text-sm leading-7">
+              <p><span className="font-semibold">{uiText.eventFee}:</span> {formatEventFee(event.fee)}</p>
               <p><span className="font-semibold">{uiText.coordinator}:</span> Shoaib Ul Din</p>
               <p><span className="font-semibold">{uiText.email}:</span> coordinator@ashshajrah.com</p>
               <p><span className="font-semibold">{uiText.whatsapp}:</span> +923473547036</p>

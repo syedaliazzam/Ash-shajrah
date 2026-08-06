@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { FacebookIcon } from "@/components/ui/FacebookIcon";
-import { formatEventDateTime, type PublicEvent } from "@/lib/public-events";
+import { formatEventDateTime, formatEventFee, type PublicEvent } from "@/lib/public-events";
 
 function getLifecycleLabel(value: PublicEvent["lifecycle"]) {
   if (value === "current") return "Current";
@@ -94,7 +94,7 @@ export function PublicEventCard({
             </div>
             <div>
               <span className="font-semibold text-emerald-deep">Fee:</span>{" "}
-              {event.fee || "Contact for details"}
+              {formatEventFee(event.fee, "Contact for details")}
             </div>
             <div>
               <span className="font-semibold text-emerald-deep">Registration Deadline:</span>{" "}
