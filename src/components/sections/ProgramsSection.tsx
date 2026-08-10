@@ -52,10 +52,11 @@ export function ProgramsSection() {
   };
 
   const programsList = [
-    t.programs.playgroup,
-    t.programs.prepI,
-    t.programs.prepII,
-    t.programs.parentPartnership,
+    { ...t.programs.playgroup, image: undefined as string | undefined, buttonLabel: undefined as string | undefined },
+    { ...t.programs.prepI, image: undefined as string | undefined, buttonLabel: undefined as string | undefined },
+    { ...t.programs.prepII, image: undefined as string | undefined, buttonLabel: undefined as string | undefined },
+    { ...t.programs.parentPartnership, image: undefined as string | undefined, buttonLabel: undefined as string | undefined },
+    { ...t.programs.monthlyPlan },
   ];
 
   return (
@@ -109,6 +110,17 @@ export function ProgramsSection() {
                 <p className={`${language === 'ur' ? 'font-urdu leading-[2]' : 'leading-relaxed'} text-sm text-emerald-deep/80`}>
                   {program.body}
                 </p>
+
+                {program.image ? (
+                  <a
+                    href={program.image}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-5 inline-flex items-center gap-2 rounded-full border border-emerald/20 bg-emerald/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-emerald-deep transition hover:border-gold hover:bg-gold/10 hover:text-gold"
+                  >
+                    {program.buttonLabel ?? "View Plan"}
+                  </a>
+                ) : null}
               </div>
             </article>
           ))}

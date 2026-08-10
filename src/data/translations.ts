@@ -96,6 +96,12 @@ export const translations = {
       parentPartnership: {
         title: "Parent Partnership Model",
         body: "At Ash-Shajrah, parents are not passive observers — they are active learning partners. We provide parents with training, ongoing guidance, and regular communication so they can confidently support their child's learning at home. This partnership creates a strong, loving, and consistent learning environment for every child.",
+      },
+      monthlyPlan: {
+        title: "Monthly Plan for August 2026",
+        body: "The August 2026 learning plan provides a structured overview of educational goals, key learning milestones, study activities, and progress tracking. It is designed to support consistent learning, skill development, knowledge building, and measurable academic progress throughout the month.",
+        image: "/images/ourprograms/august-13.jpeg",
+        buttonLabel: "View Monthly Plan",
       }
     },
     curriculumTable: {
@@ -114,6 +120,8 @@ export const translations = {
         { area: "Interactive Classes", description: "Interactive online classes with engaging lessons and individual attention." },
         { area: "Personal and Social Development", description: "Focus on social, emotional, physical, cognitive and spiritual development." },
         { area: "Creativity", description: "A safe, nurturing and inclusive virtual environment to build creativity and prepare young learners to become confident, compassionate and lifelong learners." },
+        { area: "Early Years Planning Manual Prep", description: "The Prep curriculum provides a structured, child-centered learning journey through annual, monthly, weekly, and daily planning, supporting children’s language, mathematics, faith and character, personal and social development, creativity, and discovery through developmentally appropriate learning experiences." },
+        { area: "Early Years Planning Manual Play Group", description: "The Play Group curriculum provides a child-centered, developmentally appropriate learning journey that nurtures early language, numeracy, faith and character, social-emotional growth, creativity, and sensory discovery through purposeful learning experiences." },
       ]
     },
     learning: {
@@ -546,6 +554,12 @@ export const translations = {
       parentPartnership: {
         title: "والدین کی شراکت داری",
         body: "الشجرہ لرننگ ہب میں والدین صرف تماشائی نہیں بلکہ فعال تعلیمی شراکت دار ہیں۔ ہم والدین کو تربیت، رہنمائی اور مسلسل تعاون فراہم کرتے ہیں تاکہ وہ گھر میں بچوں کی تعلیم کو صحیح طریقے سے سنبھال سکیں۔ یہ شراکت داری بچے کے لیے ایک مضبوط، محبت بھرا سیکھنے کا ماحول پیدا کرتی ہے۔",
+      },
+      monthlyPlan: {
+        title: "اگست 2026 کا ماہانہ منصوبہ",
+        body: "اگست 2026 کا تعلیمی ماہانہ منصوبہ تعلیمی اہداف، اہم تعلیمی سنگ میل، مطالعہ کی سرگرمیاں اور پیش رفت کے جائزے کا منظم خلاصہ فراہم کرتا ہے۔ یہ منصوبہ مسلسل سیکھنے، مہارتوں کی نشوونما، علم کی ترقی اور ماہ کے دوران قابلِ پیمائش تعلیمی پیش رفت کو مضبوط بنانے کے لیے ڈیزائن کیا گیا ہے۔",
+        image: "/images/ourprograms/august-13.jpeg",
+        buttonLabel: "ماہانہ منصوبہ دیکھیں",
       }
     },
     curriculumTable: {
@@ -564,6 +578,8 @@ export const translations = {
         { area: "انٹرایکٹو کلاسز", description: "دلچسپ اسباق اور انفرادی توجہ کے ساتھ انٹرایکٹو آن لائن کلاسز۔" },
         { area: "شخصی اور سماجی نشوونما", description: "سماجی، جذباتی، جسمانی، ذہنی اور روحانی نشوونما پر توجہ۔" },
         { area: "تخلیقی صلاحیت", description: "ایک محفوظ، تربیتی اور جامع ورچوئل ماحول جو تخلیقی صلاحیت کو فروغ دے اور بچوں کو پراعتماد، ہمدرد اور زندگی بھر سیکھنے والا بنائے۔" },
+        { area: "ایئرلی ایئرز پلاسنگ مینول پری", description: "پری کے نصاب میں سالانہ، ماہانہ، ہفتہ وار اور روزانہ منصوبہ بندی کے ذریعے ایک منظم، بچے کی مرکزیت پر مبنی سیکھنے کا سفر فراہم کیا جاتا ہے، جو بچوں کی زبان، ریاضی، ایمان، کردار، شخصی اور سماجی نشوونما، تخلیقی صلاحیت اور دریافت کو ترقیاتی طور پر مناسب تعلیمی تجربات کے ذریعے سہارا دیتا ہے۔" },
+        { area: "ایئرلی ایئرز پلاسنگ مینول پلے گروپ", description: "پلے گروپ کے نصاب میں ایک بچے کی مرکزیت پر مبنی، ترقیاتی طور پر مناسب سیکھنے کا سفر شامل ہے جو ابتدائی زبان، عددی مہارتیں، ایمان اور کردار، سماجی-جذباتی نشوونما، تخلیقی صلاحیت اور حسی دریافت کو مقصدی تعلیمی تجربات کے ذریعے فروغ دیتا ہے۔" },
       ]
     },
     learning: {
