@@ -77,31 +77,66 @@ function buildParentInterviewParentConfirmationHtml(input: {
   interestedProgramme: string | null;
   submittedAt: string;
 }) {
+  const safeWrapStyle = (isUrl = false) =>
+    isUrl
+      ? "overflow-wrap:break-word;word-break:break-all;"
+      : "overflow-wrap:break-word;word-break:break-word;";
+  const buildCard = (title: string, bodyHtml: string) =>
+    `<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:100%;margin-bottom:18px;background-color:#FFFFFF;border:1px solid #DDD6C8;border-top-right-radius: 18px;border-bottom-right-radius: 18px;"><tr><td><table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"><tr><td style="width:4px;background-color:#C79A3B;font-size:0;line-height:0;border-radius:0;"></td><td class="mobile-card-pad" style="padding:22px 22px 20px;"><p style="margin:0 0 14px;color:#0F4C3A;font-size:21px;line-height:26px;font-weight:700;text-transform:uppercase;">${escapeHtml(title)}</p>${bodyHtml}</td></tr></table></td></tr></table>`;
+  const buildRows = (rows: Array<{ label: string; value: string; isUrl?: boolean }>) =>
+    `<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:100%;border-collapse:collapse;">${rows
+      .map(
+        ({ label, value, isUrl }) =>
+          `<tr><td class="stack-column" valign="top" style="padding:7px 0;width:42%;color:#1F2A24;font-size:14px;line-height:21px;font-weight:700;">${escapeHtml(label)}</td><td class="stack-column" valign="top" style="padding:7px 0;color:#5B655F;font-size:14px;line-height:21px;${safeWrapStyle(isUrl)}">${escapeHtml(value)}</td></tr>`
+      )
+      .join("")}</table>`;
   return `
-    <div style="font-family:Arial,sans-serif;max-width:640px;margin:0 auto;background:#faf7f0;padding:24px;border-radius:12px">
-      <div style="background:linear-gradient(135deg,#0d3b2e,#1a5c45);padding:28px 24px;border-radius:12px 12px 0 0">
-        <h2 style="color:#faf7f0;margin:0 0 8px">Parents Interview Form Received</h2>
-        <p style="color:#e8d5a3;margin:0;font-size:14px">Ash-Shajrah Learning Hub</p>
-      </div>
-      <div style="background:#ffffff;padding:24px;border:1px solid #e8e4dc;border-top:0;border-radius:0 0 12px 12px">
-        <p style="color:#0d3b2e;line-height:1.7;margin:0 0 16px">Dear ${escapeHtml(input.parentName)},</p>
-        <p style="color:#0d3b2e;line-height:1.7;margin:0 0 16px">
+    <html lang="en">
+    <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <style>
+        body, table, td, p, a { font-family: Arial, Helvetica, sans-serif; }
+        @media only screen and (max-width: 600px) {
+          .container { width: 100% !important; }
+          .stack-column { display: block !important; width: 100% !important; max-width: 100% !important; }
+          .mobile-padding { padding-left: 20px !important; padding-right: 20px !important; }
+          .mobile-card-pad { padding: 18px !important; }
+        }
+      </style>
+    </head>
+    <body style="margin:0;padding:0;background-color:#F7F4EE;">
+      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:100%;background-color:#F7F4EE;">
+        <tr><td align="center" style="padding:24px 16px;">
+          <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="600" class="container" style="width:100%;max-width:600px;">
+            <tr><td class="mobile-padding" style="background-color:#0F4C3A;border-radius:24px 24px 0 0;padding:28px 28px 24px;">
+              <p style="margin:0;color:#C79A3B;font-size:14px;line-height:20px;font-weight:700;letter-spacing:0.08em;text-transform:none;">Ash-Shajrah Learning Hub</p>
+              <p style="margin:10px 0 0;color:#FFFFFF;font-size:30px;line-height:36px;font-weight:700;">Parents Interview Received</p>
+            </td></tr>
+            <tr><td class="mobile-padding" style="background-color:#FFFFFF;padding:28px 28px 10px;border-left:1px solid #DDD6C8;border-right:1px solid #DDD6C8;">
+              <p style="margin:0 0 16px;color:#1F2A24;font-size:16px;line-height:24px;font-weight:700;">Dear ${escapeHtml(input.parentName)},</p>
+              <p style="margin:0 0 16px;color:#5B655F;font-size:15px;line-height:24px;">
           Thank you for submitting the Parents Interview Form. We have received your response successfully.
         </p>
-        <div style="background:#faf7f0;border:1px solid #e8e4dc;border-radius:12px;padding:16px 18px;margin:20px 0">
-          <p style="margin:0 0 8px;color:#5c4a32;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;">Submitted</p>
-          <p style="margin:0;color:#0d3b2e;font-size:14px;">${escapeHtml(input.submittedAt)}</p>
-          <p style="margin:16px 0 8px;color:#5c4a32;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;">Child Name</p>
-          <p style="margin:0;color:#0d3b2e;font-size:14px;">${escapeHtml(input.childName || "-")}</p>
-          <p style="margin:16px 0 8px;color:#5c4a32;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;">Interested Programme</p>
-          <p style="margin:0;color:#0d3b2e;font-size:14px;">${escapeHtml(input.interestedProgramme || "-")}</p>
-        </div>
-        <p style="color:#0d3b2e;line-height:1.7;margin:0">
+              ${buildCard(
+                "Registration Summary",
+                buildRows([
+                  { label: "Submitted", value: input.submittedAt },
+                  { label: "Child Name", value: input.childName || "-" },
+                  { label: "Interested Programme", value: input.interestedProgramme || "-" },
+                ])
+              )}
+              <p style="color:#5B655F;font-size:15px;line-height:24px;margin:0">
           Our admissions team will review the information and contact you if anything further is needed.
-        </p>
-        <p style="color:#0d3b2e;line-height:1.7;margin:20px 0 0">Warm regards,<br/>Ash-Shajrah Learning Hub</p>
-      </div>
-    </div>
+              </p>
+              <p style="color:#1F2A24;font-size:15px;line-height:24px;margin:20px 0 0">Warm regards,<br/><strong>Ash-Shajrah Learning Hub</strong></p>
+            </td></tr>
+            <tr><td class="mobile-padding" style="background-color:#0F4C3A;border-radius:0 0 24px 24px;padding:20px 28px;"><p style="margin:0;color:#F7F4EE;font-size:13px;line-height:20px;text-align:center;">Ash-Shajrah Learning Hub | Trusted knowledge, guided with care.</p></td></tr>
+          </table>
+        </td></tr>
+      </table>
+    </body>
+    </html>
   `;
 }
 

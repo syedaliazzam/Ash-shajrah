@@ -144,6 +144,95 @@ function escapeHtml(value: string): string {
     .replace(/"/g, "&quot;");
 }
 
+function safeWrapStyle(isUrl = false): string {
+  return isUrl
+    ? "overflow-wrap:break-word;word-break:break-all;"
+    : "overflow-wrap:break-word;word-break:break-word;";
+}
+
+function buildEmailShell(input: {
+  preheader: string;
+  headerEyebrow?: string;
+  title: string;
+  subtitle?: string;
+  registrationNumber?: string;
+  statusBadge?: string;
+  introHtml: string;
+  sectionsHtml: string;
+  footerNote?: string;
+}) {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>${escapeHtml(input.title)}</title>
+  <style>
+    body, table, td, p, a { font-family: Arial, Helvetica, sans-serif; }
+    @media only screen and (max-width: 600px) {
+      .container { width: 100% !important; }
+      .stack-column { display: block !important; width: 100% !important; max-width: 100% !important; }
+      .mobile-padding { padding-left: 20px !important; padding-right: 20px !important; }
+      .mobile-full-button { display: block !important; width: 100% !important; }
+      .mobile-center { text-align: left !important; }
+      .mobile-card-pad { padding: 18px !important; }
+    }
+  </style>
+</head>
+<body style="margin:0;padding:0;background-color:#F7F4EE;">
+  <div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent;">${escapeHtml(input.preheader)}</div>
+  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:100%;background-color:#F7F4EE;">
+    <tr>
+      <td align="center" style="padding:24px 16px;">
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="600" class="container" style="width:100%;max-width:600px;">
+          <tr>
+            <td class="mobile-padding" style="background-color:#0F4C3A;border-radius:24px 24px 0 0;padding:28px 28px 24px;">
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                <tr>
+                  <td class="stack-column" valign="top" style="padding-right:12px;">
+                    <p style="margin:0;color:#C79A3B;font-size:14px;line-height:20px;font-weight:700;letter-spacing:0.08em;text-transform:none;">Ash-Shajrah Learning Hub</p>
+                    <p style="margin:10px 0 0;color:#DDE9E3;font-size:30px;line-height:36px;font-weight:700;${safeWrapStyle()}">${escapeHtml(input.registrationNumber || input.title)}</p>
+                    ${input.subtitle ? `<p style="margin:12px 0 0;color:#DDE9E3;font-size:14px;line-height:22px;">${escapeHtml(input.subtitle)}</p>` : ""}
+                  </td>
+                  <td class="stack-column mobile-center" valign="middle" align="right" style="width:180px;">
+                    ${input.statusBadge ? `<table role="presentation" cellpadding="0" cellspacing="0" border="0" align="right" class="mobile-full-button" style="border:1px solid rgba(255,255,255,0.22);background-color:#1E6B52;border-radius:999px;"><tr><td style="padding:12px 18px;color:#FFFFFF;font-size:14px;line-height:18px;font-weight:700;text-align:center;">${escapeHtml(input.statusBadge)}</td></tr></table>` : ""}
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td class="mobile-padding" style="background-color:#FFFFFF;padding:28px 28px 10px;border-left:1px solid #DDD6C8;border-right:1px solid #DDD6C8;">
+              ${input.introHtml}
+              ${input.sectionsHtml}
+            </td>
+          </tr>
+          <tr>
+            <td class="mobile-padding" style="background-color:#0F4C3A;border-radius:0 0 24px 24px;padding:20px 28px;">
+              <p style="margin:0;color:#F7F4EE;font-size:13px;line-height:20px;text-align:center;">${escapeHtml(input.footerNote || "Ash-Shajrah Learning Hub | Trusted knowledge, guided with care.")}</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+}
+
+function buildInfoCard(title: string, bodyHtml: string) {
+  return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:100%;margin-bottom:18px;background-color:#FFFFFF;border:1px solid #DDD6C8;border-top-right-radius: 18px;border-bottom-right-radius: 18px;"><tr><td><table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"><tr><td style="width:4px;background-color:#C79A3B;font-size:0;line-height:0;border-radius:0;"></td><td class="mobile-card-pad" style="padding:22px 22px 20px;"><p style="margin:0 0 14px;color:#0F4C3A;font-size:21px;line-height:26px;font-weight:700;text-transform:uppercase;">${escapeHtml(title)}</p>${bodyHtml}</td></tr></table></td></tr></table>`;
+}
+
+function buildDetailRows(rows: Array<{ label: string; value: string; isUrl?: boolean }>) {
+  return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:100%;border-collapse:collapse;">${rows
+    .map(
+      ({ label, value, isUrl }) =>
+        `<tr><td class="stack-column" valign="top" style="padding:7px 0;width:42%;color:#1F2A24;font-size:14px;line-height:21px;font-weight:700;">${escapeHtml(label)}</td><td class="stack-column" valign="top" style="padding:7px 0;color:#5B655F;font-size:14px;line-height:21px;${safeWrapStyle(isUrl)}">${escapeHtml(value)}</td></tr>`
+    )
+    .join("")}</table>`;
+}
+
 function toPlainText(value: unknown): string {
   if (value === null || value === undefined) return "";
   if (typeof value === "string") return value;
@@ -215,6 +304,29 @@ export function formatRegistrationEmailHtml(
   data: RegistrationFormData,
   submittedAt: string
 ): string {
+  return buildEmailShell({
+    preheader: "New student registration received.",
+    headerEyebrow: "Registration Alert",
+    title: "New Registration",
+    subtitle: "Ash-Shajrah Learning Hub Online Early Childhood Learning",
+    statusBadge: "New Submission",
+    introHtml:
+      '<p style="margin:0 0 20px;color:#1F2A24;font-size:15px;line-height:24px;">A new student registration has been submitted. The full details are listed below.</p>',
+    sectionsHtml: buildInfoCard(
+      "Registration Summary",
+      buildDetailRows([
+        { label: "Submitted", value: submittedAt },
+        { label: "Parent / Guardian Name", value: data.parentName.trim() },
+        { label: "WhatsApp Number", value: data.whatsapp.trim() },
+        { label: "Email Address", value: data.email.trim() },
+        { label: "Child Name", value: data.childName.trim() },
+        { label: "Child Date of Birth", value: data.childDob?.trim() || "(Not provided)" },
+        { label: "Interested Level", value: data.level.trim() },
+        { label: "City / Country", value: data.cityCountry.trim() },
+        { label: "Message", value: data.message.trim() || "(Not provided)" },
+      ])
+    ),
+  });
   const row = (label: string, value: string) =>
     `<tr><td style="padding:10px 12px;border-bottom:1px solid #e8e4dc;color:#5c4a32;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;width:36%;vertical-align:top;">${label}</td><td style="padding:10px 12px;border-bottom:1px solid #e8e4dc;color:#0d3b2e;font-size:15px;">${escapeHtml(value)}</td></tr>`;
 
@@ -311,70 +423,64 @@ export function formatRegistrationConfirmationHtml(
     ? cityCountry.split(",").map((part) => part.trim())
     : ["", cityCountry];
 
-  const interviewSection = interviewUrl
-    ? `
-      <div style="background:#faf7f0;border:1px solid #e8e4dc;border-radius:12px;padding:20px 18px;margin:24px 0;">
-        <h2 style="margin:0 0 12px;color:#0d3b2e;font-size:18px;font-weight:700;">Next Step: Complete the Parents Interview Form</h2>
-        <p style="margin:0 0 12px;color:#0d3b2e;font-size:15px;line-height:1.7;">
-          Every child develops and learns differently. To help our admission and academic team understand your child’s health, development, learning readiness, daily routine, behaviour, interests, and home environment, please complete the Parents Interview Form using the button below.
+  const redesignedInterviewSection = interviewUrl
+    ? buildInfoCard(
+        "Next Step",
+        `
+        <p style="margin:0 0 12px;color:#1F2A24;font-size:15px;line-height:24px;font-weight:700;">Complete the Parents Interview Form</p>
+        <p style="margin:0 0 12px;color:#5B655F;font-size:15px;line-height:24px;">
+          Every child develops and learns differently. To help our admission and academic team understand your childâ€™s health, development, learning readiness, daily routine, behaviour, interests, and home environment, please complete the Parents Interview Form using the button below.
         </p>
-        <p style="margin:0 0 18px;color:#0d3b2e;font-size:15px;line-height:1.7;">
+        <p style="margin:0 0 18px;color:#5B655F;font-size:15px;line-height:24px;">
           This is not a test, and there are no right or wrong answers. The information will help us prepare a more caring, supportive, and age-appropriate learning experience for your child.
         </p>
-        <p style="margin:0 0 12px;">
-          <a
-            href="${escapeHtml(interviewUrl)}"
-            style="display:inline-block;background:#0f5a43;color:#ffffff;padding:14px 24px;border-radius:999px;text-decoration:none;font-weight:700;"
-          >
-            Complete Parents Interview Form
-          </a>
-        </p>
-        <p style="margin:0;color:#5c4a32;font-size:12px;line-height:1.6;word-break:break-all;">
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" class="mobile-full-button" style="margin-bottom:12px;">
+          <tr>
+            <td align="center" style="background-color:#0F4C3A;border-radius:999px;">
+              <a href="${escapeHtml(interviewUrl)}" class="mobile-full-button" style="display:inline-block;padding:14px 24px;color:#FFFFFF;text-decoration:none;font-size:15px;line-height:20px;font-weight:700;">Complete Parents Interview Form</a>
+            </td>
+          </tr>
+        </table>
+        <p style="margin:0;color:#5B655F;font-size:12px;line-height:20px;${safeWrapStyle(true)}">
           If the button does not work, open this link:<br/>
-          <a href="${escapeHtml(interviewUrl)}" style="color:#0f5a43;">${escapeHtml(interviewUrl)}</a>
+          <a href="${escapeHtml(interviewUrl)}" style="color:#1E6B52;text-decoration:underline;">${escapeHtml(interviewUrl)}</a>
         </p>
-      </div>`
+      `
+      )
     : "";
 
-  return `<!DOCTYPE html>
-<html>
-<body style="margin:0;padding:24px;background:#faf7f0;font-family:Georgia,serif;">
-  <div style="max-width:600px;margin:0 auto;background:#ffffff;border:1px solid #e8e4dc;border-radius:16px;overflow:hidden;">
-    <div style="background:linear-gradient(135deg,#0d3b2e,#1a5c45);padding:32px 28px;">
-      <h1 style="margin:0;color:#faf7f0;font-size:24px;font-weight:600;">Registration Confirmed</h1>
-      <p style="margin:8px 0 0;color:#e8d5a3;font-size:14px;">Ash-Shajrah Learning Hub</p>
-    </div>
-    <div style="padding:28px;">
-      <p style="margin:0 0 16px;color:#0d3b2e;font-size:16px;line-height:1.6;">
+  return buildEmailShell({
+    preheader: "Your Ash-Shajrah registration has been received successfully.",
+    headerEyebrow: "Ash-Shajrah Learning Hub",
+    title: "Registration Details",
+    statusBadge: "Registration Confirmed",
+    introHtml: `
+      <p style="margin:0 0 16px;color:#1F2A24;font-size:16px;line-height:24px;font-weight:700;">
         Dear ${escapeHtml(data.parentName.trim())},
       </p>
-      <p style="margin:0 0 16px;color:#0d3b2e;font-size:15px;line-height:1.7;">
+      <p style="margin:0 0 22px;color:#5B655F;font-size:15px;line-height:24px;">
         Thank you for registering with Ash-Shajrah Learning Hub. Your registration has been received successfully.
         Our team will contact you soon with the next steps.
       </p>
-      <div style="background:#faf7f0;border:1px solid #e8e4dc;border-radius:12px;padding:16px 18px;margin:20px 0;">
-        <p style="margin:0 0 8px;color:#5c4a32;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;">Submitted</p>
-        <p style="margin:0;color:#0d3b2e;font-size:14px;">${escapeHtml(submittedAt)}</p>
-        <p style="margin:16px 0 8px;color:#5c4a32;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;">Child</p>
-        <p style="margin:0;color:#0d3b2e;font-size:14px;">${escapeHtml(data.childName.trim())}</p>
-        <p style="margin:16px 0 8px;color:#5c4a32;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;">Programme</p>
-        <p style="margin:0;color:#0d3b2e;font-size:14px;">${escapeHtml(data.level.trim())}</p>
-        <p style="margin:16px 0 8px;color:#5c4a32;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;">Child Date of Birth</p>
-        <p style="margin:0;color:#0d3b2e;font-size:14px;">${escapeHtml(childDob || "(Not provided)")}</p>
-        <p style="margin:16px 0 8px;color:#5c4a32;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;">Country</p>
-        <p style="margin:0;color:#0d3b2e;font-size:14px;">${escapeHtml(country || "(Not provided)")}</p>
-        <p style="margin:16px 0 8px;color:#5c4a32;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;">City</p>
-        <p style="margin:0;color:#0d3b2e;font-size:14px;">${escapeHtml(city || "(Not provided)")}</p>
-      </div>
-      ${interviewSection}
-      <p style="margin:0;color:#0d3b2e;font-size:15px;line-height:1.7;">
+    `,
+    sectionsHtml:
+      buildInfoCard(
+        "Registration Summary",
+        buildDetailRows([
+          { label: "Submitted", value: submittedAt },
+          { label: "Child Name", value: data.childName.trim() },
+          { label: "Programme", value: data.level.trim() },
+          { label: "Child Date of Birth", value: childDob || "(Not provided)" },
+          { label: "Country", value: country || "(Not provided)" },
+          { label: "City", value: city || "(Not provided)" },
+        ])
+      ) +
+      redesignedInterviewSection +
+      `<p style="margin:0;color:#5B655F;font-size:15px;line-height:24px;">
         If you need to update any information, please reply to this email.
       </p>
-      <p style="margin:20px 0 0;color:#0d3b2e;font-size:15px;line-height:1.7;">Warm regards,<br/>Ash-Shajrah Learning Hub</p>
-    </div>
-  </div>
-</body>
-</html>`;
+      <p style="margin:20px 0 0;color:#1F2A24;font-size:15px;line-height:24px;">Warm regards,<br/><strong>Ash-Shajrah Learning Hub</strong></p>`,
+  });
 }
 
 export function formatRegistrationCoordinatorText(
@@ -414,6 +520,29 @@ export function formatRegistrationCoordinatorHtml(
   const [city, country] = cityCountry.includes(",")
     ? cityCountry.split(",").map((part) => part.trim())
     : ["", cityCountry];
+  return buildEmailShell({
+    preheader: "A new student registration requires review.",
+    headerEyebrow: "Admissions Team",
+    title: "New Student Registration",
+    statusBadge: "Needs Review",
+    introHtml:
+      '<p style="margin:0 0 20px;color:#1F2A24;font-size:15px;line-height:24px;">A new student registration has been received for follow-up.</p>',
+    sectionsHtml: buildInfoCard(
+      "Registration Summary",
+      buildDetailRows([
+        { label: "Submitted", value: submittedAt },
+        { label: "Parent / Guardian Name", value: data.parentName.trim() },
+        { label: "WhatsApp Number", value: data.whatsapp.trim() },
+        { label: "Email Address", value: data.email.trim() },
+        { label: "Child Name", value: data.childName.trim() },
+        { label: "Child Date of Birth", value: childDob || "(Not provided)" },
+        { label: "Interested Level", value: data.level.trim() },
+        { label: "Country", value: country || "(Not provided)" },
+        { label: "City", value: city || "(Not provided)" },
+        { label: "Message", value: data.message.trim() || "(Not provided)" },
+      ])
+    ),
+  });
   const row = (label: string, value: string) =>
     `<tr><td style="padding:10px 12px;border-bottom:1px solid #e8e4dc;color:#5c4a32;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;width:36%;vertical-align:top;">${label}</td><td style="padding:10px 12px;border-bottom:1px solid #e8e4dc;color:#0d3b2e;font-size:15px;">${escapeHtml(value)}</td></tr>`;
 
