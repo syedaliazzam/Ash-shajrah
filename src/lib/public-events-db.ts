@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { getPgPool } from "@/lib/postgres";
 import { slugifyPublicEventTitle, type PublicEvent } from "@/lib/public-events";
 
@@ -160,12 +161,12 @@ function toPublicEvent(row: PublicEventRow): PublicEvent {
   };
 }
 
-export async function getPublicEventBySlugFromDb(slug: string) {
+export const getPublicEventBySlugFromDb = cache(async (slug: string) => {
   const { currentUpcoming, past } = await listPublicEventsFromDb();
   return [...currentUpcoming, ...past].find((event) => event.slug === slug) || null;
-}
+});
 
-export async function listPublicEventsFromDb() {
+export const listPublicEventsFromDb = cache(async () => {
   const client = getPgPool();
   const result = await client.query<PublicEventRow>(`
     select
@@ -190,7 +191,7 @@ export async function listPublicEventsFromDb() {
     currentUpcoming: events.filter((event) => event.lifecycle !== "past"),
     past: events.filter((event) => event.lifecycle === "past"),
   };
-}
+});
 
 export async function createPublicEventRegistrationInDb(input: {
   eventId: string;

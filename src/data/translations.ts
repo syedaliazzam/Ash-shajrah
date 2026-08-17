@@ -120,8 +120,9 @@ export const translations = {
         { area: "Interactive Classes", description: "Interactive online classes with engaging lessons and individual attention." },
         { area: "Personal and Social Development", description: "Focus on social, emotional, physical, cognitive and spiritual development." },
         { area: "Creativity", description: "A safe, nurturing and inclusive virtual environment to build creativity and prepare young learners to become confident, compassionate and lifelong learners." },
-        { area: "Early Years Planning Manual Prep", description: "The Prep curriculum provides a structured, child-centered learning journey through annual, monthly, weekly, and daily planning, supporting children’s language, mathematics, faith and character, personal and social development, creativity, and discovery through developmentally appropriate learning experiences." },
-        { area: "Early Years Planning Manual Play Group", description: "The Play Group curriculum provides a child-centered, developmentally appropriate learning journey that nurtures early language, numeracy, faith and character, social-emotional growth, creativity, and sensory discovery through purposeful learning experiences." },
+        { area: "Early Years Planning Manual Prep", description: "The Prep curriculum offers structured, child-centered planning that supports language, mathematics, faith and character, social development, creativity, and discovery." },
+        { area: "Early Years Planning Manual Play Group", description: "The Play Group curriculum nurtures early language, numeracy, faith and character, social-emotional growth, creativity, and sensory discovery through developmentally appropriate learning." },
+        { area: "Seerat un Nabi Mubarak", description: "Parents are encouraged to nurture children’s love for God and the Prophet by making kindness, honesty, prayer, gratitude, cleanliness, respect, and prophetic traditions a natural part of daily family life." },
       ]
     },
     learning: {
