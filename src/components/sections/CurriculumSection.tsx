@@ -1,14 +1,76 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useGSAP } from "@/lib/gsap";
 import { scrollReveal } from "@/lib/animations";
 import { useLanguage } from "@/contexts/LanguageContext";
+
+type CurriculumDocument = {
+  id: string;
+  title: string;
+  documentType: string;
+  classLevel: string | null;
+  fileUrl: string;
+  isActive: boolean;
+};
+
+const normalizeCurriculumTitle = (value: string) =>
+  value
+    .toLowerCase()
+    .trim()
+    .replace(/&/g, " and ")
+    .replace(/[^a-z0-9]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 
 export function CurriculumSection() {
   const { t, language } = useLanguage();
   const sectionRef = useRef<HTMLElement>(null);
   const tableRef = useRef<HTMLDivElement>(null);
+  const [documents, setDocuments] = useState<CurriculumDocument[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadDocuments = async () => {
+      try {
+        const response = await fetch("/api/educational-documents", {
+          method: "GET",
+          cache: "no-store",
+        });
+
+        if (!response.ok) return;
+
+        const payload = await response.json().catch(() => ({}));
+        const rows = Array.isArray((payload as { data?: unknown })?.data)
+          ? ((payload as { data?: CurriculumDocument[] }).data ?? [])
+          : [];
+
+        if (!cancelled) {
+          setDocuments(rows.filter((row) => row?.fileUrl && row?.title));
+        }
+      } catch {
+        if (!cancelled) {
+          setDocuments([]);
+        }
+      }
+    };
+
+    void loadDocuments();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const matchedDocuments = useMemo(() => {
+    const map = new Map<string, CurriculumDocument>();
+    for (const document of documents) {
+      const key = normalizeCurriculumTitle(document.title);
+      if (key) map.set(key, document);
+    }
+    return map;
+  }, [documents]);
 
   useGSAP(
     () => {
@@ -54,25 +116,40 @@ export function CurriculumSection() {
           </div>
           
           <div className="divide-y divide-emerald/10">
-            {t.curriculumTable.rows.map((row, i) => (
-              <article
-                key={i}
-                data-curriculum-row
-                className={`px-5 py-5 transition-colors hover:bg-emerald/5 sm:px-8 md:grid md:grid-cols-[1fr_2fr] md:gap-6 ${language === 'ur' ? 'text-right font-urdu' : 'text-left'}`}
-              >
-                <div className={`font-semibold text-emerald-deep ${language === 'ur' ? 'text-lg leading-[1.8]' : 'text-base'}`}>
-                  {row.area}
-                </div>
-                <div className="mt-2 md:mt-0">
-                  <p className={`mb-1 text-[11px] font-semibold uppercase tracking-wider text-emerald/50 md:hidden ${language === 'ur' ? 'font-urdu normal-case tracking-normal' : ''}`}>
-                    {t.curriculumTable.headers.description}
-                  </p>
-                  <div className={`text-emerald-deep/80 ${language === 'ur' ? 'text-base leading-[2.1]' : 'text-sm leading-relaxed sm:text-base'}`}>
-                    {row.description}
+            {t.curriculumTable.rows.map((row, i) => {
+              const document = matchedDocuments.get(normalizeCurriculumTitle(row.area));
+
+              return (
+                <article
+                  key={i}
+                  data-curriculum-row
+                  className={`px-5 py-5 transition-colors hover:bg-emerald/5 sm:px-8 md:grid md:grid-cols-[1fr_2fr] md:gap-6 ${language === 'ur' ? 'text-right font-urdu' : 'text-left'}`}
+                >
+                  <div className={`font-semibold text-emerald-deep ${language === 'ur' ? 'text-lg leading-[1.8]' : 'text-base'}`}>
+                    {row.area}
                   </div>
-                </div>
-              </article>
-            ))}
+                  <div className="mt-2 md:mt-0">
+                    <p className={`mb-1 text-[11px] font-semibold uppercase tracking-wider text-emerald/50 md:hidden ${language === 'ur' ? 'font-urdu normal-case tracking-normal' : ''}`}>
+                      {t.curriculumTable.headers.description}
+                    </p>
+                    <div className={`text-emerald-deep/80 ${language === 'ur' ? 'text-base leading-[2.1]' : 'text-sm leading-relaxed sm:text-base'}`}>
+                      {row.description}
+                    </div>
+
+                    {document ? (
+                      <a
+                        href={document.fileUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-3 inline-flex items-center gap-2 rounded-full border border-emerald/20 bg-emerald/5 px-3 py-1.5 text-xs font-semibold text-emerald-deep transition hover:border-gold hover:bg-gold hover:text-emerald-deep"
+                      >
+                        {document.title}
+                      </a>
+                    ) : null}
+                  </div>
+                </article>
+              );
+            })}
           </div>
         </div>
       </div>
