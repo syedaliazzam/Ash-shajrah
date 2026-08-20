@@ -8,7 +8,6 @@ import {
   validateParentInterviewResponses,
   type ParentInterviewResponsePayload,
 } from "@/lib/parents-interview/validation";
-import { getLmsParentsInterviewAdminUrl } from "@/lib/lms-url";
 import nodemailer from "nodemailer";
 import { markInterestedStudentInterviewSubmitted } from "@/lib/postgres";
 
@@ -82,7 +81,7 @@ function buildParentInterviewParentConfirmationHtml(input: {
       ? "overflow-wrap:break-word;word-break:break-all;"
       : "overflow-wrap:break-word;word-break:break-word;";
   const buildCard = (title: string, bodyHtml: string) =>
-    `<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:100%;margin-bottom:18px;background-color:#FFFFFF;border:1px solid #DDD6C8;border-top-right-radius: 18px;border-bottom-right-radius: 18px;"><tr><td><table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"><tr><td style="width:4px;background-color:#C79A3B;font-size:0;line-height:0;border-radius:0;"></td><td class="mobile-card-pad" style="padding:22px 22px 20px;"><p style="margin:0 0 14px;color:#0F4C3A;font-size:21px;line-height:26px;font-weight:700;text-transform:uppercase;">${escapeHtml(title)}</p>${bodyHtml}</td></tr></table></td></tr></table>`;
+    `<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:100%;margin-bottom:18px;background-color:#FFFFFF;border:1px solid #DDD6C8;border-radius:0 18px 18px 0;"><tr><td><table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"><tr><td style="width:4px;background-color:#C79A3B;font-size:0;line-height:0;border-radius:0;"></td><td class="mobile-card-pad" style="padding:22px 22px 20px;"><p style="margin:0 0 14px;color:#0F4C3A;font-size:21px;line-height:26px;font-weight:700;text-transform:uppercase;">${escapeHtml(title)}</p>${bodyHtml}</td></tr></table></td></tr></table>`;
   const buildRows = (rows: Array<{ label: string; value: string; isUrl?: boolean }>) =>
     `<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:100%;border-collapse:collapse;">${rows
       .map(
@@ -115,9 +114,7 @@ function buildParentInterviewParentConfirmationHtml(input: {
             </td></tr>
             <tr><td class="mobile-padding" style="background-color:#FFFFFF;padding:28px 28px 10px;border-left:1px solid #DDD6C8;border-right:1px solid #DDD6C8;">
               <p style="margin:0 0 16px;color:#1F2A24;font-size:16px;line-height:24px;font-weight:700;">Dear ${escapeHtml(input.parentName)},</p>
-              <p style="margin:0 0 16px;color:#5B655F;font-size:15px;line-height:24px;">
-          Thank you for submitting the Parents Interview Form. We have received your response successfully.
-        </p>
+              <p style="margin:0 0 16px;color:#5B655F;font-size:15px;line-height:24px;">Thank you for submitting the Parents Interview Form. We have received your response successfully.</p>
               ${buildCard(
                 "Registration Summary",
                 buildRows([
@@ -126,9 +123,7 @@ function buildParentInterviewParentConfirmationHtml(input: {
                   { label: "Interested Programme", value: input.interestedProgramme || "-" },
                 ])
               )}
-              <p style="color:#5B655F;font-size:15px;line-height:24px;margin:0">
-          Our admissions team will review the information and contact you if anything further is needed.
-              </p>
+              <p style="color:#5B655F;font-size:15px;line-height:24px;margin:0">Our admissions team will review the information and contact you if anything further is needed.</p>
               <p style="color:#1F2A24;font-size:15px;line-height:24px;margin:20px 0 0">Warm regards,<br/><strong>Ash-Shajrah Learning Hub</strong></p>
             </td></tr>
             <tr><td class="mobile-padding" style="background-color:#0F4C3A;border-radius:0 0 24px 24px;padding:20px 28px;"><p style="margin:0;color:#F7F4EE;font-size:13px;line-height:20px;text-align:center;">Ash-Shajrah Learning Hub | Trusted knowledge, guided with care.</p></td></tr>
@@ -354,7 +349,8 @@ export async function POST(request: NextRequest, context: RouteContext) {
 
     const smtpConfig = getSmtpConfig();
     if (smtpConfig) {
-      const adminUrl = getLmsParentsInterviewAdminUrl();
+      const adminUrl =
+        "https://lms.ashshajrah.com/coordinator/parent-interview-forms";
       const fromEmail = process.env.SMTP_FROM || smtpConfig.auth.user;
       const submittedAt = new Date(
         submitted.submittedAt || Date.now()
@@ -397,23 +393,46 @@ export async function POST(request: NextRequest, context: RouteContext) {
             adminUrl,
           ].join("\n"),
           html: `
-            <div style="font-family:Arial,sans-serif;max-width:640px;margin:0 auto;background:#faf7f0;padding:24px;border-radius:12px">
-              <h2 style="color:#064635;margin:0 0 12px">Parents Interview Form Submitted</h2>
-              <p style="color:#333;line-height:1.6">A Parents Interview Form has been submitted.</p>
-              <ul style="color:#1a1a1a;line-height:1.8">
-                <li><strong>Parent Name:</strong> ${escapeHtml(submitted.parentName)}</li>
-                <li><strong>Parent Email:</strong> ${escapeHtml(submitted.parentEmail)}</li>
-                <li><strong>Child Name:</strong> ${escapeHtml(submitted.childName || "—")}</li>
-                <li><strong>Child Date of Birth:</strong> ${escapeHtml(submitted.childAge || "—")}</li>
-                <li><strong>Interested Programme:</strong> ${escapeHtml(submitted.interestedProgramme || "—")}</li>
-                <li><strong>Submitted At:</strong> ${escapeHtml(submittedAt)}</li>
-              </ul>
-              <p style="margin-top:18px">
-                <a href="${escapeHtml(adminUrl)}" style="display:inline-block;background:#0f5a43;color:#fff;padding:12px 18px;border-radius:999px;text-decoration:none;font-weight:700">
-                  Open Ash-Shajrah LMS
-                </a>
-              </p>
-            </div>
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+              <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+              <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+            </head>
+            <body style="margin:0;padding:0;background-color:#F7F4EE;font-family:Arial,Helvetica,sans-serif;">
+              <div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent;">A Parents Interview Form has been submitted and is ready for review.</div>
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:100%;background-color:#F7F4EE;">
+                <tr><td align="center" style="padding:24px 16px;">
+                  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="600" style="width:100%;max-width:600px;">
+                    <tr><td style="background-color:#0F4C3A;border-radius:24px 24px 0 0;padding:28px 28px 24px;">
+                      <p style="margin:0;color:#C79A3B;font-size:14px;line-height:20px;font-weight:700;letter-spacing:0.08em;">ASH-SHAJRAH LEARNING HUB</p>
+                      <h1 style="margin:10px 0 0;color:#FFFFFF;font-size:30px;line-height:36px;font-weight:700;">Parents Interview Submitted</h1>
+                      <p style="margin:12px 0 0;color:#DDE9E3;font-size:14px;line-height:22px;">A new parent interview is ready for admissions review.</p>
+                    </td></tr>
+                    <tr><td style="background-color:#FFFFFF;border-left:1px solid #DDD6C8;border-right:1px solid #DDD6C8;padding:28px 28px 10px;">
+                      <p style="margin:0 0 22px;color:#5B655F;font-size:15px;line-height:24px;">A Parents Interview Form has been submitted. The response summary is below.</p>
+                      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:100%;margin-bottom:22px;background-color:#FFFFFF;border:1px solid #DDD6C8;border-radius:0 18px 18px 0;">
+                        <tr><td style="width:4px;background-color:#C79A3B;font-size:0;line-height:0;border-radius:0;"></td><td style="padding:22px 22px 20px;">
+                          <p style="margin:0 0 14px;color:#0F4C3A;font-size:21px;line-height:26px;font-weight:700;text-transform:uppercase;">Registration Summary</p>
+                          <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:100%;border-collapse:collapse;">
+                            <tr><td valign="top" style="padding:7px 0;width:42%;color:#1F2A24;font-size:14px;line-height:21px;font-weight:700;">Parent Name</td><td valign="top" style="padding:7px 0;color:#5B655F;font-size:14px;line-height:21px;overflow-wrap:break-word;word-break:break-word;">${escapeHtml(submitted.parentName)}</td></tr>
+                            <tr><td valign="top" style="padding:7px 0;width:42%;color:#1F2A24;font-size:14px;line-height:21px;font-weight:700;">Parent Email</td><td valign="top" style="padding:7px 0;color:#5B655F;font-size:14px;line-height:21px;overflow-wrap:break-word;word-break:break-all;">${escapeHtml(submitted.parentEmail)}</td></tr>
+                            <tr><td valign="top" style="padding:7px 0;width:42%;color:#1F2A24;font-size:14px;line-height:21px;font-weight:700;">Child Name</td><td valign="top" style="padding:7px 0;color:#5B655F;font-size:14px;line-height:21px;overflow-wrap:break-word;word-break:break-word;">${escapeHtml(submitted.childName || "-")}</td></tr>
+                            <tr><td valign="top" style="padding:7px 0;width:42%;color:#1F2A24;font-size:14px;line-height:21px;font-weight:700;">Child Date of Birth</td><td valign="top" style="padding:7px 0;color:#5B655F;font-size:14px;line-height:21px;overflow-wrap:break-word;word-break:break-word;">${escapeHtml(submitted.childAge || "-")}</td></tr>
+                            <tr><td valign="top" style="padding:7px 0;width:42%;color:#1F2A24;font-size:14px;line-height:21px;font-weight:700;">Interested Programme</td><td valign="top" style="padding:7px 0;color:#5B655F;font-size:14px;line-height:21px;overflow-wrap:break-word;word-break:break-word;">${escapeHtml(submitted.interestedProgramme || "-")}</td></tr>
+                            <tr><td valign="top" style="padding:7px 0;width:42%;color:#1F2A24;font-size:14px;line-height:21px;font-weight:700;">Submitted At</td><td valign="top" style="padding:7px 0;color:#5B655F;font-size:14px;line-height:21px;overflow-wrap:break-word;word-break:break-word;">${escapeHtml(submittedAt)}</td></tr>
+                          </table>
+                        </td></tr>
+                      </table>
+                      <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 22px;"><tr><td align="center" style="background-color:#0F4C3A;border-radius:999px;"><a href="${escapeHtml(adminUrl)}" style="display:inline-block;padding:14px 24px;color:#FFFFFF;text-decoration:none;font-size:15px;line-height:20px;font-weight:700;">Open Ash-Shajrah LMS</a></td></tr></table>
+                      <p style="margin:0 0 18px;color:#5B655F;font-size:12px;line-height:20px;overflow-wrap:break-word;word-break:break-all;">If the button does not work, open this link:<br/><a href="${escapeHtml(adminUrl)}" style="color:#1E6B52;text-decoration:underline;">${escapeHtml(adminUrl)}</a></p>
+                    </td></tr>
+                    <tr><td style="background-color:#0F4C3A;border-radius:0 0 24px 24px;padding:20px 28px;"><p style="margin:0;color:#F7F4EE;font-size:13px;line-height:20px;text-align:center;">Ash-Shajrah Learning Hub | Trusted knowledge, guided with care.</p></td></tr>
+                  </table>
+                </td></tr>
+              </table>
+            </body>
+            </html>
           `,
         });
 
