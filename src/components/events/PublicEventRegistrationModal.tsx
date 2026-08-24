@@ -242,7 +242,7 @@ export function PublicEventRegistrationModal({ event, open, onClose }: Props) {
       }
     }
 
-    if (category === "alh-parents" || category === "general-parents") {
+    if (category === "alh-parents") {
       const studentNames = form.studentNames?.filter(name => name.trim()) || [];
       if (studentNames.length === 0) {
         nextErrors.studentNames = isUrdu ? "کم از کم ایک طالب علم کا نام ضروری ہے۔" : "At least one student name is required.";
@@ -347,7 +347,7 @@ export function PublicEventRegistrationModal({ event, open, onClose }: Props) {
         requestPayload.classInput = form.classInput?.trim();
       }
 
-      if (category === "alh-parents" || category === "general-parents") {
+      if (category === "alh-parents") {
         requestPayload.studentNames = (form.studentNames || []).filter(name => name.trim());
       }
 
@@ -456,43 +456,46 @@ export function PublicEventRegistrationModal({ event, open, onClose }: Props) {
             {errors.participantName ? <p className="mt-2 text-sm text-red-700">{errors.participantName}</p> : null}
           </div>
 
-          {(event.eventCategory === "alh-parents" || event.eventCategory === "general-parents") && (
-            <div>
-              <label className={labelClassName}>{uiText.enterStudentNames} *</label>
-              <div className="space-y-2">
-                {(form.studentNames || []).map((studentName, index) => (
-                  <div key={index} className="flex gap-2">
-                    <input
-                      value={studentName}
-                      onChange={(eventChange) => updateStudentName(index, eventChange.target.value)}
-                      placeholder={uiText.enterStudentNamesPlaceholder}
-                      className="min-h-12 flex-1 rounded-2xl border border-emerald/12 bg-white px-4 py-3 outline-none transition focus:border-gold"
-                    />
-                    <div className="flex gap-1">
-                      {index === (form.studentNames || []).length - 1 && (
-                        <button
-                          type="button"
-                          onClick={addStudentName}
-                          className="inline-flex min-h-12 min-w-12 items-center justify-center rounded-2xl border border-emerald/12 bg-white px-3 py-3 font-semibold text-emerald-deep transition hover:border-gold hover:text-gold"
-                        >
-                          {uiText.addStudent}
-                        </button>
-                      )}
-                      {(form.studentNames || []).length > 1 && (
-                        <button
-                          type="button"
-                          onClick={() => removeStudentName(index)}
-                          className="inline-flex min-h-12 min-w-12 items-center justify-center rounded-2xl border border-red-200 bg-red-50 px-3 py-3 font-semibold text-red-600 transition hover:border-red-400 hover:text-red-700"
-                        >
-                          {uiText.removeStudent}
-                        </button>
-                      )}
+          {event.eventCategory === "alh-parents" && (
+            <>
+              {/* Keep this block in the file for future parent-event use. */}
+              <div>
+                <label className={labelClassName}>{uiText.enterStudentNames} *</label>
+                <div className="space-y-2">
+                  {(form.studentNames || []).map((studentName, index) => (
+                    <div key={index} className="flex gap-2">
+                      <input
+                        value={studentName}
+                        onChange={(eventChange) => updateStudentName(index, eventChange.target.value)}
+                        placeholder={uiText.enterStudentNamesPlaceholder}
+                        className="min-h-12 flex-1 rounded-2xl border border-emerald/12 bg-white px-4 py-3 outline-none transition focus:border-gold"
+                      />
+                      <div className="flex gap-1">
+                        {index === (form.studentNames || []).length - 1 && (
+                          <button
+                            type="button"
+                            onClick={addStudentName}
+                            className="inline-flex min-h-12 min-w-12 items-center justify-center rounded-2xl border border-emerald/12 bg-white px-3 py-3 font-semibold text-emerald-deep transition hover:border-gold hover:text-gold"
+                          >
+                            {uiText.addStudent}
+                          </button>
+                        )}
+                        {(form.studentNames || []).length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => removeStudentName(index)}
+                            className="inline-flex min-h-12 min-w-12 items-center justify-center rounded-2xl border border-red-200 bg-red-50 px-3 py-3 font-semibold text-red-600 transition hover:border-red-400 hover:text-red-700"
+                          >
+                            {uiText.removeStudent}
+                          </button>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
+                {errors.studentNames ? <p className="mt-2 text-sm text-red-700">{errors.studentNames}</p> : null}
               </div>
-              {errors.studentNames ? <p className="mt-2 text-sm text-red-700">{errors.studentNames}</p> : null}
-            </div>
+            </>
           )}
 
           <div className="grid gap-4 sm:grid-cols-2">
