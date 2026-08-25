@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState, type CSSProperties } from "react";
+import { useCallback, useEffect, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from "react";
 import type { EventItem } from "@/data/events";
 import { EventCard } from "@/components/cards/EventCard";
 
@@ -27,6 +27,11 @@ function getRelativeIndex(index: number, activeIndex: number, total: number) {
   if (diff > total / 2) diff -= total;
   if (diff < -total / 2) diff += total;
   return diff;
+}
+
+function isInteractiveTarget(target: EventTarget | null) {
+  return target instanceof HTMLElement
+    && Boolean(target.closest("a, button, input, textarea, select, label"));
 }
 
 function useBreakpoint(): Breakpoint {
@@ -156,6 +161,8 @@ export function EventsGlobeCarousel({
   const [activeIndex, setActiveIndex] = useState(0);
   const breakpoint = useBreakpoint();
   const total = events.length;
+  const dragStartXRef = useRef<number | null>(null);
+  const dragMovedRef = useRef(false);
 
   const goNext = useCallback(() => {
     setActiveIndex((current) => (current + 1) % total);
@@ -175,15 +182,43 @@ export function EventsGlobeCarousel({
 
   if (total === 0) return null;
 
+  const handlePointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (total < 2) return;
+    if (isInteractiveTarget(event.target)) return;
+    dragStartXRef.current = event.clientX;
+    dragMovedRef.current = false;
+    event.currentTarget.setPointerCapture(event.pointerId);
+  };
+
+  const handlePointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (dragStartXRef.current === null) return;
+
+    const deltaX = event.clientX - dragStartXRef.current;
+    if (Math.abs(deltaX) < 18 || dragMovedRef.current) return;
+
+    dragMovedRef.current = true;
+    if (deltaX < 0) goNext();
+    else goPrev();
+  };
+
+  const handlePointerUp = () => {
+    dragStartXRef.current = null;
+    dragMovedRef.current = false;
+  };
+
   return (
     <div className="relative mt-10 w-full max-w-full overflow-x-hidden sm:mt-14" dir="ltr">
       <div
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerUp}
         className={`relative mx-auto w-full max-w-full overflow-hidden [perspective:1400px] sm:[perspective:1800px] ${
           breakpoint === "mobile"
-            ? "h-[580px]"
+            ? "h-[580px] cursor-grab active:cursor-grabbing"
             : breakpoint === "tablet"
-              ? "h-[640px]"
-              : "h-[700px] lg:h-[720px]"
+              ? "h-[640px] cursor-grab active:cursor-grabbing"
+              : "h-[700px] cursor-grab active:cursor-grabbing lg:h-[720px]"
         }`}
       >
         <div

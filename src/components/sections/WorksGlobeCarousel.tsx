@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState, type CSSProperties } from "react";
+import { useCallback, useEffect, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from "react";
 import Image from "next/image";
 import type { WorkItem } from "@/data/works";
 
@@ -27,6 +27,11 @@ function getRelativeIndex(index: number, activeIndex: number, total: number) {
   if (diff > total / 2) diff -= total;
   if (diff < -total / 2) diff += total;
   return diff;
+}
+
+function isInteractiveTarget(target: EventTarget | null) {
+  return target instanceof HTMLElement
+    && Boolean(target.closest("a, button, input, textarea, select, label"));
 }
 
 function useBreakpoint(): Breakpoint {
@@ -165,7 +170,8 @@ function WorkCard({
     <article
       dir={isUrdu ? "rtl" : "ltr"}
       lang={isUrdu ? "ur" : "en"}
-      className={`group flex h-full flex-col overflow-hidden rounded-3xl border border-emerald/12 bg-white shadow-[0_20px_50px_rgba(13,59,46,0.12)] transition-all duration-500 hover:border-gold/35 hover:shadow-[0_28px_60px_rgba(13,59,46,0.16)] ${
+      onDragStart={(event) => event.preventDefault()}
+      className={`group flex h-full select-none flex-col overflow-hidden rounded-3xl border border-emerald/12 bg-white shadow-[0_20px_50px_rgba(13,59,46,0.12)] transition-all duration-500 hover:border-gold/35 hover:shadow-[0_28px_60px_rgba(13,59,46,0.16)] ${
         isUrdu ? "text-right font-urdu" : "text-left"
       }`}
     >
@@ -175,12 +181,13 @@ function WorkCard({
           alt={item.alt[language]}
           fill
           sizes="(max-width: 768px) 82vw, 460px"
+          draggable={false}
           className={imageFitClass}
         />
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-emerald-deep/10 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
       </div>
 
-      <div className="flex flex-1 flex-col p-5 sm:p-6">
+      <div className="flex flex-1 select-none flex-col p-5 sm:p-6">
         <span className="inline-flex w-fit rounded-full border border-gold/30 bg-gold/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-emerald-deep">
           {item.category[language]}
         </span>
@@ -201,7 +208,7 @@ function WorkCard({
         <button
           type="button"
           onClick={() => onReadMore(item)}
-          className={`mt-5 inline-flex min-h-11 w-full items-center justify-center rounded-full bg-emerald px-5 py-3 text-sm font-semibold text-cream transition-all duration-300 hover:bg-emerald-light sm:w-auto ${
+          className={`mt-5 inline-flex min-h-11 w-full select-auto items-center justify-center rounded-full bg-emerald px-5 py-3 text-sm font-semibold text-cream transition-all duration-300 hover:bg-emerald-light sm:w-auto ${
             isUrdu ? "sm:self-end" : "sm:self-start"
           }`}
         >
@@ -226,6 +233,8 @@ export function WorksGlobeCarousel({
   const [activeIndex, setActiveIndex] = useState(0);
   const breakpoint = useBreakpoint();
   const total = works.length;
+  const dragStartXRef = useRef<number | null>(null);
+  const dragMovedRef = useRef(false);
 
   const goNext = useCallback(() => {
     setActiveIndex((current) => (current + 1) % total);
@@ -245,9 +254,39 @@ export function WorksGlobeCarousel({
 
   if (total === 0) return null;
 
+  const handlePointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (total < 2) return;
+    if (isInteractiveTarget(event.target)) return;
+    dragStartXRef.current = event.clientX;
+    dragMovedRef.current = false;
+    event.currentTarget.setPointerCapture(event.pointerId);
+  };
+
+  const handlePointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (dragStartXRef.current === null) return;
+
+    const deltaX = event.clientX - dragStartXRef.current;
+    if (Math.abs(deltaX) < 18 || dragMovedRef.current) return;
+
+    dragMovedRef.current = true;
+    if (deltaX < 0) goNext();
+    else goPrev();
+  };
+
+  const handlePointerUp = () => {
+    dragStartXRef.current = null;
+    dragMovedRef.current = false;
+  };
+
   return (
     <div className="relative mt-10 w-full max-w-full overflow-x-hidden" dir="ltr">
-      <div className="relative mx-auto h-[620px] w-full max-w-full overflow-hidden [perspective:1400px] sm:h-[680px] sm:[perspective:1800px] lg:h-[760px]">
+      <div
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerUp}
+        className="relative mx-auto h-[620px] w-full max-w-full touch-none cursor-grab overflow-hidden [perspective:1400px] active:cursor-grabbing sm:h-[680px] sm:[perspective:1800px] lg:h-[760px]"
+      >
         <div
           className="pointer-events-none absolute left-1/2 top-[58%] h-[100px] w-[min(70%,640px)] -translate-x-1/2 rounded-[100%] bg-emerald-deep/10 blur-2xl"
           aria-hidden
@@ -277,18 +316,20 @@ export function WorksGlobeCarousel({
 
         <button
           type="button"
+          onPointerDown={(event) => event.stopPropagation()}
           onClick={goPrev}
           aria-label={language === "ur" ? "پچھلا کام" : "Previous work"}
-          className="absolute left-3 top-[42%] z-[70] flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-emerald-deep/15 bg-white/95 text-emerald-deep shadow-xl transition hover:bg-emerald-deep hover:text-cream sm:left-4 sm:h-12 sm:w-12 lg:h-14 lg:w-14"
+          className="pointer-events-auto absolute left-3 top-[42%] z-[80] flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-emerald-deep/15 bg-white/95 text-emerald-deep shadow-xl transition hover:bg-emerald-deep hover:text-cream sm:left-4 sm:h-12 sm:w-12 lg:h-14 lg:w-14"
         >
           <ChevronLeft />
         </button>
 
         <button
           type="button"
+          onPointerDown={(event) => event.stopPropagation()}
           onClick={goNext}
           aria-label={language === "ur" ? "اگلا کام" : "Next work"}
-          className="absolute right-3 top-[42%] z-[70] flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-emerald-deep/15 bg-white/95 text-emerald-deep shadow-xl transition hover:bg-emerald-deep hover:text-cream sm:right-4 sm:h-12 sm:w-12 lg:h-14 lg:w-14"
+          className="pointer-events-auto absolute right-3 top-[42%] z-[80] flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-emerald-deep/15 bg-white/95 text-emerald-deep shadow-xl transition hover:bg-emerald-deep hover:text-cream sm:right-4 sm:h-12 sm:w-12 lg:h-14 lg:w-14"
         >
           <ChevronRight />
         </button>
@@ -299,6 +340,7 @@ export function WorksGlobeCarousel({
           <button
             key={item.id}
             type="button"
+            onPointerDown={(event) => event.stopPropagation()}
             onClick={() => setActiveIndex(index)}
             aria-label={language === "ur" ? `کام ${index + 1}` : `Go to work ${index + 1}`}
             aria-current={index === activeIndex ? "true" : undefined}

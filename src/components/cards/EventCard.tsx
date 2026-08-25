@@ -38,10 +38,10 @@ export function EventCard({
   const imageFitClass =
     item.fit === "contain"
       ? "object-contain p-3 transition duration-500 group-hover:scale-[1.03]"
-      : "object-cover transition duration-500 group-hover:scale-[1.03]";
+      : "object-cover object-top transition duration-500 group-hover:scale-[1.03]";
 
   return (
-    <article className="group flex h-full flex-col overflow-hidden rounded-3xl border border-emerald/12 bg-white shadow-[0_20px_50px_rgba(13,59,46,0.14)] transition-all duration-500 hover:border-gold/35 hover:shadow-[0_28px_60px_rgba(13,59,46,0.18)]">
+    <article className="group flex h-full select-none flex-col overflow-hidden rounded-3xl border border-emerald/12 bg-white shadow-[0_20px_50px_rgba(13,59,46,0.14)] transition-all duration-500 hover:border-gold/35 hover:shadow-[0_28px_60px_rgba(13,59,46,0.18)]">
       <div className="relative h-56 w-full overflow-hidden rounded-t-3xl bg-[#fff8ea] sm:h-64">
         {!imageFailed ? (
           // eslint-disable-next-line @next/next/no-img-element -- local optional files need reliable onError fallback
@@ -65,7 +65,7 @@ export function EventCard({
       <div
         dir={isUrdu ? "rtl" : "ltr"}
         lang={isUrdu ? "ur" : "en"}
-        className={`flex flex-1 flex-col p-5 sm:p-6 ${isUrdu ? "text-right font-urdu" : "text-left"}`}
+        className={`flex flex-1 select-none flex-col p-5 sm:p-6 ${isUrdu ? "text-right font-urdu" : "text-left"}`}
       >
         <span className="inline-flex w-fit rounded-full border border-gold/30 bg-gold/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-emerald-deep">
           {item.category[language]}

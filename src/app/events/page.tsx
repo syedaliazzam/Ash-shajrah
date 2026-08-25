@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { PublicEventsPageContent } from "@/components/pages/PublicEventsPageContent";
+import { listPublicEventsFromDb } from "@/lib/public-events-db";
 
 export const metadata: Metadata = {
   title: "Public Events",
@@ -10,6 +11,13 @@ export const metadata: Metadata = {
   },
 };
 
-export default function EventsPage() {
-  return <PublicEventsPageContent />;
+export default async function EventsPage() {
+  const events = await listPublicEventsFromDb();
+
+  return (
+    <PublicEventsPageContent
+      initialCurrentUpcoming={events.currentUpcoming}
+      initialPast={events.past}
+    />
+  );
 }

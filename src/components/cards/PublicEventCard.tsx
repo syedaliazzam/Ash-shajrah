@@ -48,14 +48,14 @@ export function PublicEventCard({
   const showMetaFields = !isExternal;
 
   return (
-    <article className="group flex h-full w-full flex-col overflow-hidden rounded-3xl border border-emerald/12 bg-white text-left shadow-[0_20px_50px_rgba(13,59,46,0.14)] transition-all duration-500 hover:border-gold/35 hover:shadow-[0_28px_60px_rgba(13,59,46,0.18)]">
+    <article className="group flex h-full w-full select-none flex-col overflow-hidden rounded-3xl border border-emerald/12 bg-white text-left shadow-[0_20px_50px_rgba(13,59,46,0.14)] transition-all duration-500 hover:border-gold/35 hover:shadow-[0_28px_60px_rgba(13,59,46,0.18)]">
       <div className="relative h-56 w-full overflow-hidden rounded-t-3xl bg-[#fff8ea] sm:h-64">
         {event.imageUrl && !imageFailed ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={event.imageUrl}
             alt={event.title}
-            className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
+            className="h-full w-full object-cover object-top transition duration-500 group-hover:scale-[1.03]"
             onError={() => setImageFailed(true)}
           />
         ) : (
@@ -67,7 +67,7 @@ export function PublicEventCard({
         </span>
       </div>
 
-      <div className="flex flex-1 flex-col p-5 text-left sm:p-6">
+      <div className="flex flex-1 select-none flex-col p-5 text-left sm:p-6">
         <span
           className={`inline-flex w-fit rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-wider ${getLifecycleClasses(
             event.lifecycle

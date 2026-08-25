@@ -1,11 +1,19 @@
 ﻿"use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
+import { PublicEventRegistrationModal } from "@/components/events/PublicEventRegistrationModal";
 import { Header } from "@/components/layout/Header";
 import { PublicEventsGlobeCarousel } from "@/components/sections/PublicEventsGlobeCarousel";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { EVENT_ITEMS } from "@/data/events";
-import { normalizePublicEventsResponse, type PublicEvent } from "@/lib/public-events";
+import {
+  formatEventDate,
+  formatEventFee,
+  formatEventTime,
+  normalizePublicEventsResponse,
+  type PublicEvent,
+} from "@/lib/public-events";
 
 function extractApiError(payload: unknown, fallback: string) {
   if (payload && typeof payload === "object") {
@@ -57,13 +65,19 @@ function EventSlider({
   events,
   emptyText,
   viewDetailsLabel,
+  singleEventActionLabel,
+  onSingleEventAction,
 }: {
   title: string;
   description: string;
   events: PublicEvent[];
   emptyText: string;
   viewDetailsLabel: string;
+  singleEventActionLabel: string;
+  onSingleEventAction?: (event: PublicEvent) => void;
 }) {
+  const isSingleCurrentUpcoming = title.toLowerCase().includes("current") || title.toLowerCase().includes("موجودہ");
+
   return (
     <section className="space-y-5">
       <div>
@@ -79,6 +93,71 @@ function EventSlider({
         <div className="rounded-[28px] border border-emerald/10 bg-white/80 px-6 py-10 text-sm text-emerald-deep/70 shadow-[0_18px_60px_rgba(13,59,46,0.06)]">
           {emptyText}
         </div>
+      ) : events.length === 1 && isSingleCurrentUpcoming ? (
+        <article className="mt-6 grid items-start gap-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
+          <div className="min-w-0 overflow-hidden rounded-[32px] border border-emerald/10 bg-white/90 shadow-[0_24px_70px_rgba(13,59,46,0.08)]">
+            <div className="relative flex w-full items-start justify-center overflow-hidden bg-[#fff8ea] p-0">
+              {events[0].imageUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={events[0].imageUrl}
+                  alt={events[0].title}
+                  className="block w-full max-w-full object-contain"
+                />
+              ) : (
+                <div className="flex h-[320px] w-full items-center justify-center bg-gradient-to-br from-emerald-deep via-emerald to-gold/70 px-6 text-center text-white sm:h-[380px] lg:h-[520px]">
+                  <span className="font-display text-2xl font-bold">{events[0].title}</span>
+                </div>
+              )}
+              <span className="absolute left-5 top-5 rounded-full border border-white bg-white px-4 py-2 text-xs font-semibold text-emerald-deep shadow-md">
+                {events[0].lifecycle === "current" ? "Current" : "Upcoming"}
+              </span>
+            </div>
+          </div>
+
+          <div className="min-w-0 rounded-[32px] border border-emerald/10 bg-[linear-gradient(180deg,#ffffff,#faf7f0)] p-6 shadow-[0_24px_70px_rgba(13,59,46,0.08)] sm:p-8">
+            <h3 className="font-display text-3xl font-bold tracking-tight text-emerald-deep sm:text-4xl">
+              {events[0].title}
+            </h3>
+
+            <div className="mt-6 grid gap-4 rounded-[28px] border border-emerald/10 bg-cream/65 p-5 text-sm text-emerald-deep sm:grid-cols-2">
+              <div><span className="font-semibold">Start Date:</span> {formatEventDate(events[0].startAt)}</div>
+              <div><span className="font-semibold">Start Time:</span> {formatEventTime(events[0].startAt)}</div>
+              <div><span className="font-semibold">End Time:</span> {formatEventTime(events[0].endAt)}</div>
+              <div><span className="font-semibold">Fee:</span> {formatEventFee(events[0].fee, "Contact for details")}</div>
+              <div><span className="font-semibold">Registration Deadline Date:</span> {formatEventDate(events[0].registrationDeadline)}</div>
+              <div><span className="font-semibold">Registration Deadline Time:</span> {formatEventTime(events[0].registrationDeadline)}</div>
+            </div>
+
+            <div className="mt-6 min-w-0 rounded-[28px] border border-emerald/10 bg-white/80 p-5">
+              <h4 className="font-display text-2xl font-bold tracking-tight text-emerald-deep">
+                Description
+              </h4>
+              <div className="mt-3 whitespace-pre-line break-words [overflow-wrap:anywhere] text-sm leading-8 text-emerald-deep/80 sm:text-base">
+                {events[0].description || "More details will be shared soon."}
+              </div>
+            </div>
+
+            <div className="mt-8">
+              {onSingleEventAction ? (
+                <button
+                  type="button"
+                  onClick={() => onSingleEventAction(events[0])}
+                  className="inline-flex min-h-12 items-center justify-center rounded-full bg-emerald-deep px-6 py-3 text-sm font-semibold text-cream transition hover:bg-gold hover:text-emerald-deep"
+                >
+                  {singleEventActionLabel}
+                </button>
+              ) : (
+                <Link
+                  href={`/events/${events[0].slug}`}
+                  className="inline-flex min-h-12 items-center justify-center rounded-full bg-emerald-deep px-6 py-3 text-sm font-semibold text-cream transition hover:bg-gold hover:text-emerald-deep"
+                >
+                  {singleEventActionLabel}
+                </Link>
+              )}
+            </div>
+          </div>
+        </article>
       ) : (
         <PublicEventsGlobeCarousel events={events} viewDetailsLabel={viewDetailsLabel} />
       )}
@@ -116,13 +195,22 @@ function EventsLoadingState() {
   );
 }
 
-export function PublicEventsPageContent() {
+export function PublicEventsPageContent({
+  initialCurrentUpcoming = [],
+  initialPast = [],
+}: {
+  initialCurrentUpcoming?: PublicEvent[];
+  initialPast?: PublicEvent[];
+}) {
   const { language } = useLanguage();
   const isUrdu = language === "ur";
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(
+    initialCurrentUpcoming.length === 0 && initialPast.length === 0
+  );
   const [loadError, setLoadError] = useState("");
-  const [currentUpcoming, setCurrentUpcoming] = useState<PublicEvent[]>([]);
-  const [past, setPast] = useState<PublicEvent[]>([]);
+  const [currentUpcoming, setCurrentUpcoming] = useState<PublicEvent[]>(initialCurrentUpcoming);
+  const [past, setPast] = useState<PublicEvent[]>(initialPast);
+  const [selectedEvent, setSelectedEvent] = useState<PublicEvent | null>(null);
 
   const staticPastEvents = useMemo(
     () => EVENT_ITEMS.map((item, index) => mapStaticEventToPublicEvent(item, index)),
@@ -157,9 +245,17 @@ export function PublicEventsPageContent() {
       : "A record of recently completed public events and workshops, along with selected past events from our archive.",
     noEvents: isUrdu ? "اس حصے میں ابھی کوئی ایونٹس دستیاب نہیں ہیں۔" : "No events are available in this section yet.",
     viewDetails: isUrdu ? "ویو ڈیٹیلز" : "View Details",
+    joinEvent: isUrdu ? "ایونٹ جوائن کریں" : "Join Event",
   };
 
   useEffect(() => {
+    if (initialCurrentUpcoming.length > 0 || initialPast.length > 0) {
+      setCurrentUpcoming(initialCurrentUpcoming);
+      setPast(initialPast);
+      setLoading(false);
+      return;
+    }
+
     let cancelled = false;
 
     const loadEvents = async () => {
@@ -196,7 +292,7 @@ export function PublicEventsPageContent() {
     return () => {
       cancelled = true;
     };
-  }, [uiText.loadError]);
+  }, [initialCurrentUpcoming, initialPast, uiText.loadError]);
 
   return (
     <>
@@ -239,6 +335,8 @@ export function PublicEventsPageContent() {
                   events={currentUpcoming}
                   emptyText={uiText.noEvents}
                   viewDetailsLabel={uiText.viewDetails}
+                  singleEventActionLabel={uiText.joinEvent}
+                  onSingleEventAction={setSelectedEvent}
                 />
 
                 <EventSlider
@@ -247,12 +345,21 @@ export function PublicEventsPageContent() {
                   events={mergedPastEvents}
                   emptyText={uiText.noEvents}
                   viewDetailsLabel={uiText.viewDetails}
+                  singleEventActionLabel={uiText.viewDetails}
                 />
               </>
             )}
           </div>
         </section>
       </main>
+
+      {selectedEvent ? (
+        <PublicEventRegistrationModal
+          event={selectedEvent}
+          open={true}
+          onClose={() => setSelectedEvent(null)}
+        />
+      ) : null}
     </>
   );
 }
