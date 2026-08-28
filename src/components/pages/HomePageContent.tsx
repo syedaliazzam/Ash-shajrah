@@ -21,8 +21,13 @@ import { VisionSection } from "@/components/sections/VisionSection";
 import { NeedBasedScholarshipSection } from "@/components/sections/NeedBasedScholarshipSection";
 import { LogoPhilosophySection } from "@/components/sections/LogoPhilosophySection";
 import { UpcomingEventAlert } from "@/components/sections/UpcomingEventAlert";
+import type { PublicEvent } from "@/lib/public-events";
 
-export function HomePageContent() {
+export function HomePageContent({
+  initialUpcomingEvent = null,
+}: {
+  initialUpcomingEvent?: PublicEvent | null;
+}) {
   useEffect(() => {
     ensurePlugins();
     const refresh = () => ScrollTrigger.refresh();
@@ -33,7 +38,7 @@ export function HomePageContent() {
   return (
     <ReducedMotionProvider>
       <Header />
-      <UpcomingEventAlert />
+      <UpcomingEventAlert initialEvent={initialUpcomingEvent} />
       <main>
         <HeroSection />
         <AboutSection />

@@ -123,6 +123,7 @@ export const translations = {
         { area: "Early Years Planning Manual Prep", description: "The Prep curriculum offers structured, child-centered planning that supports language, mathematics, faith and character, social development, creativity, and discovery." },
         { area: "Early Years Planning Manual Play Group", description: "The Play Group curriculum nurtures early language, numeracy, faith and character, social-emotional growth, creativity, and sensory discovery through developmentally appropriate learning." },
         { area: "Seerat un Nabi Mubarak", description: "Parents are encouraged to nurture children’s love for God and the Prophet by making kindness, honesty, prayer, gratitude, cleanliness, respect, and prophetic traditions a natural part of daily family life." },
+        { area: "Curriculum Testing", description: "Parents are encouraged to nurture children’s love for God and the Prophet by making kindness, honesty, prayer, gratitude, cleanliness, respect, and prophetic traditions a natural part of daily family life." },
       ]
     },
     learning: {
@@ -450,7 +451,7 @@ export const translations = {
         office: "Admin Office",
         whatsappValue: "0347-3547036",
         whatsappValueSecondary: "0336-5409798",
-        emailValue: "admissions@ashshajrah.com",
+        emailValue: "coordinator@ashshajrah.com",
         officeValue: "304, Altura Arcade, Block F Markaz, B-17, Islamabad"
       },
       messageUs: "Message Us on WhatsApp",
@@ -909,7 +910,7 @@ export const translations = {
         office: "انتظامی دفتر",
         whatsappValue: "0347-3547036",
         whatsappValueSecondary: "0336-5409798",
-        emailValue: "admissions@ashshajrah.com",
+        emailValue: "coordinator@ashshajrah.com",
         officeValue: "304, Altura Arcade, Block F Markaz, B-17, Islamabad"
       },
       messageUs: "ہمیں واٹس ایپ کریں",

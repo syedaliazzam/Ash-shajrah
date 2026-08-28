@@ -23,7 +23,7 @@ function CarouselArrow({
       onClick={onClick}
       disabled={disabled}
       aria-label={label}
-      className={`values-carousel-arrow group absolute top-1/2 z-20 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-emerald/20 bg-white/95 text-emerald-deep shadow-[0_8px_28px_rgba(13,59,46,0.14)] backdrop-blur-md transition-all duration-300 hover:scale-110 hover:border-gold/50 hover:bg-white hover:text-gold disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:scale-100 sm:h-14 sm:w-14 ${
+      className={`values-carousel-arrow group absolute top-1/2 z-20 hidden h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-emerald/20 bg-white/95 text-emerald-deep shadow-[0_8px_28px_rgba(13,59,46,0.14)] backdrop-blur-md transition-all duration-300 hover:scale-110 hover:border-gold/50 hover:bg-white hover:text-gold disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:scale-100 sm:flex sm:h-14 sm:w-14 ${
         direction === "prev"
           ? "left-2 translate-x-0 sm:left-3 lg:left-0 lg:-translate-x-1/2 xl:-left-2"
           : "right-2 translate-x-0 sm:right-3 lg:right-0 lg:translate-x-1/2 xl:-right-2"
@@ -53,6 +53,7 @@ export function CoreValuesCarousel() {
   const [scrollSnaps, setScrollSnaps] = useState<number[]>([]);
   const [canScrollPrev, setCanScrollPrev] = useState(false);
   const [canScrollNext, setCanScrollNext] = useState(false);
+  const maxVisibleDots = 7;
 
   const [emblaRef, emblaApi] = useEmblaCarousel(
     {
@@ -117,7 +118,7 @@ export function CoreValuesCarousel() {
         aria-hidden
       />
 
-      <div className="relative px-12 sm:px-14 md:px-16 lg:px-20 xl:px-24">
+      <div className="relative px-4 sm:px-8 md:px-16 lg:px-20 xl:px-24">
         <CarouselArrow direction="prev" onClick={scrollPrev} disabled={!canScrollPrev} />
         <CarouselArrow direction="next" onClick={scrollNext} disabled={!canScrollNext} />
 
@@ -151,21 +152,31 @@ export function CoreValuesCarousel() {
         role="tablist"
         aria-label="Carousel pagination"
       >
-        {scrollSnaps.map((_, index) => (
-          <button
-            key={index}
-            type="button"
-            role="tab"
-            aria-selected={index === selectedIndex}
-            aria-label={`Go to value ${index + 1}`}
-            onClick={() => scrollTo(index)}
-            className={`h-2.5 rounded-full transition-all duration-500 ease-out ${
-              index === selectedIndex
-                ? "w-10 bg-gradient-to-r from-emerald-light via-gold to-gold-soft shadow-[0_0_14px_rgba(201,162,39,0.35)]"
-                : "w-2.5 bg-emerald/30 hover:w-3.5 hover:bg-emerald/50"
-            }`}
-          />
-        ))}
+        {scrollSnaps.map((_, index) => {
+          const distance = Math.abs(index - selectedIndex);
+          const wrappedDistance = Math.min(distance, Math.abs(distance - scrollSnaps.length));
+          const isVisibleDot = wrappedDistance <= Math.floor(maxVisibleDots / 2);
+
+          if (!isVisibleDot) return null;
+
+          return (
+            <button
+              key={index}
+              type="button"
+              role="tab"
+              aria-selected={index === selectedIndex}
+              aria-label={`Go to value ${index + 1}`}
+              onClick={() => scrollTo(index)}
+              className={`rounded-full transition-all duration-500 ease-out ${
+                index === selectedIndex
+                  ? "h-2.5 w-10 bg-gradient-to-r from-emerald-light via-gold to-gold-soft shadow-[0_0_14px_rgba(201,162,39,0.35)]"
+                  : wrappedDistance <= 1
+                    ? "h-2.5 w-2.5 bg-emerald/30 hover:w-3.5 hover:bg-emerald/50"
+                    : "h-2 w-2 bg-emerald/18 hover:bg-emerald/32"
+              }`}
+            />
+          );
+        })}
       </div>
     </div>
   );

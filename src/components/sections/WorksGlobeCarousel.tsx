@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent, type TouchEvent as ReactTouchEvent } from "react";
 import Image from "next/image";
 import type { WorkItem } from "@/data/works";
 
@@ -235,6 +235,7 @@ export function WorksGlobeCarousel({
   const total = works.length;
   const dragStartXRef = useRef<number | null>(null);
   const dragMovedRef = useRef(false);
+  const maxVisibleDots = 7;
 
   const goNext = useCallback(() => {
     setActiveIndex((current) => (current + 1) % total);
@@ -278,6 +279,27 @@ export function WorksGlobeCarousel({
     dragMovedRef.current = false;
   };
 
+  const handleTouchStart = (event: ReactTouchEvent<HTMLDivElement>) => {
+    if (total < 2) return;
+    if (isInteractiveTarget(event.target)) return;
+    dragStartXRef.current = event.touches[0]?.clientX ?? null;
+    dragMovedRef.current = false;
+  };
+
+  const handleTouchMove = (event: ReactTouchEvent<HTMLDivElement>) => {
+    if (dragStartXRef.current === null) return;
+
+    const clientX = event.touches[0]?.clientX;
+    if (typeof clientX !== "number") return;
+
+    const deltaX = clientX - dragStartXRef.current;
+    if (Math.abs(deltaX) < 18 || dragMovedRef.current) return;
+
+    dragMovedRef.current = true;
+    if (deltaX < 0) goNext();
+    else goPrev();
+  };
+
   return (
     <div className="relative mt-10 w-full max-w-full overflow-x-hidden" dir="ltr">
       <div
@@ -285,6 +307,9 @@ export function WorksGlobeCarousel({
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerUp}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handlePointerUp}
         className="relative mx-auto h-[620px] w-full max-w-full touch-none cursor-grab overflow-hidden [perspective:1400px] active:cursor-grabbing sm:h-[680px] sm:[perspective:1800px] lg:h-[760px]"
       >
         <div
@@ -319,7 +344,7 @@ export function WorksGlobeCarousel({
           onPointerDown={(event) => event.stopPropagation()}
           onClick={goPrev}
           aria-label={language === "ur" ? "پچھلا کام" : "Previous work"}
-          className="pointer-events-auto absolute left-3 top-[42%] z-[80] flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-emerald-deep/15 bg-white/95 text-emerald-deep shadow-xl transition hover:bg-emerald-deep hover:text-cream sm:left-4 sm:h-12 sm:w-12 lg:h-14 lg:w-14"
+          className="pointer-events-auto absolute left-3 top-[42%] z-[80] hidden h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-emerald-deep/15 bg-white/95 text-emerald-deep shadow-xl transition hover:bg-emerald-deep hover:text-cream sm:flex sm:left-4 sm:h-12 sm:w-12 lg:h-14 lg:w-14"
         >
           <ChevronLeft />
         </button>
@@ -329,28 +354,38 @@ export function WorksGlobeCarousel({
           onPointerDown={(event) => event.stopPropagation()}
           onClick={goNext}
           aria-label={language === "ur" ? "اگلا کام" : "Next work"}
-          className="pointer-events-auto absolute right-3 top-[42%] z-[80] flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-emerald-deep/15 bg-white/95 text-emerald-deep shadow-xl transition hover:bg-emerald-deep hover:text-cream sm:right-4 sm:h-12 sm:w-12 lg:h-14 lg:w-14"
+          className="pointer-events-auto absolute right-3 top-[42%] z-[80] hidden h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-emerald-deep/15 bg-white/95 text-emerald-deep shadow-xl transition hover:bg-emerald-deep hover:text-cream sm:flex sm:right-4 sm:h-12 sm:w-12 lg:h-14 lg:w-14"
         >
           <ChevronRight />
         </button>
       </div>
 
       <div className="mt-6 flex max-w-full flex-wrap justify-center gap-2 overflow-hidden px-4 sm:px-6">
-        {works.map((item, index) => (
-          <button
-            key={item.id}
-            type="button"
-            onPointerDown={(event) => event.stopPropagation()}
-            onClick={() => setActiveIndex(index)}
-            aria-label={language === "ur" ? `کام ${index + 1}` : `Go to work ${index + 1}`}
-            aria-current={index === activeIndex ? "true" : undefined}
-            className={`h-2 rounded-full transition-all ${
-              index === activeIndex
-                ? "w-7 bg-gradient-to-r from-[#d4af37] to-[#064635]"
-                : "w-2 bg-emerald-deep/25 hover:bg-emerald-deep/40"
-            }`}
-          />
-        ))}
+        {works.map((item, index) => {
+          const distance = Math.abs(index - activeIndex);
+          const wrappedDistance = Math.min(distance, Math.abs(distance - total));
+          const isVisibleDot = wrappedDistance <= Math.floor(maxVisibleDots / 2);
+
+          if (!isVisibleDot) return null;
+
+          return (
+            <button
+              key={item.id}
+              type="button"
+              onPointerDown={(event) => event.stopPropagation()}
+              onClick={() => setActiveIndex(index)}
+              aria-label={language === "ur" ? `کام ${index + 1}` : `Go to work ${index + 1}`}
+              aria-current={index === activeIndex ? "true" : undefined}
+              className={`rounded-full transition-all ${
+                index === activeIndex
+                  ? "h-2 w-7 bg-gradient-to-r from-[#d4af37] to-[#064635]"
+                  : wrappedDistance <= 1
+                    ? "h-2 w-2 bg-emerald-deep/30 hover:bg-emerald-deep/45"
+                    : "h-1.5 w-1.5 bg-emerald-deep/18 hover:bg-emerald-deep/32"
+              }`}
+            />
+          );
+        })}
       </div>
     </div>
   );

@@ -31,7 +31,7 @@ export function Header() {
 
   return (
     <header
-      className={`fixed inset-x-0 top-0 z-50 w-full max-w-full transition-all duration-500 ${
+      className={`fixed inset-x-0 top-0 ${menuOpen ? "z-[10000]" : "z-50"} w-full max-w-full transition-all duration-500 ${
         scrolled
           ? "border-b border-emerald/15 bg-cream/90 py-2 shadow-md shadow-emerald-deep/10 backdrop-blur-xl sm:py-2.5"
           : "border-b border-white/10 bg-cream/55 py-2.5 shadow-sm shadow-emerald-deep/5 backdrop-blur-md sm:py-3"

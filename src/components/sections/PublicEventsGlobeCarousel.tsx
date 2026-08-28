@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent, type TouchEvent as ReactTouchEvent } from "react";
 import { PublicEventCard } from "@/components/cards/PublicEventCard";
 import type { PublicEvent } from "@/lib/public-events";
 
@@ -89,6 +89,7 @@ export function PublicEventsGlobeCarousel({
   const total = events.length;
   const dragStartXRef = useRef<number | null>(null);
   const dragMovedRef = useRef(false);
+  const maxVisibleDots = 7;
 
   const goNext = useCallback(() => {
     setActiveIndex((current) => (current + 1) % total);
@@ -132,6 +133,27 @@ export function PublicEventsGlobeCarousel({
     dragMovedRef.current = false;
   };
 
+  const handleTouchStart = (event: ReactTouchEvent<HTMLDivElement>) => {
+    if (total < 2) return;
+    if (isInteractiveTarget(event.target)) return;
+    dragStartXRef.current = event.touches[0]?.clientX ?? null;
+    dragMovedRef.current = false;
+  };
+
+  const handleTouchMove = (event: ReactTouchEvent<HTMLDivElement>) => {
+    if (dragStartXRef.current === null) return;
+
+    const clientX = event.touches[0]?.clientX;
+    if (typeof clientX !== "number") return;
+
+    const deltaX = clientX - dragStartXRef.current;
+    if (Math.abs(deltaX) < 18 || dragMovedRef.current) return;
+
+    dragMovedRef.current = true;
+    if (deltaX < 0) goNext();
+    else goPrev();
+  };
+
   return (
     <div className="relative mt-10 w-full max-w-full overflow-x-hidden sm:mt-14" dir="ltr">
       <div
@@ -139,8 +161,11 @@ export function PublicEventsGlobeCarousel({
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerUp}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handlePointerUp}
         className={`relative mx-auto w-full max-w-full overflow-hidden [perspective:1400px] sm:[perspective:1800px] ${
-          breakpoint === "mobile" ? "h-[590px] cursor-grab active:cursor-grabbing" : breakpoint === "tablet" ? "h-[650px] cursor-grab active:cursor-grabbing" : "h-[710px] cursor-grab active:cursor-grabbing lg:h-[730px]"
+          breakpoint === "mobile" ? "h-[680px] touch-none cursor-grab active:cursor-grabbing" : breakpoint === "tablet" ? "h-[760px] touch-none cursor-grab active:cursor-grabbing" : "h-[840px] touch-none cursor-grab active:cursor-grabbing lg:h-[860px]"
         }`}
       >
         <div
@@ -173,35 +198,48 @@ export function PublicEventsGlobeCarousel({
       <div className="mt-4 flex items-center justify-center gap-4 sm:mt-6">
         <button
           type="button"
+          onPointerDown={(event) => event.stopPropagation()}
           onClick={goPrev}
           aria-label="Previous event"
-          className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-emerald-deep/15 bg-white text-emerald-deep shadow-lg transition hover:bg-emerald-deep hover:text-cream sm:h-14 sm:w-14"
+          className="pointer-events-auto hidden h-12 w-12 shrink-0 items-center justify-center rounded-full border border-emerald-deep/15 bg-white text-emerald-deep shadow-lg transition hover:bg-emerald-deep hover:text-cream sm:flex sm:h-14 sm:w-14"
         >
           <ChevronLeft />
         </button>
 
         <div className="flex justify-center gap-2">
-          {events.map((event, index) => (
-            <button
-              key={event.id}
-              type="button"
-              onClick={() => setActiveIndex(index)}
-              aria-label={`Go to event ${index + 1}`}
-              aria-current={index === activeIndex ? "true" : undefined}
-              className={`h-2.5 rounded-full transition-all ${
-                index === activeIndex
-                  ? "w-8 bg-gradient-to-r from-[#d4af37] to-[#064635]"
-                  : "w-2.5 bg-emerald-deep/25 hover:bg-emerald-deep/40"
-              }`}
-            />
-          ))}
+          {events.map((event, index) => {
+            const distance = Math.abs(index - activeIndex);
+            const wrappedDistance = Math.min(distance, Math.abs(distance - total));
+            const isVisibleDot = wrappedDistance <= Math.floor(maxVisibleDots / 2);
+
+            if (!isVisibleDot) return null;
+
+            return (
+              <button
+                key={event.id}
+                type="button"
+                onPointerDown={(event) => event.stopPropagation()}
+                onClick={() => setActiveIndex(index)}
+                aria-label={`Go to event ${index + 1}`}
+                aria-current={index === activeIndex ? "true" : undefined}
+                className={`rounded-full transition-all ${
+                  index === activeIndex
+                    ? "h-2.5 w-8 bg-gradient-to-r from-[#d4af37] to-[#064635]"
+                    : wrappedDistance <= 1
+                      ? "h-2.5 w-2.5 bg-emerald-deep/25 hover:bg-emerald-deep/40"
+                      : "h-2 w-2 bg-emerald-deep/18 hover:bg-emerald-deep/32"
+                }`}
+              />
+            );
+          })}
         </div>
 
         <button
           type="button"
+          onPointerDown={(event) => event.stopPropagation()}
           onClick={goNext}
           aria-label="Next event"
-          className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-emerald-deep/15 bg-white text-emerald-deep shadow-lg transition hover:bg-emerald-deep hover:text-cream sm:h-14 sm:w-14"
+          className="pointer-events-auto hidden h-12 w-12 shrink-0 items-center justify-center rounded-full border border-emerald-deep/15 bg-white text-emerald-deep shadow-lg transition hover:bg-emerald-deep hover:text-cream sm:flex sm:h-14 sm:w-14"
         >
           <ChevronRight />
         </button>

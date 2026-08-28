@@ -34,7 +34,7 @@ function WorkDetailModal({
   }, [onClose]);
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
+    <div className="fixed inset-0 z-[9999] flex items-start justify-center px-2 pb-6 pt-3 sm:items-center sm:p-6">
       <div
         className="absolute inset-0 bg-emerald-deep/60 backdrop-blur-sm"
         onClick={onClose}
@@ -46,7 +46,7 @@ function WorkDetailModal({
         aria-labelledby="work-modal-title"
         dir={isUrdu ? "rtl" : "ltr"}
         lang={isUrdu ? "ur" : "en"}
-        className={`relative flex max-h-[min(85vh,100dvh)] w-[92vw] max-w-3xl flex-col overflow-hidden rounded-2xl bg-cream shadow-2xl ${
+        className={`relative flex max-h-[96vh] w-[94vw] max-w-3xl flex-col overflow-hidden rounded-2xl bg-cream shadow-2xl sm:max-h-[min(85vh,100dvh)] sm:w-[92vw] ${
           isUrdu ? "text-right font-urdu" : "text-left"
         }`}
       >

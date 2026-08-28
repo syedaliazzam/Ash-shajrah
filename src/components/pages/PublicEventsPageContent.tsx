@@ -76,7 +76,21 @@ function EventSlider({
   singleEventActionLabel: string;
   onSingleEventAction?: (event: PublicEvent) => void;
 }) {
+  const { language } = useLanguage();
+  const isUrdu = language === "ur";
   const isSingleCurrentUpcoming = title.toLowerCase().includes("current") || title.toLowerCase().includes("موجودہ");
+  const eventMetaText = {
+    current: isUrdu ? "موجودہ" : "Current",
+    upcoming: isUrdu ? "آنے والا" : "Upcoming",
+    startDate: isUrdu ? "آغاز کی تاریخ" : "Start Date",
+    startTime: isUrdu ? "آغاز کا وقت" : "Start Time",
+    endTime: isUrdu ? "اختتامی وقت" : "End Time",
+    fee: isUrdu ? "فیس" : "Fee",
+    registrationDeadlineDate: isUrdu ? "رجسٹریشن کی آخری تاریخ" : "Registration Deadline Date",
+    registrationDeadlineTime: isUrdu ? "رجسٹریشن کا آخری وقت" : "Registration Deadline Time",
+    description: isUrdu ? "تفصیل" : "Description",
+    detailsFallback: isUrdu ? "مزید تفصیل جلد شیئر کی جائے گی۔" : "More details will be shared soon.",
+  };
 
   return (
     <section className="space-y-5">
@@ -110,7 +124,7 @@ function EventSlider({
                 </div>
               )}
               <span className="absolute left-5 top-5 rounded-full border border-white bg-white px-4 py-2 text-xs font-semibold text-emerald-deep shadow-md">
-                {events[0].lifecycle === "current" ? "Current" : "Upcoming"}
+                {events[0].lifecycle === "current" ? eventMetaText.current : eventMetaText.upcoming}
               </span>
             </div>
           </div>
@@ -121,20 +135,20 @@ function EventSlider({
             </h3>
 
             <div className="mt-6 grid gap-4 rounded-[28px] border border-emerald/10 bg-cream/65 p-5 text-sm text-emerald-deep sm:grid-cols-2">
-              <div><span className="font-semibold">Start Date:</span> {formatEventDate(events[0].startAt)}</div>
-              <div><span className="font-semibold">Start Time:</span> {formatEventTime(events[0].startAt)}</div>
-              <div><span className="font-semibold">End Time:</span> {formatEventTime(events[0].endAt)}</div>
-              <div><span className="font-semibold">Fee:</span> {formatEventFee(events[0].fee, "Contact for details")}</div>
-              <div><span className="font-semibold">Registration Deadline Date:</span> {formatEventDate(events[0].registrationDeadline)}</div>
-              <div><span className="font-semibold">Registration Deadline Time:</span> {formatEventTime(events[0].registrationDeadline)}</div>
+              <div><span className="font-semibold">{eventMetaText.startDate}:</span> <span dir="ltr" className="inline-block [unicode-bidi:isolate]">{formatEventDate(events[0].startAt)}</span></div>
+              <div><span className="font-semibold">{eventMetaText.startTime}:</span> <span dir="ltr" className="inline-block [unicode-bidi:isolate]">{formatEventTime(events[0].startAt)}</span></div>
+              <div><span className="font-semibold">{eventMetaText.endTime}:</span> <span dir="ltr" className="inline-block [unicode-bidi:isolate]">{formatEventTime(events[0].endAt)}</span></div>
+              <div><span className="font-semibold">{eventMetaText.fee}:</span> <span dir="ltr" className="inline-block [unicode-bidi:isolate]">{formatEventFee(events[0].fee, "Contact for details")}</span></div>
+              <div><span className="font-semibold">{eventMetaText.registrationDeadlineDate}:</span> <span dir="ltr" className="inline-block [unicode-bidi:isolate]">{formatEventDate(events[0].registrationDeadline)}</span></div>
+              <div><span className="font-semibold">{eventMetaText.registrationDeadlineTime}:</span> <span dir="ltr" className="inline-block [unicode-bidi:isolate]">{formatEventTime(events[0].registrationDeadline)}</span></div>
             </div>
 
             <div className="mt-6 min-w-0 rounded-[28px] border border-emerald/10 bg-white/80 p-5">
               <h4 className="font-display text-2xl font-bold tracking-tight text-emerald-deep">
-                Description
+                {eventMetaText.description}
               </h4>
               <div className="mt-3 whitespace-pre-line break-words [overflow-wrap:anywhere] text-sm leading-8 text-emerald-deep/80 sm:text-base">
-                {events[0].description || "More details will be shared soon."}
+                {events[0].description || eventMetaText.detailsFallback}
               </div>
             </div>
 

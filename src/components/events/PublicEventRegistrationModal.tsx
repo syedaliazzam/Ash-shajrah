@@ -1,6 +1,7 @@
 ﻿"use client";
 
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import {
   formatEventDate,
   formatEventFee,
@@ -122,6 +123,7 @@ function getCountryFlagForOption(label: string, fallbackFlag?: string) {
 export function PublicEventRegistrationModal({ event, open, onClose }: Props) {
   const { language } = useLanguage();
   const isUrdu = language === "ur";
+  const [mounted, setMounted] = useState(false);
   const [form, setForm] = useState<FormState>(INITIAL_FORM);
   const [countryCode, setCountryCode] = useState("+92");
   const [countryMenuOpen, setCountryMenuOpen] = useState(false);
@@ -161,6 +163,11 @@ export function PublicEventRegistrationModal({ event, open, onClose }: Props) {
     addStudent: isUrdu ? "+" : "+",
     removeStudent: isUrdu ? "−" : "−",
     eventFee: isUrdu ? "ایونٹ فیس" : "Event Fee",
+    startDate: isUrdu ? "آغاز کی تاریخ" : "Start Date",
+    startTime: isUrdu ? "آغاز کا وقت" : "Start Time",
+    endTime: isUrdu ? "اختتامی وقت" : "End Time",
+    registrationDeadlineDate: isUrdu ? "رجسٹریشن کی آخری تاریخ" : "Registration Deadline Date",
+    registrationDeadlineTime: isUrdu ? "رجسٹریشن کا آخری وقت" : "Registration Deadline Time",
     registerButton: isUrdu ? "ایونٹ کے لیے رجسٹر کریں" : "Register for Event",
     submitting: isUrdu ? "رجسٹریشن جمع ہو رہی ہے..." : "Submitting registration...",
     registrationSuccessful: isUrdu ? "رجسٹریشن کامیابی سے مکمل ہو گئی۔" : "Registration successful.",
@@ -181,6 +188,11 @@ export function PublicEventRegistrationModal({ event, open, onClose }: Props) {
   }, [event.lifecycle, event.registrationDeadline, uiText.deadlinePassed, uiText.pastClosed]);
 
   useEffect(() => {
+    setMounted(true);
+    return () => setMounted(false);
+  }, []);
+
+  useEffect(() => {
     const handleOutsideClick = (mouseEvent: MouseEvent) => {
       if (!countryMenuRef.current?.contains(mouseEvent.target as Node)) {
         setCountryMenuOpen(false);
@@ -198,7 +210,7 @@ export function PublicEventRegistrationModal({ event, open, onClose }: Props) {
     }
   }, [open]);
 
-  if (!open) return null;
+  if (!open || !mounted) return null;
 
   const validate = () => {
     const nextErrors: FormErrors = {};
@@ -301,7 +313,7 @@ export function PublicEventRegistrationModal({ event, open, onClose }: Props) {
     updateField("whatsapp", sanitized ? `${nextCode} ${sanitized}` : "");
   };
 
-  const resetForm = () => {
+  function resetForm() {
     setForm({
       ...INITIAL_FORM,
       studentNames: [""],
@@ -312,7 +324,7 @@ export function PublicEventRegistrationModal({ event, open, onClose }: Props) {
     setErrors({});
     setSubmitError("");
     setSubmitting(false);
-  };
+  }
 
   const handleSubmit = async (submitEvent: FormEvent) => {
     submitEvent.preventDefault();
@@ -375,16 +387,16 @@ export function PublicEventRegistrationModal({ event, open, onClose }: Props) {
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-[120] flex items-center justify-center bg-emerald-deep/65 px-4 py-6">
+  return createPortal(
+    <div className="fixed inset-0 z-[9999] isolate flex items-start justify-center bg-emerald-deep/65 px-3 pb-6 pt-2 sm:items-center sm:px-6 sm:py-8">
       <div
         dir={isUrdu ? "rtl" : "ltr"}
-        className={`relative max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-[32px] border border-emerald/10 bg-[linear-gradient(180deg,#fffdf8,#f7f1e6)] p-6 shadow-[0_30px_100px_rgba(13,59,46,0.28)] sm:p-8 ${isUrdu ? "font-urdu text-right" : ""}`}
+        className={`relative max-h-[96vh] w-full max-w-3xl overflow-y-auto rounded-[28px] border border-emerald/10 bg-[linear-gradient(180deg,#fffdf8,#f7f1e6)] p-5 shadow-[0_30px_100px_rgba(13,59,46,0.28)] sm:max-h-[90vh] sm:rounded-[32px] sm:p-8 ${isUrdu ? "font-urdu text-right" : ""}`}
       >
         <button
           type="button"
           onClick={onClose}
-          className="absolute right-4 top-4 inline-flex min-h-10 items-center justify-center rounded-full border border-emerald/12 bg-white px-4 text-sm font-semibold text-emerald-deep transition hover:border-gold hover:text-gold"
+          className="absolute right-4 top-4 z-10 inline-flex min-h-10 items-center justify-center rounded-full border border-emerald/12 bg-white px-4 text-sm font-semibold text-emerald-deep transition hover:border-gold hover:text-gold"
         >
           {uiText.close}
         </button>
@@ -404,12 +416,12 @@ export function PublicEventRegistrationModal({ event, open, onClose }: Props) {
         <div className="mt-6 rounded-[24px] border border-emerald/10 bg-white/80 p-5 text-sm text-emerald-deep/85">
           <h3 className="font-display text-xl font-bold text-emerald-deep">{event.title}</h3>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
-            <div><span className="font-semibold">Start Date:</span> {formatEventDate(event.startAt)}</div>
-            <div><span className="font-semibold">Start Time:</span> {formatEventTime(event.startAt)}</div>
-            <div><span className="font-semibold">End Time:</span> {formatEventTime(event.endAt)}</div>
-            <div><span className="font-semibold">{uiText.eventFee}:</span> {formatEventFee(event.fee)}</div>
-            <div><span className="font-semibold">Registration Deadline Date:</span> {formatEventDate(event.registrationDeadline)}</div>
-            <div><span className="font-semibold">Registration Deadline Time:</span> {formatEventTime(event.registrationDeadline)}</div>
+            <div><span className="font-semibold">{uiText.startDate}:</span> <span dir="ltr" className="inline-block [unicode-bidi:isolate]">{formatEventDate(event.startAt)}</span></div>
+            <div><span className="font-semibold">{uiText.startTime}:</span> <span dir="ltr" className="inline-block [unicode-bidi:isolate]">{formatEventTime(event.startAt)}</span></div>
+            <div><span className="font-semibold">{uiText.endTime}:</span> <span dir="ltr" className="inline-block [unicode-bidi:isolate]">{formatEventTime(event.endAt)}</span></div>
+            <div><span className="font-semibold">{uiText.eventFee}:</span> <span dir="ltr" className="inline-block [unicode-bidi:isolate]">{formatEventFee(event.fee)}</span></div>
+            <div><span className="font-semibold">{uiText.registrationDeadlineDate}:</span> <span dir="ltr" className="inline-block [unicode-bidi:isolate]">{formatEventDate(event.registrationDeadline)}</span></div>
+            <div><span className="font-semibold">{uiText.registrationDeadlineTime}:</span> <span dir="ltr" className="inline-block [unicode-bidi:isolate]">{formatEventTime(event.registrationDeadline)}</span></div>
           </div>
         </div>
 
@@ -607,6 +619,7 @@ export function PublicEventRegistrationModal({ event, open, onClose }: Props) {
         </form>
         ) : null}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

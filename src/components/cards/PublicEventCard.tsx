@@ -3,12 +3,13 @@
 import Link from "next/link";
 import { useState } from "react";
 import { FacebookIcon } from "@/components/ui/FacebookIcon";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { formatEventDate, formatEventFee, formatEventTime, type PublicEvent } from "@/lib/public-events";
 
-function getLifecycleLabel(value: PublicEvent["lifecycle"]) {
-  if (value === "current") return "Current";
-  if (value === "past") return "Past";
-  return "Upcoming";
+function getLifecycleLabel(value: PublicEvent["lifecycle"], isUrdu: boolean) {
+  if (value === "current") return isUrdu ? "موجودہ" : "Current";
+  if (value === "past") return isUrdu ? "گزشتہ" : "Past";
+  return isUrdu ? "آنے والا" : "Upcoming";
 }
 
 function getLifecycleClasses(value: PublicEvent["lifecycle"]) {
@@ -40,15 +41,30 @@ export function PublicEventCard({
   ctaLabel?: string;
   ctaHref?: string;
 }) {
+  const { language } = useLanguage();
+  const isUrdu = language === "ur";
   const [imageFailed, setImageFailed] = useState(false);
   const resolvedLabel = event.ctaLabel || ctaLabel;
   const resolvedHref = event.ctaHref || ctaHref;
   const isExternal = event.ctaExternal === true;
   const showFacebookIcon = event.showFacebookIcon === true;
   const showMetaFields = !isExternal;
+  const eventMetaText = {
+    startDate: isUrdu ? "آغاز کی تاریخ" : "Start Date",
+    startTime: isUrdu ? "آغاز کا وقت" : "Start Time",
+    endTime: isUrdu ? "اختتامی وقت" : "End Time",
+    fee: isUrdu ? "فیس" : "Fee",
+    registrationDeadlineDate: isUrdu ? "رجسٹریشن کی آخری تاریخ" : "Registration Deadline Date",
+    registrationDeadlineTime: isUrdu ? "رجسٹریشن کا آخری وقت" : "Registration Deadline Time",
+  };
 
   return (
-    <article className="group flex h-full w-full select-none flex-col overflow-hidden rounded-3xl border border-emerald/12 bg-white text-left shadow-[0_20px_50px_rgba(13,59,46,0.14)] transition-all duration-500 hover:border-gold/35 hover:shadow-[0_28px_60px_rgba(13,59,46,0.18)]">
+    <article
+      dir={isUrdu ? "rtl" : "ltr"}
+      className={`group flex h-full w-full select-none flex-col overflow-hidden rounded-3xl border border-emerald/12 bg-white shadow-[0_20px_50px_rgba(13,59,46,0.14)] transition-all duration-500 hover:border-gold/35 hover:shadow-[0_28px_60px_rgba(13,59,46,0.18)] ${
+        isUrdu ? "text-right font-urdu" : "text-left"
+      }`}
+    >
       <div className="relative h-56 w-full overflow-hidden rounded-t-3xl bg-[#fff8ea] sm:h-64">
         {event.imageUrl && !imageFailed ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -67,13 +83,13 @@ export function PublicEventCard({
         </span>
       </div>
 
-      <div className="flex flex-1 select-none flex-col p-5 text-left sm:p-6">
+      <div className="flex flex-1 select-none flex-col p-5 sm:p-6">
         <span
           className={`inline-flex w-fit rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-wider ${getLifecycleClasses(
             event.lifecycle
           )}`}
         >
-          {getLifecycleLabel(event.lifecycle)}
+          {getLifecycleLabel(event.lifecycle, isUrdu)}
         </span>
         <h3 className="mt-3 line-clamp-2 font-display text-lg leading-snug text-emerald-deep sm:text-xl">
           {event.title || "Untitled Event"}
@@ -84,29 +100,41 @@ export function PublicEventCard({
 
         {showMetaFields ? (
           <div className="mt-4 grid gap-2 text-xs text-emerald-deep/80 sm:text-sm">
-            <div>
-              <span className="font-semibold text-emerald-deep">Start Date:</span>{" "}
-              {formatEventDate(event.startAt)}
+            <div className="leading-relaxed">
+              <span className="font-semibold text-emerald-deep">{eventMetaText.startDate}:</span>{" "}
+              <span dir="ltr" className="inline-block text-left [unicode-bidi:isolate]">
+                {formatEventDate(event.startAt)}
+              </span>
             </div>
-            <div>
-              <span className="font-semibold text-emerald-deep">Start Time:</span>{" "}
-              {formatEventTime(event.startAt)}
+            <div className="leading-relaxed">
+              <span className="font-semibold text-emerald-deep">{eventMetaText.startTime}:</span>{" "}
+              <span dir="ltr" className="inline-block text-left [unicode-bidi:isolate]">
+                {formatEventTime(event.startAt)}
+              </span>
             </div>
-            <div>
-              <span className="font-semibold text-emerald-deep">End Time:</span>{" "}
-              {formatEventTime(event.endAt)}
+            <div className="leading-relaxed">
+              <span className="font-semibold text-emerald-deep">{eventMetaText.endTime}:</span>{" "}
+              <span dir="ltr" className="inline-block text-left [unicode-bidi:isolate]">
+                {formatEventTime(event.endAt)}
+              </span>
             </div>
-            <div>
-              <span className="font-semibold text-emerald-deep">Fee:</span>{" "}
-              {formatEventFee(event.fee, "Contact for details")}
+            <div className="leading-relaxed">
+              <span className="font-semibold text-emerald-deep">{eventMetaText.fee}:</span>{" "}
+              <span dir="ltr" className="inline-block text-left [unicode-bidi:isolate]">
+                {formatEventFee(event.fee, "Contact for details")}
+              </span>
             </div>
-            <div>
-              <span className="font-semibold text-emerald-deep">Registration Deadline Date:</span>{" "}
-              {formatEventDate(event.registrationDeadline)}
+            <div className="leading-relaxed">
+              <span className="font-semibold text-emerald-deep">{eventMetaText.registrationDeadlineDate}:</span>{" "}
+              <span dir="ltr" className="inline-block text-left [unicode-bidi:isolate]">
+                {formatEventDate(event.registrationDeadline)}
+              </span>
             </div>
-            <div>
-              <span className="font-semibold text-emerald-deep">Registration Deadline Time:</span>{" "}
-              {formatEventTime(event.registrationDeadline)}
+            <div className="leading-relaxed">
+              <span className="font-semibold text-emerald-deep">{eventMetaText.registrationDeadlineTime}:</span>{" "}
+              <span dir="ltr" className="inline-block text-left [unicode-bidi:isolate]">
+                {formatEventTime(event.registrationDeadline)}
+              </span>
             </div>
           </div>
         ) : null}
