@@ -50,7 +50,7 @@ export function PublicEventCard({
   const showFacebookIcon = event.showFacebookIcon === true;
   const showMetaFields = !isExternal;
   const eventMetaText = {
-    startDate: isUrdu ? "آغاز کی تاریخ" : "Start Date",
+    startDate: isUrdu ? "تاریخ" : "Date",
     startTime: isUrdu ? "آغاز کا وقت" : "Start Time",
     endTime: isUrdu ? "اختتامی وقت" : "End Time",
     fee: isUrdu ? "فیس" : "Fee",

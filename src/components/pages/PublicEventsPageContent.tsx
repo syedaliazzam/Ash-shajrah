@@ -82,7 +82,7 @@ function EventSlider({
   const eventMetaText = {
     current: isUrdu ? "موجودہ" : "Current",
     upcoming: isUrdu ? "آنے والا" : "Upcoming",
-    startDate: isUrdu ? "آغاز کی تاریخ" : "Start Date",
+    startDate: isUrdu ? "تاریخ" : "Date",
     startTime: isUrdu ? "آغاز کا وقت" : "Start Time",
     endTime: isUrdu ? "اختتامی وقت" : "End Time",
     fee: isUrdu ? "فیس" : "Fee",

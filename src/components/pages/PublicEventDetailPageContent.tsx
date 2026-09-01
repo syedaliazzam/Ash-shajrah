@@ -28,7 +28,7 @@ export function PublicEventDetailPageContent({ event }: { event: PublicEvent }) 
     current: isUrdu ? "موجودہ" : "Current",
     upcoming: isUrdu ? "آنے والا" : "Upcoming",
     past: isUrdu ? "گزشتہ" : "Past",
-    startDate: isUrdu ? "آغاز کی تاریخ" : "Start Date",
+    startDate: isUrdu ? "تاریخ" : "Date",
     startTime: isUrdu ? "آغاز کا وقت" : "Start Time",
     endDate: isUrdu ? "اختتام کی تاریخ" : "End Date",
     endTime: isUrdu ? "اختتام کا وقت" : "End Time",

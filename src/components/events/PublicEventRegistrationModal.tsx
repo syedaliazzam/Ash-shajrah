@@ -163,7 +163,7 @@ export function PublicEventRegistrationModal({ event, open, onClose }: Props) {
     addStudent: isUrdu ? "+" : "+",
     removeStudent: isUrdu ? "−" : "−",
     eventFee: isUrdu ? "ایونٹ فیس" : "Event Fee",
-    startDate: isUrdu ? "آغاز کی تاریخ" : "Start Date",
+    startDate: isUrdu ? "تاریخ" : "Date",
     startTime: isUrdu ? "آغاز کا وقت" : "Start Time",
     endTime: isUrdu ? "اختتامی وقت" : "End Time",
     registrationDeadlineDate: isUrdu ? "رجسٹریشن کی آخری تاریخ" : "Registration Deadline Date",
