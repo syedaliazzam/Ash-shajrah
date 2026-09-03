@@ -103,7 +103,7 @@ export function PublicEventDetailPageContent({ event }: { event: PublicEvent }) 
                   <h2 className="font-display text-2xl font-bold tracking-tight text-emerald-deep">
                     {uiText.description}
                   </h2>
-                  <div className="mt-3 whitespace-pre-line break-words [overflow-wrap:anywhere] text-sm leading-8 text-emerald-deep/80 sm:text-base">
+                  <div className="mt-3 whitespace-pre-line [overflow-wrap:anywhere] text-sm leading-8 text-emerald-deep/80 sm:text-base">
                     {event.description || uiText.descriptionFallback}
                   </div>
                 </div>

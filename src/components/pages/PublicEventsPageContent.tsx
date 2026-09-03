@@ -147,7 +147,7 @@ function EventSlider({
               <h4 className="font-display text-2xl font-bold tracking-tight text-emerald-deep">
                 {eventMetaText.description}
               </h4>
-              <div className="mt-3 whitespace-pre-line break-words [overflow-wrap:anywhere] text-sm leading-8 text-emerald-deep/80 sm:text-base">
+              <div className="mt-3 whitespace-pre-line [overflow-wrap:anywhere] text-sm leading-8 text-emerald-deep/80 sm:text-base">
                 {events[0].description || eventMetaText.detailsFallback}
               </div>
             </div>

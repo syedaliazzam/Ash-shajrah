@@ -8,7 +8,7 @@ import { EVENTS_URL, REGISTER_URL, WHATSAPP_URL } from "@/lib/constants";
 import { NAV_ITEMS } from "@/lib/nav";
 
 const navLinkClass =
-  "min-h-[44px] whitespace-nowrap text-[11px] font-medium text-emerald-deep/85 transition-colors hover:text-emerald xl:text-xs 2xl:text-sm";
+  "inline-flex min-h-[44px] items-center whitespace-nowrap text-[11px] font-medium text-emerald-deep/85 transition-colors hover:text-emerald xl:text-xs 2xl:text-sm";
 
 export function Header() {
   const { t, language } = useLanguage();
