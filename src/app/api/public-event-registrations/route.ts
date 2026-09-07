@@ -3,7 +3,9 @@ import nodemailer from "nodemailer";
 import {
   createPublicEventRegistrationInDb,
   listActivePaymentMethods,
+  type PublicEventCustomFieldValues,
 } from "@/lib/public-events-db";
+import type { EventRegistrationField } from "@/lib/public-events";
 
 export const runtime = "nodejs";
 
@@ -119,8 +121,13 @@ function buildEventEmailShell(input: {
   eventTitle: string;
   participantName: string;
   amountDue: string;
+  requiresPayment: boolean;
   sectionsHtml: string;
 }) {
+  const paymentIntro = input.requiresPayment
+    ? `<p style="margin:0 0 22px;color:#5B655F;font-size:15px;line-height:24px;">Kindly complete a payment of ${escapeHtml(input.amountDue)}, then send your payment details to the coordinator on WhatsApp to confirm your seat. Payment details are given below.</p>`
+    : '<p style="margin:0 0 22px;color:#5B655F;font-size:15px;line-height:24px;">Your registration has been received and is pending review.</p>';
+
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -159,7 +166,7 @@ function buildEventEmailShell(input: {
         <tr><td class="mobile-padding" style="background-color:#FFFFFF;padding:28px 28px 10px;border-left:1px solid #DDD6C8;border-right:1px solid #DDD6C8;">
           <p style="margin:0 0 16px;color:#1F2A24;font-size:16px;line-height:24px;font-weight:700;">Dear ${escapeHtml(input.participantName)},</p>
           <p style="margin:0 0 12px;color:#5B655F;font-size:15px;line-height:24px;">Thank you for registering for an Ash-Shajrah public event.</p>
-          <p style="margin:0 0 22px;color:#5B655F;font-size:15px;line-height:24px;">Kindly complete a payment of ${escapeHtml(input.amountDue)}, then send your payment details to the coordinator on WhatsApp to confirm your seat. Payment details are given below.</p>
+          ${paymentIntro}
           ${input.sectionsHtml}
           <p style="margin:20px 0 0;color:#1F2A24;font-size:15px;line-height:24px;">Warm regards,<br/><strong>Ash-Shajrah Learning Hub Admissions Team</strong></p>
         </td></tr>
@@ -238,21 +245,130 @@ function buildPaymentMethodsHtml(
   );
 }
 
+function normalizeCustomFieldValues(value: unknown): PublicEventCustomFieldValues {
+  if (!value || typeof value !== "object") return {};
+
+  if (Array.isArray(value)) {
+    return value.reduce<PublicEventCustomFieldValues>((answers, item) => {
+      if (!item || typeof item !== "object") return answers;
+      const record = item as Record<string, unknown>;
+      const fieldId = String(record.fieldId ?? record.id ?? record.key ?? "").trim();
+      if (!fieldId) return answers;
+      const rawValue = record.value;
+      answers[fieldId] = Array.isArray(rawValue)
+        ? rawValue.map((entry) => String(entry ?? "").trim()).filter(Boolean)
+        : String(rawValue ?? "").trim();
+      return answers;
+    }, {});
+  }
+
+  return Object.entries(value as Record<string, unknown>).reduce<PublicEventCustomFieldValues>(
+    (answers, [fieldId, rawValue]) => {
+      answers[fieldId] = Array.isArray(rawValue)
+        ? rawValue.map((entry) => String(entry ?? "").trim()).filter(Boolean)
+        : String(rawValue ?? "").trim();
+      return answers;
+    },
+    {}
+  );
+}
+
+function stringifyCustomFieldValue(value: string | string[]) {
+  return Array.isArray(value) ? value.join(", ") : value;
+}
+
+function normalizedLabel(value: string) {
+  return value.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+}
+
+function getCustomValueByIds(customFieldValues: PublicEventCustomFieldValues, ids: string[]) {
+  for (const id of ids) {
+    const value = customFieldValues[id];
+    if (value !== undefined) return stringifyCustomFieldValue(value).trim();
+  }
+  return "";
+}
+
+function getStudentNamesFromCustom(customFieldValues: PublicEventCustomFieldValues) {
+  const value = customFieldValues.studentNames;
+  if (value === undefined) return [];
+  return Array.isArray(value)
+    ? value.map((name) => name.trim()).filter(Boolean)
+    : String(value || "")
+        .split(",")
+        .map((name) => name.trim())
+        .filter(Boolean);
+}
+
+function buildCustomFieldDisplayValues(
+  fields: EventRegistrationField[],
+  customFieldValues: PublicEventCustomFieldValues
+) {
+  return fields
+    .filter((field) => customFieldValues[field.id] !== undefined)
+    .map((field) => ({
+      label: field.label,
+      value: customFieldValues[field.id],
+    }));
+}
+
+function hasPositiveAmount(value: string | number | null | undefined) {
+  if (value === null || value === undefined || value === "") return false;
+  const numericValue = typeof value === "string" ? Number(value) : value;
+  return Number.isFinite(numericValue) && numericValue > 0;
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
+    const customFieldValues = normalizeCustomFieldValues(body.customFieldValues);
+    const emailFromCustom = getCustomValueByIds(customFieldValues, ["email"]);
+    const phoneFromCustom = getCustomValueByIds(customFieldValues, ["whatsapp", "phone", "mobile"]);
+    const parentNameFromCustom = getCustomValueByIds(customFieldValues, ["parentName", "guardianName"]);
+    const studentNameFromCustom = getCustomValueByIds(customFieldValues, ["studentName", "childName"]);
+    const schoolNameFromCustom = getCustomValueByIds(customFieldValues, ["schoolName"]);
+    const classInputFromCustom = getCustomValueByIds(customFieldValues, ["classInput", "classLevel", "grade"]);
+    const firstTextValue = Object.values(customFieldValues).find(
+      (value) => typeof value === "string" && value.trim()
+    );
+    const studentNamesFromCustom = getStudentNamesFromCustom(customFieldValues);
+    const email = String(body.email ?? "").trim() || emailFromCustom;
+    const participantName =
+      String(body.participantName ?? "").trim() ||
+      parentNameFromCustom ||
+      studentNameFromCustom ||
+      String(firstTextValue || "").trim() ||
+      "Event Participant";
+    const whatsapp = String(body.whatsapp ?? "").trim() || phoneFromCustom;
+    const emailFieldWasSubmitted =
+      Object.keys(customFieldValues).some((fieldId) => normalizedLabel(fieldId).includes("email")) ||
+      Boolean(String(body.email ?? "").trim());
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (emailFieldWasSubmitted && email && !emailRegex.test(email)) {
+      return NextResponse.json(
+        {
+          error: "Please enter a valid email address.",
+          errors: { email: "Please enter a valid email address." },
+        },
+        { status: 400 }
+      );
+    }
 
     const registration = await createPublicEventRegistrationInDb({
       eventId: String(body.eventId ?? ""),
-      participantName: String(body.participantName ?? "").trim(),
-      email: String(body.email ?? "").trim(),
-      whatsapp: String(body.whatsapp ?? "").trim(),
+      participantName,
+      email,
+      whatsapp,
       notes: String(body.notes ?? "").trim(),
-      studentName: body.studentName ? String(body.studentName).trim() : undefined,
-      parentName: body.parentName ? String(body.parentName).trim() : undefined,
-      schoolName: body.schoolName ? String(body.schoolName).trim() : undefined,
-      classInput: body.classInput ? String(body.classInput).trim() : undefined,
-      studentNames: Array.isArray(body.studentNames) ? body.studentNames.map((name: unknown) => String(name).trim()).filter((name: string) => name) : undefined,
+      studentName: String(body.studentName ?? "").trim() || studentNameFromCustom || undefined,
+      parentName: String(body.parentName ?? "").trim() || parentNameFromCustom || undefined,
+      schoolName: String(body.schoolName ?? "").trim() || schoolNameFromCustom || undefined,
+      classInput: String(body.classInput ?? "").trim() || classInputFromCustom || undefined,
+      studentNames: Array.isArray(body.studentNames)
+        ? body.studentNames.map((name: unknown) => String(name).trim()).filter((name: string) => name)
+        : studentNamesFromCustom,
+      customFieldValues,
     });
 
     const smtpConfig = getSmtpConfig();
@@ -261,8 +377,9 @@ export async function POST(request: NextRequest) {
       return [];
     });
     let confirmationEmailSent = false;
+    const requiresPayment = hasPositiveAmount(registration.amountDue);
 
-    if (smtpConfig) {
+    if (smtpConfig && email) {
       try {
         const publicEventsFromEmail = getPublicEventsFromEmail(smtpConfig.auth.user);
         const transporter = nodemailer.createTransport(smtpConfig);
@@ -274,26 +391,33 @@ export async function POST(request: NextRequest) {
         const paymentText = buildPaymentMethodsText(paymentMethods);
         const paymentHtml = buildPaymentMethodsHtml(paymentMethods);
         const emailSubject = `${registration.eventTitle} | Ash-Shajrah Learning Hub`;
+        const customRows = buildCustomFieldDisplayValues(
+          registration.registrationFormSchema,
+          registration.customFieldValues
+        ).map((field) => ({
+          label: field.label,
+          value: stringifyCustomFieldValue(field.value) || "-",
+        }));
         const eventEmailHtml = buildEventEmailShell({
           registrationNumber: registration.registrationNumber,
           eventTitle: registration.eventTitle,
-          participantName: String(body.participantName ?? "").trim(),
+          participantName,
           amountDue: formattedAmountDue,
+          requiresPayment,
           sectionsHtml:
             buildEmailCard(
               "Registration Summary",
               buildDetailRows([
                 { label: "Event", value: registration.eventTitle },
-                { label: "Participant Name", value: String(body.participantName ?? "").trim() },
-                { label: "WhatsApp", value: String(body.whatsapp ?? "").trim() },
                 { label: "Date", value: eventStartDate },
                 { label: "Start Time", value: eventStartTime || "To be announced" },
                 { label: "End Time", value: eventEndTime || "To be announced" },
                 { label: "Registration Deadline", value: deadline },
                 { label: "Amount Due", value: formattedAmountDue },
+                ...customRows,
               ])
             ) +
-            paymentHtml +
+            (requiresPayment ? paymentHtml : "") +
             buildEmailCard(
               "Coordinator Details",
               buildDetailRows([
@@ -302,40 +426,43 @@ export async function POST(request: NextRequest) {
                 { label: "WhatsApp", value: "+923473547036" },
               ])
             ) +
-            buildEmailCard(
-              "Next Step",
-              `
-                <p style="margin:0 0 12px;color:#1F2A24;font-size:15px;line-height:24px;font-weight:700;">Send your payment screenshot on WhatsApp</p>
-                <p style="margin:0;color:#5B655F;font-size:15px;line-height:24px;">Share your payment screenshot with the coordinator to confirm your seat and secure your registration.</p>
-              `
-            ),
+            (requiresPayment
+              ? buildEmailCard(
+                  "Next Step",
+                  `
+                    <p style="margin:0 0 12px;color:#1F2A24;font-size:15px;line-height:24px;font-weight:700;">Send your payment screenshot on WhatsApp</p>
+                    <p style="margin:0;color:#5B655F;font-size:15px;line-height:24px;">Share your payment screenshot with the coordinator to confirm your seat and secure your registration.</p>
+                  `
+                )
+              : ""),
         });
 
         await transporter.sendMail({
           from: `"Ash-Shajrah Learning Hub" <${publicEventsFromEmail}>`,
-          to: String(body.email ?? "").trim(),
+          to: email,
           replyTo: getAdmissionsEmail(),
           subject: emailSubject,
           text: [
             emailSubject,
             "",
-            `Dear ${String(body.participantName ?? "").trim()},`,
+            `Dear ${participantName},`,
             "",
             "Thank you for registering for an Ash-Shajrah event.",
-            `Kindly complete a payment of ${formattedAmountDue}, then send your payment details to the coordinator on WhatsApp to confirm your seat. Payment details are provided below.`,
+            requiresPayment
+              ? `Kindly complete a payment of ${formattedAmountDue}, then send your payment details to the coordinator on WhatsApp to confirm your seat. Payment details are provided below.`
+              : "Your registration has been received and is pending review.",
             "",
             `Registration Number: ${registration.registrationNumber}`,
             `Event: ${registration.eventTitle}`,
-            `Participant Name: ${String(body.participantName ?? "").trim()}`,
-            `WhatsApp: ${String(body.whatsapp ?? "").trim()}`,
             `Event Timing:`,
             `- Date: ${eventStartDate}`,
             `- Start Time: ${eventStartTime || "To be announced"}`,
             `- End Time: ${eventEndTime || "To be announced"}`,
             `Registration Deadline: ${deadline}`,
             `Amount Due: ${formattedAmountDue}`,
+            ...customRows.map((field) => `${field.label}: ${field.value}`),
             "",
-            paymentText,
+            requiresPayment ? paymentText : "",
             "",
             "Coordinator Details:",
             "Name: Shoaib Ul Din",
@@ -358,6 +485,12 @@ export async function POST(request: NextRequest) {
       registrationNumber: registration.registrationNumber,
       amountDue: registration.amountDue,
       eventTitle: registration.eventTitle,
+      customFieldValues: registration.customFieldValues,
+      customFieldDisplayValues: buildCustomFieldDisplayValues(
+        registration.registrationFormSchema,
+        registration.customFieldValues
+      ),
+      requiresPayment,
       confirmationEmailSent,
     });
   } catch (error) {

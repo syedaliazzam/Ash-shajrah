@@ -1,6 +1,11 @@
 import { cache } from "react";
 import { getPgPool } from "@/lib/postgres";
-import { slugifyPublicEventTitle, type PublicEvent } from "@/lib/public-events";
+import {
+  normalizeEventRegistrationFields,
+  slugifyPublicEventTitle,
+  type EventRegistrationField,
+  type PublicEvent,
+} from "@/lib/public-events";
 
 type PublicEventRow = {
   id: string;
@@ -14,11 +19,21 @@ type PublicEventRow = {
   image_object_path: string | null;
   image_stored_path: string | null;
   event_category: string | null;
+  registration_form_schema: unknown;
 };
 
 type PublicEventRegistrationRow = {
   registration_no: string;
 };
+
+export type PublicEventCustomFieldValue = {
+  fieldId: string;
+  label: string;
+  type: EventRegistrationField["type"];
+  value: string | string[];
+};
+
+export type PublicEventCustomFieldValues = Record<string, string | string[]>;
 
 type PaymentMethodRow = {
   name: string | null;
@@ -120,6 +135,60 @@ function toDate(value: Date | string) {
   return new Date(value);
 }
 
+function createInternalNoEmailValue(eventId: string) {
+  const uniqueValue = `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+  return `no-email-${eventId}-${uniqueValue}@ash-shajrah.local`;
+}
+
+function normalizeKey(value: string) {
+  return value.toLowerCase().replace(/[^a-z0-9]+/g, "");
+}
+
+function valueToString(value: string | string[] | undefined) {
+  return Array.isArray(value) ? value.join(", ").trim() : String(value || "").trim();
+}
+
+function getFieldValue(
+  fields: EventRegistrationField[],
+  values: PublicEventCustomFieldValues,
+  ids: string[],
+  type?: EventRegistrationField["type"]
+) {
+  for (const id of ids) {
+    const value = values[id];
+    if (value !== undefined) return valueToString(value);
+  }
+
+  const normalizedIds = ids.map(normalizeKey);
+  const matchingField = fields.find((field) => {
+    const fieldId = normalizeKey(field.id);
+    return (
+      (type ? field.type === type : false) ||
+      normalizedIds.some((id) => fieldId === id)
+    );
+  });
+
+  return matchingField ? valueToString(values[matchingField.id]) : "";
+}
+
+function getStudentNamesValue(
+  fields: EventRegistrationField[],
+  values: PublicEventCustomFieldValues
+) {
+  const directValue = values.studentNames;
+  const schemaField = fields.find((field) => field.type === "multiple_student_names");
+  const value = directValue !== undefined ? directValue : schemaField ? values[schemaField.id] : undefined;
+
+  if (Array.isArray(value)) return value.map((name) => name.trim()).filter(Boolean);
+  if (typeof value === "string") {
+    return value
+      .split(",")
+      .map((name) => name.trim())
+      .filter(Boolean);
+  }
+  return [];
+}
+
 function toPublicEvent(row: PublicEventRow): PublicEvent {
   const startDate = toDate(row.start_at);
   const endDate = toDate(row.end_at);
@@ -158,6 +227,7 @@ function toPublicEvent(row: PublicEventRow): PublicEvent {
       : registrationDeadline.toISOString(),
     lifecycle: end < now ? "past" : start <= now ? "current" : "upcoming",
     eventCategory,
+    registrationFormSchema: normalizeEventRegistrationFields(row.registration_form_schema),
   };
 }
 
@@ -180,7 +250,8 @@ export const listPublicEventsFromDb = cache(async () => {
       image_bucket,
       image_object_path,
       image_stored_path,
-      event_category
+      event_category,
+      registration_form_schema
     from public.public_events
     where publication_status = 'published'
     order by start_at asc
@@ -196,7 +267,7 @@ export const listPublicEventsFromDb = cache(async () => {
 export async function createPublicEventRegistrationInDb(input: {
   eventId: string;
   participantName: string;
-  email: string;
+  email?: string;
   whatsapp: string;
   notes: string;
   studentName?: string;
@@ -204,6 +275,7 @@ export async function createPublicEventRegistrationInDb(input: {
   schoolName?: string;
   classInput?: string;
   studentNames?: string[];
+  customFieldValues?: PublicEventCustomFieldValues;
 }) {
   const client = getPgPool();
 
@@ -215,6 +287,7 @@ export async function createPublicEventRegistrationInDb(input: {
     registration_deadline: Date;
     event_fee_amount: string | number | null;
     publication_status: string;
+    registration_form_schema: unknown;
   }>(
     `
       select
@@ -224,7 +297,8 @@ export async function createPublicEventRegistrationInDb(input: {
         end_at,
         registration_deadline,
         event_fee_amount,
-        publication_status
+        publication_status,
+        registration_form_schema
       from public.public_events
       where id = $1
       limit 1
@@ -248,21 +322,117 @@ export async function createPublicEventRegistrationInDb(input: {
     throw new Error("Registration deadline has passed for this event.");
   }
 
-  const duplicateResult = await client.query<{ exists: boolean }>(
-    `
-      select exists(
-        select 1
-        from public.public_event_registrations
-        where event_id = $1
-          and lower(trim(email)) = lower(trim($2))
-          and status <> 'cancelled'
-      ) as exists
-    `,
-    [input.eventId, input.email]
-  );
+  const registrationFields = normalizeEventRegistrationFields(event.registration_form_schema);
+  const hasConfiguredFields = registrationFields.length > 0;
+  const customFieldValues = input.customFieldValues || {};
+  const derivedEmail = input.email?.trim() || getFieldValue(registrationFields, customFieldValues, ["email"], "email");
+  const derivedWhatsapp =
+    input.whatsapp?.trim() ||
+    getFieldValue(registrationFields, customFieldValues, ["whatsapp", "phone", "mobile"], "phone");
+  const derivedParentName =
+    input.parentName?.trim() ||
+    getFieldValue(registrationFields, customFieldValues, ["parentName", "guardianName"]);
+  const derivedStudentName =
+    input.studentName?.trim() ||
+    getFieldValue(registrationFields, customFieldValues, ["studentName", "childName"]);
+  const derivedSchoolName =
+    input.schoolName?.trim() ||
+    getFieldValue(registrationFields, customFieldValues, ["schoolName"]);
+  const derivedClassInput =
+    input.classInput?.trim() ||
+    getFieldValue(registrationFields, customFieldValues, ["classInput", "classLevel", "grade"]);
+  const derivedStudentNames =
+    input.studentNames && input.studentNames.length > 0
+      ? input.studentNames
+      : getStudentNamesValue(registrationFields, customFieldValues);
+  const derivedParticipantName =
+    input.participantName?.trim() ||
+    derivedParentName ||
+    derivedStudentName ||
+    "Event Participant";
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const hasEmailField = !hasConfiguredFields || registrationFields.some((field) => field.type === "email");
+  const trimmedEmail = derivedEmail.trim().toLowerCase();
+  const storedEmail = trimmedEmail || createInternalNoEmailValue(input.eventId);
 
-  if (duplicateResult.rows[0]?.exists) {
-    throw new Error("User is already registered for this event.");
+  if (hasConfiguredFields) {
+    for (const field of registrationFields) {
+      const value = customFieldValues[field.id];
+      const stringValue = Array.isArray(value) ? value.join(" ").trim() : String(value || "").trim();
+      const studentNames = Array.isArray(value)
+        ? value.map((name) => name.trim()).filter(Boolean)
+        : [];
+
+      if (field.required) {
+        if (field.type === "multiple_student_names" && studentNames.length === 0) {
+          throw new Error(`${field.label} is required.`);
+        }
+        if (field.type !== "multiple_student_names" && !stringValue) {
+          throw new Error(`${field.label} is required.`);
+        }
+      }
+
+      if (field.type === "email" && stringValue && !emailRegex.test(stringValue)) {
+        throw new Error("Please enter a valid email address.");
+      }
+      if (field.type === "phone" && stringValue && !/^\+\d{1,4}\s?\d{6,14}$/.test(stringValue.replace(/[()-]/g, ""))) {
+        throw new Error(`${field.label} must include a valid country code.`);
+      }
+      if (field.type === "number" && stringValue && !Number.isFinite(Number(stringValue))) {
+        throw new Error(`${field.label} must be a valid number.`);
+      }
+    }
+  }
+  if (hasEmailField && trimmedEmail) {
+    const duplicateResult = await client.query<{ exists: boolean }>(
+      `
+        select exists(
+          select 1
+          from public.public_event_registrations
+          where event_id = $1
+            and status <> 'cancelled'
+            and (
+              lower(trim(coalesce(email, ''))) = $2
+              or lower(trim(coalesce(custom_field_values->>'email', ''))) = $2
+              or exists (
+                select 1
+                from jsonb_each_text(
+                  case
+                    when jsonb_typeof(custom_field_values) = 'object' then custom_field_values
+                    else '{}'::jsonb
+                  end
+                ) as field_value(key, value)
+                where lower(trim(field_value.value)) = $2
+              )
+              or exists (
+                select 1
+                from jsonb_array_elements(
+                  case
+                    when jsonb_typeof(custom_field_values) = 'array' then custom_field_values
+                    else '[]'::jsonb
+                  end
+                ) as field
+                where lower(trim(coalesce(field->>'value', ''))) = $2
+                   or exists (
+                    select 1
+                    from jsonb_array_elements_text(
+                      case
+                        when jsonb_typeof(field->'value') = 'array' then field->'value'
+                        else '[]'::jsonb
+                      end
+                    ) as field_value(value)
+                    where lower(trim(field_value.value)) = $2
+                  )
+              )
+            )
+        ) as exists
+      `,
+      [input.eventId, trimmedEmail]
+    );
+
+    if (duplicateResult.rows[0]?.exists) {
+      throw new Error("User is already registered for this event.");
+    }
   }
 
   const insertResult = await client.query<PublicEventRegistrationRow>(
@@ -278,21 +448,24 @@ export async function createPublicEventRegistrationInDb(input: {
         school_name,
         class_input,
         student_names,
-        amount_due
-      ) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+        custom_field_values,
+        amount_due,
+        status
+      ) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11::jsonb, $12, 'pending')
       returning registration_no
     `,
     [
       input.eventId,
-      input.participantName,
-      input.email,
-      input.whatsapp,
+      derivedParticipantName,
+      storedEmail,
+      derivedWhatsapp,
       input.notes || null,
-      input.studentName || null,
-      input.parentName || null,
-      input.schoolName || null,
-      input.classInput || null,
-      input.studentNames && input.studentNames.length > 0 ? JSON.stringify(input.studentNames) : null,
+      derivedStudentName || null,
+      derivedParentName || null,
+      derivedSchoolName || null,
+      derivedClassInput || null,
+      derivedStudentNames.length > 0 ? JSON.stringify(derivedStudentNames) : null,
+      JSON.stringify(customFieldValues),
       event.event_fee_amount ?? 0,
     ]
   );
@@ -314,6 +487,8 @@ export async function createPublicEventRegistrationInDb(input: {
       event.registration_deadline instanceof Date
         ? event.registration_deadline.toISOString()
         : String(event.registration_deadline),
+    registrationFormSchema: registrationFields,
+    customFieldValues,
   };
 }
 

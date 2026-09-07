@@ -7,6 +7,7 @@ import {
   formatEventFee,
   formatEventTime,
   hasRegistrationDeadlinePassed,
+  type EventRegistrationField,
   type PublicEvent,
 } from "@/lib/public-events";
 import {
@@ -33,7 +34,7 @@ type FormState = {
   studentNames?: string[];
 };
 
-type FormErrors = Partial<Record<keyof FormState, string>>;
+type FormErrors = Partial<Record<keyof FormState | string, string>>;
 
 const INITIAL_FORM: FormState = {
   participantName: "",
@@ -46,6 +47,13 @@ const INITIAL_FORM: FormState = {
   classInput: "",
   studentNames: [""],
 };
+
+function buildDynamicValuesForFields(fields: EventRegistrationField[]) {
+  return fields.reduce<Record<string, string | string[]>>((nextValues, field) => {
+    nextValues[field.id] = field.type === "multiple_student_names" ? [""] : "";
+    return nextValues;
+  }, {});
+}
 
 function extractApiError(payload: unknown, fallback: string) {
   if (payload && typeof payload === "object") {
@@ -64,6 +72,26 @@ function extractRegistrationNumber(payload: unknown) {
     if (typeof value === "string" && value.trim()) return value;
   }
   return "";
+}
+
+function extractSubmittedCustomFields(payload: unknown) {
+  if (!payload || typeof payload !== "object") return [];
+  const values = (payload as { customFieldDisplayValues?: unknown }).customFieldDisplayValues;
+  if (!Array.isArray(values)) return [];
+
+  return values
+    .map((item) => {
+      if (!item || typeof item !== "object") return null;
+      const record = item as Record<string, unknown>;
+      const label = String(record.label ?? "").trim();
+      const rawValue = record.value;
+      const value = Array.isArray(rawValue)
+        ? rawValue.map((entry) => String(entry ?? "").trim()).filter(Boolean)
+        : String(rawValue ?? "").trim();
+      if (!label) return null;
+      return { label, value };
+    })
+    .filter((item): item is { label: string; value: string | string[] } => Boolean(item));
 }
 
 function isValidName(value: string) {
@@ -125,15 +153,25 @@ export function PublicEventRegistrationModal({ event, open, onClose }: Props) {
   const isUrdu = language === "ur";
   const [mounted, setMounted] = useState(false);
   const [form, setForm] = useState<FormState>(INITIAL_FORM);
+  const [liveEvent, setLiveEvent] = useState<PublicEvent | null>(null);
+  const [dynamicValues, setDynamicValues] = useState<Record<string, string | string[]>>({});
   const [countryCode, setCountryCode] = useState("+92");
   const [countryMenuOpen, setCountryMenuOpen] = useState(false);
   const [localNumber, setLocalNumber] = useState("");
   const [errors, setErrors] = useState<FormErrors>({});
   const [submitError, setSubmitError] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [success, setSuccess] = useState<{ registrationNumber: string; message: string } | null>(null);
+  const [success, setSuccess] = useState<{
+    registrationNumber: string;
+    message: string;
+    requiresPayment: boolean;
+    customFieldValues: Array<{ label: string; value: string | string[] }>;
+  } | null>(null);
   const countryMenuRef = useRef<HTMLDivElement | null>(null);
   const labelClassName = "mb-2 block text-xs font-bold uppercase tracking-[0.16em] text-emerald-deep/90";
+  const activeEvent = liveEvent?.id === event.id ? liveEvent : event;
+  const configuredFields = activeEvent.registrationFormSchema || [];
+  const hasConfiguredFields = configuredFields.length > 0;
 
   const localDigits = getPhoneLocalDigitsForCode(countryCode);
   const selectedCountry = PHONE_COUNTRY_CODES.find((option) => option.code === countryCode) || PHONE_COUNTRY_CODES[0];
@@ -172,20 +210,27 @@ export function PublicEventRegistrationModal({ event, open, onClose }: Props) {
     submitting: isUrdu ? "رجسٹریشن جمع ہو رہی ہے..." : "Submitting registration...",
     registrationSuccessful: isUrdu ? "رجسٹریشن کامیابی سے مکمل ہو گئی۔" : "Registration successful.",
     registrationNumber: isUrdu ? "رجسٹریشن نمبر" : "Registration Number",
-    successMessage: isUrdu ? "آپ کی ایونٹ رجسٹریشن موصول ہو گئی ہے۔ ادائیگی کے بعد اپنی نشست کی تصدیق کے لیے کوآرڈینیٹر سے رابطہ کریں۔ (ادائیگی کی تفصیلات آپ کو ای میل کر دی گئی ہیں)" : "Your event registration has been received. After payment, contact the coordinator to confirm your seat. (Payment details are in the email already sent to you.)",
+    successMessage: isUrdu ? "آپ کی ایونٹ رجسٹریشن موصول ہو گئی ہے۔ اگر ادائیگی ضروری ہے تو نیچے دی گئی تفصیلات کے مطابق کوآرڈینیٹر سے رابطہ کریں۔" : "Your event registration has been received. If payment is required, use the details below and contact the coordinator to confirm your seat.",
     coordinator: isUrdu ? "کوآرڈینیٹر" : "Coordinator",
     submitError: isUrdu ? "ایونٹ رجسٹریشن جمع نہیں ہو سکی۔" : "Unable to submit event registration.",
     pastClosed: isUrdu ? "ماضی کے ایونٹس کے لیے رجسٹریشن بند ہے۔" : "Registration is closed for past events.",
     deadlinePassed: isUrdu ? "اس ایونٹ کی رجسٹریشن کی آخری تاریخ گزر چکی ہے۔" : "Registration deadline has passed for this event.",
     enterDigits: isUrdu ? `باقی ${localDigits} ہندسے درج کریں` : `Enter ${localDigits} digits`,
     remainingDigits: isUrdu ? `باقی ہندسے: ${Math.max(localDigits - localNumber.length, 0)} / ${localDigits}` : `Remaining digits: ${Math.max(localDigits - localNumber.length, 0)} / ${localDigits}`,
+    requiredField: isUrdu ? "یہ فیلڈ ضروری ہے۔" : "This field is required.",
+    invalidEmail: isUrdu ? "درست ای میل درج کریں۔" : "Please enter a valid email address.",
+    invalidPhone: isUrdu ? "ملکی کوڈ کے ساتھ درست فون نمبر درج کریں۔" : "Enter a valid phone number with country code.",
+    invalidNumber: isUrdu ? "درست نمبر درج کریں۔" : "Please enter a valid number.",
+    atLeastOneStudent: isUrdu ? "کم از کم ایک طالب علم کا نام ضروری ہے۔" : "At least one student name is required.",
+    addStudentButton: isUrdu ? "طالب علم شامل کریں" : "Add Student",
+    formNotConfigured: isUrdu ? "اس ایونٹ کا رجسٹریشن فارم ابھی ترتیب نہیں دیا گیا۔" : "The registration form for this event is not configured yet.",
   };
 
   const blockedReason = useMemo(() => {
-    if (event.lifecycle === "past") return uiText.pastClosed;
-    if (hasRegistrationDeadlinePassed(event.registrationDeadline)) return uiText.deadlinePassed;
+    if (activeEvent.lifecycle === "past") return uiText.pastClosed;
+    if (hasRegistrationDeadlinePassed(activeEvent.registrationDeadline)) return uiText.deadlinePassed;
     return "";
-  }, [event.lifecycle, event.registrationDeadline, uiText.deadlinePassed, uiText.pastClosed]);
+  }, [activeEvent.lifecycle, activeEvent.registrationDeadline, uiText.deadlinePassed, uiText.pastClosed]);
 
   useEffect(() => {
     setMounted(true);
@@ -210,13 +255,126 @@ export function PublicEventRegistrationModal({ event, open, onClose }: Props) {
     }
   }, [open]);
 
+  useEffect(() => {
+    if (!open) {
+      setLiveEvent(null);
+      return;
+    }
+
+    let cancelled = false;
+
+    const loadLatestEvent = async () => {
+      try {
+        const response = await fetch("/api/public-events", { cache: "no-store" });
+        const payload = await response.json().catch(() => ({}));
+        const source =
+          payload && typeof payload === "object" && "data" in payload
+            ? (payload as { data?: unknown }).data
+            : payload;
+        const body = (source && typeof source === "object" ? source : {}) as {
+          currentUpcoming?: PublicEvent[];
+          past?: PublicEvent[];
+        };
+        const latestEvent = [...(body.currentUpcoming || []), ...(body.past || [])].find(
+          (item) => item.id === event.id
+        );
+
+        if (!cancelled && latestEvent) {
+          setLiveEvent(latestEvent);
+          setDynamicValues(buildDynamicValuesForFields(latestEvent.registrationFormSchema || []));
+        }
+      } catch {
+        // Keep the already loaded event if the live refresh cannot complete.
+      }
+    };
+
+    void loadLatestEvent();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [event.id, open]);
+
   if (!open || !mounted) return null;
+
+  function buildInitialDynamicValues() {
+    return configuredFields.reduce<Record<string, string | string[]>>((nextValues, field) => {
+      nextValues[field.id] = field.type === "multiple_student_names" ? [""] : "";
+      return nextValues;
+    }, {});
+  }
+
+  const getDynamicString = (fieldId: string) => {
+    const value = dynamicValues[fieldId];
+    return Array.isArray(value) ? value.join(", ") : value || "";
+  };
+
+  const getDynamicStudentNames = (fieldId: string) => {
+    const value = dynamicValues[fieldId];
+    return Array.isArray(value) && value.length > 0 ? value : [""];
+  };
+
+  const updateDynamicField = (fieldId: string, value: string | string[]) => {
+    setDynamicValues((prev) => ({ ...prev, [fieldId]: value }));
+    if (errors[fieldId]) {
+      setErrors((prev) => ({ ...prev, [fieldId]: undefined }));
+    }
+    setSubmitError("");
+  };
+
+  const updateDynamicStudentName = (fieldId: string, index: number, value: string) => {
+    const studentNames = [...getDynamicStudentNames(fieldId)];
+    studentNames[index] = value;
+    updateDynamicField(fieldId, studentNames);
+  };
+
+  const addDynamicStudentName = (fieldId: string) => {
+    updateDynamicField(fieldId, [...getDynamicStudentNames(fieldId), ""]);
+  };
+
+  const removeDynamicStudentName = (fieldId: string, index: number) => {
+    const studentNames = getDynamicStudentNames(fieldId).filter((_, itemIndex) => itemIndex !== index);
+    updateDynamicField(fieldId, studentNames.length > 0 ? studentNames : [""]);
+  };
 
   const validate = () => {
     const nextErrors: FormErrors = {};
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const whatsappDigits = form.whatsapp.replace(/\D/g, "");
-    const category = event.eventCategory;
+    const category = activeEvent.eventCategory;
+
+    if (hasConfiguredFields) {
+      for (const field of configuredFields) {
+        const value = dynamicValues[field.id];
+        const stringValue = Array.isArray(value) ? value.join(" ").trim() : String(value || "").trim();
+        const studentNames = Array.isArray(value)
+          ? value.map((name) => name.trim()).filter(Boolean)
+          : [];
+
+        if (field.required) {
+          if (field.type === "multiple_student_names" && studentNames.length === 0) {
+            nextErrors[field.id] = uiText.atLeastOneStudent;
+            continue;
+          }
+          if (field.type !== "multiple_student_names" && !stringValue) {
+            nextErrors[field.id] = uiText.requiredField;
+            continue;
+          }
+        }
+
+        if (field.type === "email" && stringValue && !emailRegex.test(stringValue)) {
+          nextErrors[field.id] = uiText.invalidEmail;
+        }
+        if (field.type === "phone" && stringValue && !/^\+\d{1,4}\s?\d{6,14}$/.test(stringValue.replace(/[()-]/g, ""))) {
+          nextErrors[field.id] = uiText.invalidPhone;
+        }
+        if (field.type === "number" && stringValue && !Number.isFinite(Number(stringValue))) {
+          nextErrors[field.id] = uiText.invalidNumber;
+        }
+      }
+
+      return nextErrors;
+    }
 
     if (!form.participantName.trim()) {
       nextErrors.participantName = isUrdu ? "شرکت کنندہ کا نام ضروری ہے۔" : "Participant name is required.";
@@ -313,11 +471,57 @@ export function PublicEventRegistrationModal({ event, open, onClose }: Props) {
     updateField("whatsapp", sanitized ? `${nextCode} ${sanitized}` : "");
   };
 
+  const handleDynamicPhoneChange = (fieldId: string, nextCode: string, nextNumber: string) => {
+    const digits = getPhoneLocalDigitsForCode(nextCode);
+    const sanitized = nextNumber.replace(/\D/g, "").slice(0, digits);
+    setCountryCode(nextCode);
+    setCountryMenuOpen(false);
+    setLocalNumber(sanitized);
+    updateDynamicField(fieldId, sanitized ? `${nextCode} ${sanitized}` : "");
+  };
+
+  const normalizedFieldLabel = (value: string) =>
+    value.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+
+  const findCustomStringValue = (
+    fields: Array<{ fieldId?: string; label: string; type: EventRegistrationField["type"]; value: string | string[] }>,
+    type: EventRegistrationField["type"] | null,
+    labelHints: string[],
+    fieldIdHints: string[] = []
+  ) => {
+    const field = fields.find((item) => {
+      const label = normalizedFieldLabel(item.label);
+      const fieldId = "fieldId" in item ? normalizedFieldLabel(String(item.fieldId)) : "";
+      return (
+        (type ? item.type === type : false) ||
+        labelHints.some((hint) => label.includes(hint)) ||
+        fieldIdHints.some((hint) => fieldId.includes(hint))
+      );
+    });
+    if (!field) return "";
+    return Array.isArray(field.value) ? field.value.join(", ").trim() : field.value.trim();
+  };
+
+  const findCustomStudentNames = (
+    fields: Array<{ fieldId?: string; label: string; type: EventRegistrationField["type"]; value: string | string[] }>
+  ) => {
+    const field = fields.find((item) => {
+      const label = normalizedFieldLabel(item.label);
+      const fieldId = normalizedFieldLabel(item.fieldId || "");
+      return item.type === "multiple_student_names" || label.includes("student names") || fieldId.includes("studentnames");
+    });
+    if (!field) return [];
+    return Array.isArray(field.value)
+      ? field.value.map((name) => name.trim()).filter(Boolean)
+      : field.value.split(",").map((name) => name.trim()).filter(Boolean);
+  };
+
   function resetForm() {
     setForm({
       ...INITIAL_FORM,
       studentNames: [""],
     });
+    setDynamicValues(buildInitialDynamicValues());
     setCountryCode("+92");
     setCountryMenuOpen(false);
     setLocalNumber("");
@@ -340,26 +544,84 @@ export function PublicEventRegistrationModal({ event, open, onClose }: Props) {
     setSubmitError("");
 
     try {
-      const category = event.eventCategory;
-      const requestPayload: Record<string, unknown> = {
-        eventId: event.id,
-        participantName: form.participantName.trim(),
-        parentName: form.participantName.trim(),
-        email: form.email.trim(),
-        whatsapp: form.whatsapp.trim(),
-        notes: form.notes.trim(),
-      };
+      const category = activeEvent.eventCategory;
+      let requestPayload: Record<string, unknown>;
 
-      if (category === "alh-students" || category === "general-students") {
+      if (hasConfiguredFields) {
+        const customFieldValues = configuredFields.reduce<Record<string, string | string[]>>((answers, field) => {
+          const value =
+            field.type === "multiple_student_names"
+              ? getDynamicStudentNames(field.id).map((name) => name.trim()).filter(Boolean)
+              : getDynamicString(field.id).trim();
+
+          answers[field.id] = value;
+          return answers;
+        }, {});
+        const stringAnswer = (fieldId: string) => {
+          const value = customFieldValues[fieldId];
+          return Array.isArray(value) ? value.join(", ").trim() : String(value || "").trim();
+        };
+        const firstEmail =
+          stringAnswer("email") ||
+          stringAnswer(configuredFields.find((field) => field.type === "email")?.id || "");
+        const firstPhone =
+          stringAnswer("whatsapp") ||
+          stringAnswer("phone") ||
+          stringAnswer("mobile") ||
+          stringAnswer(configuredFields.find((field) => field.type === "phone")?.id || "");
+        const parentName = stringAnswer("parentName") || stringAnswer("guardianName");
+        const studentName = stringAnswer("studentName") || stringAnswer("childName");
+        const schoolName = stringAnswer("schoolName");
+        const classInput = stringAnswer("classInput") || stringAnswer("classLevel") || stringAnswer("grade");
+        const studentNamesFieldId =
+          configuredFields.find((field) => field.type === "multiple_student_names")?.id ||
+          "studentNames";
+        const studentNamesValue = customFieldValues[studentNamesFieldId];
+        const studentNames = Array.isArray(studentNamesValue)
+          ? studentNamesValue.map((name) => name.trim()).filter(Boolean)
+          : [];
+        const firstName =
+          parentName ||
+          studentName ||
+          configuredFields
+            .map((field) => stringAnswer(field.id))
+            .find((value) => value) ||
+          "Event Participant";
+
+        requestPayload = {
+          eventId: activeEvent.id,
+          participantName: String(firstName).trim(),
+          parentName,
+          studentName,
+          studentNames,
+          schoolName,
+          classInput,
+          email: firstEmail,
+          whatsapp: firstPhone,
+          notes: "",
+          customFieldValues,
+        };
+      } else {
+        requestPayload = {
+          eventId: activeEvent.id,
+          participantName: form.participantName.trim(),
+          parentName: form.participantName.trim(),
+          email: form.email.trim(),
+          whatsapp: form.whatsapp.trim(),
+          notes: form.notes.trim(),
+        };
+      }
+
+      if (!hasConfiguredFields && (category === "alh-students" || category === "general-students")) {
         requestPayload.studentName = form.studentName?.trim();
       }
 
-      if (category === "general-students") {
+      if (!hasConfiguredFields && category === "general-students") {
         requestPayload.schoolName = form.schoolName?.trim();
         requestPayload.classInput = form.classInput?.trim();
       }
 
-      if (category === "alh-parents") {
+      if (!hasConfiguredFields && category === "alh-parents") {
         requestPayload.studentNames = (form.studentNames || []).filter(name => name.trim());
       }
 
@@ -379,12 +641,165 @@ export function PublicEventRegistrationModal({ event, open, onClose }: Props) {
       setSuccess({
         registrationNumber: extractRegistrationNumber(payload) || "-",
         message: uiText.successMessage,
+        requiresPayment: Boolean((payload as { requiresPayment?: unknown }).requiresPayment),
+        customFieldValues: extractSubmittedCustomFields(payload),
       });
       resetForm();
     } catch {
       setSubmitError(uiText.submitError);
       setSubmitting(false);
     }
+  };
+
+  const renderDynamicField = (field: EventRegistrationField) => {
+    const error = errors[field.id];
+    const requiredMark = field.required ? " *" : "";
+    const commonInputClass =
+      "min-h-12 w-full rounded-2xl border border-emerald/12 bg-white px-4 py-3 outline-none transition focus:border-gold";
+    const label = (
+      <label className={labelClassName}>
+        {field.label}
+        {requiredMark}
+      </label>
+    );
+
+    if (field.type === "long_text") {
+      return (
+        <div key={field.id}>
+          {label}
+          <textarea
+            value={getDynamicString(field.id)}
+            onChange={(eventChange) => updateDynamicField(field.id, eventChange.target.value)}
+            placeholder={field.placeholder}
+            rows={4}
+            className="w-full rounded-[24px] border border-emerald/12 bg-white px-4 py-3 outline-none transition focus:border-gold"
+          />
+          {error ? <p className="mt-2 text-sm text-red-700">{error}</p> : null}
+        </div>
+      );
+    }
+
+    if (field.type === "multiple_student_names") {
+      const studentNames = getDynamicStudentNames(field.id);
+      return (
+        <div key={field.id}>
+          {label}
+          <div className="space-y-2">
+            {studentNames.map((studentName, index) => (
+              <div key={`${field.id}-${index}`} className="flex flex-col gap-2 sm:flex-row">
+                <input
+                  value={studentName}
+                  onChange={(eventChange) =>
+                    updateDynamicStudentName(field.id, index, eventChange.target.value)
+                  }
+                  placeholder={field.placeholder || uiText.enterStudentNamesPlaceholder}
+                  className="min-h-12 flex-1 rounded-2xl border border-emerald/12 bg-white px-4 py-3 outline-none transition focus:border-gold"
+                />
+                <div className="flex gap-2">
+                  {index === studentNames.length - 1 ? (
+                    <button
+                      type="button"
+                      onClick={() => addDynamicStudentName(field.id)}
+                      className="inline-flex min-h-12 items-center justify-center rounded-2xl border border-emerald/12 bg-white px-4 py-3 text-sm font-semibold text-emerald-deep transition hover:border-gold hover:text-gold"
+                    >
+                      {uiText.addStudentButton}
+                    </button>
+                  ) : null}
+                  {studentNames.length > 1 ? (
+                    <button
+                      type="button"
+                      onClick={() => removeDynamicStudentName(field.id, index)}
+                      className="inline-flex min-h-12 min-w-12 items-center justify-center rounded-2xl border border-red-200 bg-red-50 px-3 py-3 font-semibold text-red-600 transition hover:border-red-400 hover:text-red-700"
+                    >
+                      {uiText.removeStudent}
+                    </button>
+                  ) : null}
+                </div>
+              </div>
+            ))}
+          </div>
+          {error ? <p className="mt-2 text-sm text-red-700">{error}</p> : null}
+        </div>
+      );
+    }
+
+    if (field.type === "phone") {
+      return (
+        <div key={field.id}>
+          {label}
+          <div className="flex gap-3">
+            <div ref={countryMenuRef} className="relative w-[34%] min-w-[140px]">
+              <button
+                type="button"
+                onClick={() => setCountryMenuOpen((openState) => !openState)}
+                className="flex min-h-12 w-full items-center justify-between rounded-2xl border border-emerald/12 bg-white px-3 py-3 text-left outline-none transition hover:border-gold"
+              >
+                <span className="flex items-center gap-2 text-sm font-semibold text-emerald-deep">
+                  <span className="text-base leading-none">{selectedCountryFlag}</span>
+                  <span>{selectedCountry.code}</span>
+                </span>
+                <span className="text-xs text-emerald-deep/70">▼</span>
+              </button>
+              {countryMenuOpen ? (
+                <div className="absolute left-0 top-[calc(100%+8px)] z-30 max-h-72 w-[260px] overflow-y-auto rounded-2xl border border-emerald/12 bg-white py-2 shadow-[0_18px_50px_rgba(13,59,46,0.16)]">
+                  {PHONE_COUNTRY_CODES.map((option) => {
+                    const optionFlag = getCountryFlagForOption(option.label, (option as { flag?: string }).flag);
+                    const isSelected = option.code === countryCode;
+                    return (
+                      <button
+                        key={`${option.code}-${option.label}`}
+                        type="button"
+                        onClick={() => handleDynamicPhoneChange(field.id, option.code, localNumber)}
+                        className={`flex w-full items-center gap-3 px-3 py-2 text-left text-sm transition hover:bg-cream ${isSelected ? "bg-emerald-deep/6 font-semibold text-emerald-deep" : "text-emerald-deep/85"}`}
+                      >
+                        <span className="w-6 text-base leading-none">{optionFlag}</span>
+                        <span className="min-w-[46px] font-semibold">{option.code}</span>
+                        <span className="truncate">{option.label.replace(/\s*\(\+\d+\)\s*$/, "")}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              ) : null}
+            </div>
+            <input
+              value={localNumber}
+              onChange={(eventChange) =>
+                handleDynamicPhoneChange(field.id, countryCode, eventChange.target.value)
+              }
+              placeholder={field.placeholder || uiText.enterDigits}
+              inputMode="numeric"
+              className="min-h-12 w-[66%] rounded-2xl border border-emerald/12 bg-white px-4 py-3 outline-none transition focus:border-gold"
+            />
+          </div>
+          <p className="mt-2 text-sm text-emerald-deep/70">{uiText.remainingDigits}</p>
+          {error ? <p className="mt-2 text-sm text-red-700">{error}</p> : null}
+        </div>
+      );
+    }
+
+    const inputType =
+      field.type === "email"
+        ? "email"
+        : field.type === "number"
+          ? "number"
+          : field.type === "date"
+            ? "date"
+            : "text";
+
+    return (
+      <div key={field.id}>
+        {label}
+        <input
+          type={inputType}
+          value={getDynamicString(field.id)}
+          onChange={(eventChange) => updateDynamicField(field.id, eventChange.target.value)}
+          placeholder={field.placeholder}
+          inputMode={field.type === "number" ? "decimal" : undefined}
+          className={commonInputClass}
+        />
+        {error ? <p className="mt-2 text-sm text-red-700">{error}</p> : null}
+      </div>
+    );
   };
 
   return createPortal(
@@ -402,7 +817,7 @@ export function PublicEventRegistrationModal({ event, open, onClose }: Props) {
         </button>
 
         <p className="pr-20 text-xs font-bold uppercase tracking-[0.24em] text-gold">
-          {event.title}
+          {activeEvent.title}
         </p>
         <h2 className="mt-3 font-display text-3xl font-bold tracking-tight text-emerald-deep">
           {uiText.reserveSeat}
@@ -414,14 +829,14 @@ export function PublicEventRegistrationModal({ event, open, onClose }: Props) {
         ) : null}
 
         <div className="mt-6 rounded-[24px] border border-emerald/10 bg-white/80 p-5 text-sm text-emerald-deep/85">
-          <h3 className="font-display text-xl font-bold text-emerald-deep">{event.title}</h3>
+          <h3 className="font-display text-xl font-bold text-emerald-deep">{activeEvent.title}</h3>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
-            <div><span className="font-semibold">{uiText.startDate}:</span> <span dir="ltr" className="inline-block [unicode-bidi:isolate]">{formatEventDate(event.startAt)}</span></div>
-            <div><span className="font-semibold">{uiText.startTime}:</span> <span dir="ltr" className="inline-block [unicode-bidi:isolate]">{formatEventTime(event.startAt)}</span></div>
-            <div><span className="font-semibold">{uiText.endTime}:</span> <span dir="ltr" className="inline-block [unicode-bidi:isolate]">{formatEventTime(event.endAt)}</span></div>
-            <div><span className="font-semibold">{uiText.eventFee}:</span> <span dir="ltr" className="inline-block [unicode-bidi:isolate]">{formatEventFee(event.fee)}</span></div>
-            <div><span className="font-semibold">{uiText.registrationDeadlineDate}:</span> <span dir="ltr" className="inline-block [unicode-bidi:isolate]">{formatEventDate(event.registrationDeadline)}</span></div>
-            <div><span className="font-semibold">{uiText.registrationDeadlineTime}:</span> <span dir="ltr" className="inline-block [unicode-bidi:isolate]">{formatEventTime(event.registrationDeadline)}</span></div>
+            <div><span className="font-semibold">{uiText.startDate}:</span> <span dir="ltr" className="inline-block [unicode-bidi:isolate]">{formatEventDate(activeEvent.startAt)}</span></div>
+            <div><span className="font-semibold">{uiText.startTime}:</span> <span dir="ltr" className="inline-block [unicode-bidi:isolate]">{formatEventTime(activeEvent.startAt)}</span></div>
+            <div><span className="font-semibold">{uiText.endTime}:</span> <span dir="ltr" className="inline-block [unicode-bidi:isolate]">{formatEventTime(activeEvent.endAt)}</span></div>
+            <div><span className="font-semibold">{uiText.eventFee}:</span> <span dir="ltr" className="inline-block [unicode-bidi:isolate]">{formatEventFee(activeEvent.fee)}</span></div>
+            <div><span className="font-semibold">{uiText.registrationDeadlineDate}:</span> <span dir="ltr" className="inline-block [unicode-bidi:isolate]">{formatEventDate(activeEvent.registrationDeadline)}</span></div>
+            <div><span className="font-semibold">{uiText.registrationDeadlineTime}:</span> <span dir="ltr" className="inline-block [unicode-bidi:isolate]">{formatEventTime(activeEvent.registrationDeadline)}</span></div>
           </div>
         </div>
 
@@ -433,18 +848,43 @@ export function PublicEventRegistrationModal({ event, open, onClose }: Props) {
             <p className="font-semibold">{uiText.registrationSuccessful}</p>
             <p className="mt-2">{uiText.registrationNumber}: <span className="font-semibold">{success.registrationNumber}</span></p>
             <p className="mt-2 leading-7">{success.message}</p>
+            {success.customFieldValues.length > 0 ? (
+              <div className="mt-4 rounded-2xl border border-emerald/10 bg-white/70 px-4 py-4 text-sm leading-7">
+                {success.customFieldValues.map((field) => (
+                  <p key={field.label}>
+                    <span className="font-semibold">{field.label}:</span>{" "}
+                    {Array.isArray(field.value) ? field.value.join(", ") : field.value || "-"}
+                  </p>
+                ))}
+              </div>
+            ) : null}
+            {success.requiresPayment ? (
             <div className="mt-4 rounded-2xl border border-gold/20 bg-white/70 px-4 py-4 text-sm leading-7">
-              <p><span className="font-semibold">{uiText.eventFee}:</span> {formatEventFee(event.fee)}</p>
+              <p><span className="font-semibold">{uiText.eventFee}:</span> {formatEventFee(activeEvent.fee)}</p>
               <p><span className="font-semibold">{uiText.coordinator}:</span> Shoaib Ul Din</p>
               <p><span className="font-semibold">{uiText.email}:</span> coordinator@ashshajrah.com</p>
               <p><span className="font-semibold">{uiText.whatsapp}:</span> +923473547036</p>
             </div>
+            ) : null}
           </div>
         ) : null}
 
         {!success ? (
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-          {(event.eventCategory === "alh-students" || event.eventCategory === "general-students") && (
+          {hasConfiguredFields ? (
+            <>
+              {configuredFields.map(renderDynamicField)}
+              <button
+                type="submit"
+                disabled={Boolean(blockedReason) || submitting}
+                className="inline-flex min-h-12 w-full items-center justify-center rounded-full bg-emerald-deep px-6 py-3 text-sm font-semibold text-cream transition hover:bg-gold hover:text-emerald-deep disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {submitting ? uiText.submitting : uiText.registerButton}
+              </button>
+            </>
+          ) : false ? (
+            <>
+          {(activeEvent.eventCategory === "alh-students" || activeEvent.eventCategory === "general-students") && (
             <div>
               <label className={labelClassName}>{uiText.studentName} *</label>
               <input
@@ -468,7 +908,7 @@ export function PublicEventRegistrationModal({ event, open, onClose }: Props) {
             {errors.participantName ? <p className="mt-2 text-sm text-red-700">{errors.participantName}</p> : null}
           </div>
 
-          {event.eventCategory === "alh-parents" && (
+          {activeEvent.eventCategory === "alh-parents" && (
             <>
               {/* Keep this block in the file for future parent-event use. */}
               <div>
@@ -572,7 +1012,7 @@ export function PublicEventRegistrationModal({ event, open, onClose }: Props) {
             </div>
           </div>
 
-          {event.eventCategory === "general-students" && (
+          {activeEvent.eventCategory === "general-students" && (
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
                 <label className={labelClassName}>{uiText.schoolName} *</label>
@@ -616,6 +1056,12 @@ export function PublicEventRegistrationModal({ event, open, onClose }: Props) {
           >
             {submitting ? uiText.submitting : uiText.registerButton}
           </button>
+            </>
+          ) : (
+            <div className="rounded-[24px] border border-amber-200 bg-amber-50 px-4 py-4 text-sm leading-7 text-amber-900">
+              {uiText.formNotConfigured}
+            </div>
+          )}
         </form>
         ) : null}
       </div>
