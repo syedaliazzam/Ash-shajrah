@@ -19,7 +19,7 @@ type PublicEventRow = {
   image_object_path: string | null;
   image_stored_path: string | null;
   event_category: string | null;
-  registration_form_schema: unknown;
+  registration_form_schema?: unknown;
 };
 
 type PublicEventRegistrationRow = {
@@ -45,6 +45,15 @@ type PaymentMethodRow = {
   branch_code: string | null;
   instructions: string | null;
 };
+
+function isMissingRegistrationSchemaColumnError(error: unknown) {
+  return (
+    error !== null &&
+    typeof error === "object" &&
+    "code" in error &&
+    (error as { code?: unknown }).code === "42703"
+  );
+}
 
 function resolveImageUrl(row: PublicEventRow) {
   const stored = row.image_stored_path?.trim();
@@ -238,24 +247,51 @@ export const getPublicEventBySlugFromDb = cache(async (slug: string) => {
 
 export const listPublicEventsFromDb = cache(async () => {
   const client = getPgPool();
-  const result = await client.query<PublicEventRow>(`
-    select
-      id,
-      title,
-      description,
-      start_at,
-      end_at,
-      event_fee_amount,
-      registration_deadline,
-      image_bucket,
-      image_object_path,
-      image_stored_path,
-      event_category,
-      registration_form_schema
-    from public.public_events
-    where publication_status = 'published'
-    order by start_at asc
-  `);
+  let result;
+
+  try {
+    result = await client.query<PublicEventRow>(`
+      select
+        id,
+        title,
+        description,
+        start_at,
+        end_at,
+        event_fee_amount,
+        registration_deadline,
+        image_bucket,
+        image_object_path,
+        image_stored_path,
+        event_category,
+        registration_form_schema
+      from public.public_events
+      where publication_status = 'published'
+      order by start_at asc
+    `);
+  } catch (error) {
+    if (!isMissingRegistrationSchemaColumnError(error)) throw error;
+
+    console.warn(
+      "public_events.registration_form_schema is missing; public event forms will render without configured fields."
+    );
+    result = await client.query<PublicEventRow>(`
+      select
+        id,
+        title,
+        description,
+        start_at,
+        end_at,
+        event_fee_amount,
+        registration_deadline,
+        image_bucket,
+        image_object_path,
+        image_stored_path,
+        event_category
+      from public.public_events
+      where publication_status = 'published'
+      order by start_at asc
+    `);
+  }
 
   const events = result.rows.map(toPublicEvent);
   return {
@@ -279,7 +315,7 @@ export async function createPublicEventRegistrationInDb(input: {
 }) {
   const client = getPgPool();
 
-  const eventResult = await client.query<{
+  type RegistrationEventRow = {
     id: string;
     title: string;
     start_at: Date;
@@ -287,24 +323,52 @@ export async function createPublicEventRegistrationInDb(input: {
     registration_deadline: Date;
     event_fee_amount: string | number | null;
     publication_status: string;
-    registration_form_schema: unknown;
-  }>(
-    `
-      select
-        id,
-        title,
-        start_at,
-        end_at,
-        registration_deadline,
-        event_fee_amount,
-        publication_status,
-        registration_form_schema
-      from public.public_events
-      where id = $1
-      limit 1
-    `,
-    [input.eventId]
-  );
+    registration_form_schema?: unknown;
+  };
+
+  let eventResult;
+
+  try {
+    eventResult = await client.query<RegistrationEventRow>(
+      `
+        select
+          id,
+          title,
+          start_at,
+          end_at,
+          registration_deadline,
+          event_fee_amount,
+          publication_status,
+          registration_form_schema
+        from public.public_events
+        where id = $1
+        limit 1
+      `,
+      [input.eventId]
+    );
+  } catch (error) {
+    if (!isMissingRegistrationSchemaColumnError(error)) throw error;
+
+    console.warn(
+      "public_events.registration_form_schema is missing; registration will use only submitted built-in values."
+    );
+    eventResult = await client.query<RegistrationEventRow>(
+      `
+        select
+          id,
+          title,
+          start_at,
+          end_at,
+          registration_deadline,
+          event_fee_amount,
+          publication_status
+        from public.public_events
+        where id = $1
+        limit 1
+      `,
+      [input.eventId]
+    );
+  }
 
   const event = eventResult.rows[0];
   if (!event) {
