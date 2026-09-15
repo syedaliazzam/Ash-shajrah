@@ -3,6 +3,9 @@ import { HomePageContent } from "@/components/pages/HomePageContent";
 import { OrganizationJsonLd } from "@/components/seo/OrganizationJsonLd";
 import { listPublicEventsFromDb } from "@/lib/public-events-db";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export const metadata: Metadata = {
   title: "Ash-Shajrah Learning Hub (ALH) | Online Learning, Character & Leadership",
   description:

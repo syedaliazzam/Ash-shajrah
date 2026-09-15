@@ -218,6 +218,15 @@ function toPublicEvent(row: PublicEventRow): PublicEvent {
             ? "general-parents"
             : undefined;
 
+  let lifecycle: "past" | "current" | "upcoming";
+  if (!Number.isNaN(end)) {
+    lifecycle = end < now ? "past" : start <= now ? "current" : "upcoming";
+  } else if (!Number.isNaN(start)) {
+    lifecycle = start > now ? "upcoming" : "past";
+  } else {
+    lifecycle = "upcoming";
+  }
+
   return {
     id: row.id,
     slug: slugifyPublicEventTitle(row.title),
@@ -234,12 +243,11 @@ function toPublicEvent(row: PublicEventRow): PublicEvent {
     registrationDeadline: Number.isNaN(registrationDeadline.getTime())
       ? String(row.registration_deadline)
       : registrationDeadline.toISOString(),
-    lifecycle: end < now ? "past" : start <= now ? "current" : "upcoming",
+    lifecycle,
     eventCategory,
     registrationFormSchema: normalizeEventRegistrationFields(row.registration_form_schema),
   };
 }
-
 export const getPublicEventBySlugFromDb = cache(async (slug: string) => {
   const { currentUpcoming, past } = await listPublicEventsFromDb();
   return [...currentUpcoming, ...past].find((event) => event.slug === slug) || null;

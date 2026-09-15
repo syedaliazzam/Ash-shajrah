@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import { PublicEventsPageContent } from "@/components/pages/PublicEventsPageContent";
 import { listPublicEventsFromDb } from "@/lib/public-events-db";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export const metadata: Metadata = {
   title: "Public Events",
   description:
