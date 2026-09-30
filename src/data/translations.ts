@@ -123,7 +123,6 @@ export const translations = {
         { area: "Early Years Planning Manual Prep", description: "The Prep curriculum offers structured, child-centered planning that supports language, mathematics, faith and character, social development, creativity, and discovery." },
         { area: "Early Years Planning Manual Play Group", description: "The Play Group curriculum nurtures early language, numeracy, faith and character, social-emotional growth, creativity, and sensory discovery through developmentally appropriate learning." },
         { area: "Seerat un Nabi Mubarak", description: "Parents are encouraged to nurture children’s love for God and the Prophet by making kindness, honesty, prayer, gratitude, cleanliness, respect, and prophetic traditions a natural part of daily family life." },
-        { area: "Curriculum Testing", description: "Parents are encouraged to nurture children’s love for God and the Prophet by making kindness, honesty, prayer, gratitude, cleanliness, respect, and prophetic traditions a natural part of daily family life." },
       ]
     },
     learning: {

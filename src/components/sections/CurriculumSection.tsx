@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useGSAP } from "@/lib/gsap";
 import { scrollReveal } from "@/lib/animations";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { CurriculumEventsSlider } from "@/components/sections/CurriculumEventsSlider";
 
 type CurriculumDocument = {
   id: string;
@@ -152,6 +153,8 @@ export function CurriculumSection() {
             })}
           </div>
         </div>
+
+        <CurriculumEventsSlider language={language} />
       </div>
     </section>
   );
