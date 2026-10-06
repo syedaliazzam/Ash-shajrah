@@ -32,7 +32,7 @@ export function OrganizationJsonLd() {
     ],
     contactPoint: {
       "@type": "ContactPoint",
-      telephone: "+92-336-5409798",
+      telephone: "+92-310-1734369",
       contactType: "Admissions",
       email: "admissions@ashshajrah.com",
       availableLanguage: ["English", "Urdu"],
