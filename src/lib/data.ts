@@ -13,8 +13,8 @@ export const SITE = {
   intro:
     "A fully online learning hub focused on early years learning, Montessori-inspired guidance, character development, creativity, confidence, leadership habits, and parent-friendly learning support.",
   contact: {
-    phone: "+92 336 5409798",
-    whatsappDisplay: "0336-5409798",
+    phone: "+92 310 1734369",
+    whatsappDisplay: "0310-1734369",
     whatsapp:
       "https://wa.me/923365409798?text=Assalamualaikum%2C%20I%20want%20to%20know%20more%20about%20Ash-Shajrah%20Learning%20Hub%20online%20programs.",
     email: "admissions@ashshajrah.com",

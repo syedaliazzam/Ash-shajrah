@@ -449,7 +449,7 @@ export const translations = {
         email: "Email",
         office: "Admin Office",
         whatsappValue: "0310-1734369",
-        whatsappValueSecondary: "0336-5409798",
+        whatsappValueSecondary: "0314-3970811",
         emailValue: "coordinator@ashshajrah.com",
         officeValue: "304, Altura Arcade, Block F Markaz, B-17, Islamabad"
       },
