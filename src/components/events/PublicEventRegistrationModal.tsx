@@ -50,7 +50,12 @@ const INITIAL_FORM: FormState = {
 
 function buildDynamicValuesForFields(fields: EventRegistrationField[]) {
   return fields.reduce<Record<string, string | string[]>>((nextValues, field) => {
-    nextValues[field.id] = field.type === "multiple_student_names" ? [""] : "";
+    nextValues[field.id] =
+      field.type === "multiple_student_names"
+        ? [""]
+        : field.type === "checkbox"
+          ? []
+          : "";
     return nextValues;
   }, {});
 }
@@ -299,10 +304,32 @@ export function PublicEventRegistrationModal({ event, open, onClose }: Props) {
 
   function buildInitialDynamicValues() {
     return configuredFields.reduce<Record<string, string | string[]>>((nextValues, field) => {
-      nextValues[field.id] = field.type === "multiple_student_names" ? [""] : "";
+      nextValues[field.id] =
+        field.type === "multiple_student_names"
+          ? [""]
+          : field.type === "checkbox"
+            ? []
+            : "";
       return nextValues;
     }, {});
   }
+
+  const getDynamicCheckboxValues = (fieldId: string): string[] => {
+    const val = dynamicValues[fieldId];
+    if (Array.isArray(val)) return val;
+    if (typeof val === "string" && val.trim()) {
+      return val.split(",").map((s) => s.trim()).filter(Boolean);
+    }
+    return [];
+  };
+
+  const toggleDynamicCheckboxOption = (fieldId: string, option: string) => {
+    const current = getDynamicCheckboxValues(fieldId);
+    const next = current.includes(option)
+      ? current.filter((item) => item !== option)
+      : [...current, option];
+    updateDynamicField(fieldId, next);
+  };
 
   const getDynamicString = (fieldId: string) => {
     const value = dynamicValues[fieldId];
@@ -346,17 +373,27 @@ export function PublicEventRegistrationModal({ event, open, onClose }: Props) {
     if (hasConfiguredFields) {
       for (const field of configuredFields) {
         const value = dynamicValues[field.id];
-        const stringValue = Array.isArray(value) ? value.join(" ").trim() : String(value || "").trim();
+        const isMultiple = field.type === "multiple_student_names" || field.type === "checkbox";
         const studentNames = Array.isArray(value)
           ? value.map((name) => name.trim()).filter(Boolean)
           : [];
+        const checkboxSelections = Array.isArray(value)
+          ? value.map((v) => String(v || "").trim()).filter(Boolean)
+          : typeof value === "string" && value.trim()
+            ? value.split(",").map((v) => v.trim()).filter(Boolean)
+            : [];
+        const stringValue = Array.isArray(value) ? value.join(", ").trim() : String(value || "").trim();
 
         if (field.required) {
           if (field.type === "multiple_student_names" && studentNames.length === 0) {
             nextErrors[field.id] = uiText.atLeastOneStudent;
             continue;
           }
-          if (field.type !== "multiple_student_names" && !stringValue) {
+          if (field.type === "checkbox" && checkboxSelections.length === 0) {
+            nextErrors[field.id] = uiText.requiredField;
+            continue;
+          }
+          if (!isMultiple && !stringValue) {
             nextErrors[field.id] = uiText.requiredField;
             continue;
           }
@@ -549,12 +586,13 @@ export function PublicEventRegistrationModal({ event, open, onClose }: Props) {
 
       if (hasConfiguredFields) {
         const customFieldValues = configuredFields.reduce<Record<string, string | string[]>>((answers, field) => {
-          const value =
-            field.type === "multiple_student_names"
-              ? getDynamicStudentNames(field.id).map((name) => name.trim()).filter(Boolean)
-              : getDynamicString(field.id).trim();
-
-          answers[field.id] = value;
+          if (field.type === "multiple_student_names") {
+            answers[field.id] = getDynamicStudentNames(field.id).map((name) => name.trim()).filter(Boolean);
+          } else if (field.type === "checkbox") {
+            answers[field.id] = getDynamicCheckboxValues(field.id);
+          } else {
+            answers[field.id] = getDynamicString(field.id).trim();
+          }
           return answers;
         }, {});
         const stringAnswer = (fieldId: string) => {
@@ -777,6 +815,116 @@ export function PublicEventRegistrationModal({ event, open, onClose }: Props) {
       );
     }
 
+    if (field.type === "radio") {
+      const options = (field.options || []).filter(Boolean);
+      const currentValue = getDynamicString(field.id);
+      return (
+        <div key={field.id} className="space-y-2">
+          {label}
+          {options.length > 0 ? (
+            <div className="grid gap-2">
+              {options.map((option) => {
+                const isSelected = currentValue === option;
+                return (
+                  <label
+                    key={option}
+                    className={`flex cursor-pointer items-center gap-3 rounded-2xl border px-4 py-3 transition ${isSelected
+                      ? "border-emerald-deep bg-emerald-deep/5 font-semibold text-emerald-deep shadow-sm"
+                      : "border-emerald/12 bg-white text-emerald-deep/85 hover:border-gold hover:bg-cream/40"
+                      }`}
+                  >
+                    <input
+                      type="radio"
+                      name={`field_${field.id}`}
+                      value={option}
+                      checked={isSelected}
+                      onChange={() => updateDynamicField(field.id, option)}
+                      className="h-4 w-4 accent-emerald-deep text-emerald-deep focus:ring-gold"
+                    />
+                    <span className="text-sm leading-snug">{option}</span>
+                  </label>
+                );
+              })}
+            </div>
+          ) : (
+            <input
+              value={getDynamicString(field.id)}
+              onChange={(eventChange) => updateDynamicField(field.id, eventChange.target.value)}
+              placeholder={field.placeholder}
+              className={commonInputClass}
+            />
+          )}
+          {error ? <p className="mt-2 text-sm text-red-700">{error}</p> : null}
+        </div>
+      );
+    }
+
+    if (field.type === "checkbox") {
+      const options = (field.options || []).filter(Boolean);
+      const selectedValues = getDynamicCheckboxValues(field.id);
+      return (
+        <div key={field.id} className="space-y-2">
+          {label}
+          {options.length > 0 ? (
+            <div className="grid gap-2">
+              {options.map((option) => {
+                const isChecked = selectedValues.includes(option);
+                return (
+                  <label
+                    key={option}
+                    className={`flex cursor-pointer items-start gap-3 rounded-2xl border px-4 py-3 transition ${isChecked
+                      ? "border-emerald-deep bg-emerald-deep/5 font-semibold text-emerald-deep shadow-sm"
+                      : "border-emerald/12 bg-white text-emerald-deep/85 hover:border-gold hover:bg-cream/40"
+                      }`}
+                  >
+                    <input
+                      type="checkbox"
+                      value={option}
+                      checked={isChecked}
+                      onChange={() => toggleDynamicCheckboxOption(field.id, option)}
+                      className="mt-0.5 h-4 w-4 rounded accent-emerald-deep text-emerald-deep focus:ring-gold"
+                    />
+                    <span className="text-sm leading-5">{option}</span>
+                  </label>
+                );
+              })}
+            </div>
+          ) : (
+            <input
+              value={getDynamicString(field.id)}
+              onChange={(eventChange) => updateDynamicField(field.id, eventChange.target.value)}
+              placeholder={field.placeholder}
+              className={commonInputClass}
+            />
+          )}
+          {error ? <p className="mt-2 text-sm text-red-700">{error}</p> : null}
+        </div>
+      );
+    }
+
+    if (field.type === "select") {
+      const options = (field.options || []).filter(Boolean);
+      const currentValue = getDynamicString(field.id);
+      return (
+        <div key={field.id}>
+          {label}
+          <select
+            value={currentValue}
+            onChange={(eventChange) => updateDynamicField(field.id, eventChange.target.value)}
+            className={`${commonInputClass} cursor-pointer`}
+          >
+            <option value="">{field.placeholder || "Select an option..."}</option>
+            {options.map((option) => (
+              <option key={option} value={option}>
+                {option}
+              </option>
+            ))}
+          </select>
+          {error ? <p className="mt-2 text-sm text-red-700">{error}</p> : null}
+        </div>
+      );
+    }
+
     const inputType =
       field.type === "email"
         ? "email"
@@ -831,7 +979,7 @@ export function PublicEventRegistrationModal({ event, open, onClose }: Props) {
         <div className="mt-6 rounded-[24px] border border-emerald/10 bg-white/80 p-5 text-sm text-emerald-deep/85">
           <h3 className="font-display text-xl font-bold text-emerald-deep">{activeEvent.title}</h3>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
-            <div><span className="font-semibold">{uiText.startDate}:</span> <span dir="ltr" className="inline-block [unicode-bidi:isolate]">{formatEventDate(activeEvent.startAt)}</span></div>
+            <div><span className="font-semibold">{uiText.startDate}:</span> <span dir="ltr" className="inline-block [unicode-bidi:isolate]">{activeEvent.scheduleDays && activeEvent.scheduleDays.length > 1 ? activeEvent.scheduleDays.map((d: string) => formatEventDate(d)).join(", ") : formatEventDate(activeEvent.startAt)}</span></div>
             <div><span className="font-semibold">{uiText.startTime}:</span> <span dir="ltr" className="inline-block [unicode-bidi:isolate]">{formatEventTime(activeEvent.startAt)}</span></div>
             <div><span className="font-semibold">{uiText.endTime}:</span> <span dir="ltr" className="inline-block [unicode-bidi:isolate]">{formatEventTime(activeEvent.endAt)}</span></div>
             <div><span className="font-semibold">{uiText.eventFee}:</span> <span dir="ltr" className="inline-block [unicode-bidi:isolate]">{formatEventFee(activeEvent.fee)}</span></div>
@@ -859,210 +1007,210 @@ export function PublicEventRegistrationModal({ event, open, onClose }: Props) {
               </div>
             ) : null}
             {success.requiresPayment ? (
-            <div className="mt-4 rounded-2xl border border-gold/20 bg-white/70 px-4 py-4 text-sm leading-7">
-              <p><span className="font-semibold">{uiText.eventFee}:</span> {formatEventFee(activeEvent.fee)}</p>
-              <p><span className="font-semibold">{uiText.coordinator}:</span> Shoaib Ul Din</p>
-              <p><span className="font-semibold">{uiText.email}:</span> coordinator@ashshajrah.com</p>
-              <p><span className="font-semibold">{uiText.whatsapp}:</span> +923473547036</p>
-            </div>
+              <div className="mt-4 rounded-2xl border border-gold/20 bg-white/70 px-4 py-4 text-sm leading-7">
+                <p><span className="font-semibold">{uiText.eventFee}:</span> {formatEventFee(activeEvent.fee)}</p>
+                <p><span className="font-semibold">{uiText.coordinator}:</span> Muhammad Adeel Hassan</p>
+                <p><span className="font-semibold">{uiText.email}:</span> coordinator@ashshajrah.com</p>
+                <p><span className="font-semibold">{uiText.whatsapp}:</span> +923101734369</p>
+              </div>
             ) : null}
           </div>
         ) : null}
 
         {!success ? (
-        <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-          {hasConfiguredFields ? (
-            <>
-              {configuredFields.map(renderDynamicField)}
-              <button
-                type="submit"
-                disabled={Boolean(blockedReason) || submitting}
-                className="inline-flex min-h-12 w-full items-center justify-center rounded-full bg-emerald-deep px-6 py-3 text-sm font-semibold text-cream transition hover:bg-gold hover:text-emerald-deep disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {submitting ? uiText.submitting : uiText.registerButton}
-              </button>
-            </>
-          ) : false ? (
-            <>
-          {(activeEvent.eventCategory === "alh-students" || activeEvent.eventCategory === "general-students") && (
-            <div>
-              <label className={labelClassName}>{uiText.studentName} *</label>
-              <input
-                value={form.studentName || ""}
-                onChange={(eventChange) => updateField("studentName", eventChange.target.value)}
-                placeholder={uiText.studentNamePlaceholder}
-                className="min-h-12 w-full rounded-2xl border border-emerald/12 bg-white px-4 py-3 outline-none transition focus:border-gold"
-              />
-              {errors.studentName ? <p className="mt-2 text-sm text-red-700">{errors.studentName}</p> : null}
-            </div>
-          )}
+          <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+            {hasConfiguredFields ? (
+              <>
+                {configuredFields.map(renderDynamicField)}
+                <button
+                  type="submit"
+                  disabled={Boolean(blockedReason) || submitting}
+                  className="inline-flex min-h-12 w-full items-center justify-center rounded-full bg-emerald-deep px-6 py-3 text-sm font-semibold text-cream transition hover:bg-gold hover:text-emerald-deep disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {submitting ? uiText.submitting : uiText.registerButton}
+                </button>
+              </>
+            ) : false ? (
+              <>
+                {(activeEvent.eventCategory === "alh-students" || activeEvent.eventCategory === "general-students") && (
+                  <div>
+                    <label className={labelClassName}>{uiText.studentName} *</label>
+                    <input
+                      value={form.studentName || ""}
+                      onChange={(eventChange) => updateField("studentName", eventChange.target.value)}
+                      placeholder={uiText.studentNamePlaceholder}
+                      className="min-h-12 w-full rounded-2xl border border-emerald/12 bg-white px-4 py-3 outline-none transition focus:border-gold"
+                    />
+                    {errors.studentName ? <p className="mt-2 text-sm text-red-700">{errors.studentName}</p> : null}
+                  </div>
+                )}
 
-          <div>
-            <label className={labelClassName}>{uiText.parentName} *</label>
-            <input
-              value={form.participantName}
-              onChange={(eventChange) => updateField("participantName", eventChange.target.value)}
-              placeholder={uiText.parentNamePlaceholder}
-              className="min-h-12 w-full rounded-2xl border border-emerald/12 bg-white px-4 py-3 outline-none transition focus:border-gold"
-            />
-            {errors.participantName ? <p className="mt-2 text-sm text-red-700">{errors.participantName}</p> : null}
-          </div>
+                <div>
+                  <label className={labelClassName}>{uiText.parentName} *</label>
+                  <input
+                    value={form.participantName}
+                    onChange={(eventChange) => updateField("participantName", eventChange.target.value)}
+                    placeholder={uiText.parentNamePlaceholder}
+                    className="min-h-12 w-full rounded-2xl border border-emerald/12 bg-white px-4 py-3 outline-none transition focus:border-gold"
+                  />
+                  {errors.participantName ? <p className="mt-2 text-sm text-red-700">{errors.participantName}</p> : null}
+                </div>
 
-          {activeEvent.eventCategory === "alh-parents" && (
-            <>
-              {/* Keep this block in the file for future parent-event use. */}
-              <div>
-                <label className={labelClassName}>{uiText.enterStudentNames} *</label>
-                <div className="space-y-2">
-                  {(form.studentNames || []).map((studentName, index) => (
-                    <div key={index} className="flex gap-2">
-                      <input
-                        value={studentName}
-                        onChange={(eventChange) => updateStudentName(index, eventChange.target.value)}
-                        placeholder={uiText.enterStudentNamesPlaceholder}
-                        className="min-h-12 flex-1 rounded-2xl border border-emerald/12 bg-white px-4 py-3 outline-none transition focus:border-gold"
-                      />
-                      <div className="flex gap-1">
-                        {index === (form.studentNames || []).length - 1 && (
-                          <button
-                            type="button"
-                            onClick={addStudentName}
-                            className="inline-flex min-h-12 min-w-12 items-center justify-center rounded-2xl border border-emerald/12 bg-white px-3 py-3 font-semibold text-emerald-deep transition hover:border-gold hover:text-gold"
-                          >
-                            {uiText.addStudent}
-                          </button>
-                        )}
-                        {(form.studentNames || []).length > 1 && (
-                          <button
-                            type="button"
-                            onClick={() => removeStudentName(index)}
-                            className="inline-flex min-h-12 min-w-12 items-center justify-center rounded-2xl border border-red-200 bg-red-50 px-3 py-3 font-semibold text-red-600 transition hover:border-red-400 hover:text-red-700"
-                          >
-                            {uiText.removeStudent}
-                          </button>
-                        )}
+                {activeEvent.eventCategory === "alh-parents" && (
+                  <>
+                    {/* Keep this block in the file for future parent-event use. */}
+                    <div>
+                      <label className={labelClassName}>{uiText.enterStudentNames} *</label>
+                      <div className="space-y-2">
+                        {(form.studentNames || []).map((studentName, index) => (
+                          <div key={index} className="flex gap-2">
+                            <input
+                              value={studentName}
+                              onChange={(eventChange) => updateStudentName(index, eventChange.target.value)}
+                              placeholder={uiText.enterStudentNamesPlaceholder}
+                              className="min-h-12 flex-1 rounded-2xl border border-emerald/12 bg-white px-4 py-3 outline-none transition focus:border-gold"
+                            />
+                            <div className="flex gap-1">
+                              {index === (form.studentNames || []).length - 1 && (
+                                <button
+                                  type="button"
+                                  onClick={addStudentName}
+                                  className="inline-flex min-h-12 min-w-12 items-center justify-center rounded-2xl border border-emerald/12 bg-white px-3 py-3 font-semibold text-emerald-deep transition hover:border-gold hover:text-gold"
+                                >
+                                  {uiText.addStudent}
+                                </button>
+                              )}
+                              {(form.studentNames || []).length > 1 && (
+                                <button
+                                  type="button"
+                                  onClick={() => removeStudentName(index)}
+                                  className="inline-flex min-h-12 min-w-12 items-center justify-center rounded-2xl border border-red-200 bg-red-50 px-3 py-3 font-semibold text-red-600 transition hover:border-red-400 hover:text-red-700"
+                                >
+                                  {uiText.removeStudent}
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        ))}
                       </div>
+                      {errors.studentNames ? <p className="mt-2 text-sm text-red-700">{errors.studentNames}</p> : null}
                     </div>
-                  ))}
-                </div>
-                {errors.studentNames ? <p className="mt-2 text-sm text-red-700">{errors.studentNames}</p> : null}
-              </div>
-            </>
-          )}
+                  </>
+                )}
 
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <label className={labelClassName}>{uiText.email} *</label>
-              <input
-                type="email"
-                value={form.email}
-                onChange={(eventChange) => updateField("email", eventChange.target.value)}
-                placeholder={uiText.emailPlaceholder}
-                className="min-h-12 w-full rounded-2xl border border-emerald/12 bg-white px-4 py-3 outline-none transition focus:border-gold"
-              />
-              {errors.email ? <p className="mt-2 text-sm text-red-700">{errors.email}</p> : null}
-            </div>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label className={labelClassName}>{uiText.email} *</label>
+                    <input
+                      type="email"
+                      value={form.email}
+                      onChange={(eventChange) => updateField("email", eventChange.target.value)}
+                      placeholder={uiText.emailPlaceholder}
+                      className="min-h-12 w-full rounded-2xl border border-emerald/12 bg-white px-4 py-3 outline-none transition focus:border-gold"
+                    />
+                    {errors.email ? <p className="mt-2 text-sm text-red-700">{errors.email}</p> : null}
+                  </div>
 
-            <div>
-              <label className={labelClassName}>{uiText.whatsapp} *</label>
-              <div className="flex gap-3">
-                <div ref={countryMenuRef} className="relative w-[34%] min-w-[140px]">
-                  <button
-                    type="button"
-                    onClick={() => setCountryMenuOpen((openState) => !openState)}
-                    className="flex min-h-12 w-full items-center justify-between rounded-2xl border border-emerald/12 bg-white px-3 py-3 text-left outline-none transition hover:border-gold"
-                  >
-                    <span className="flex items-center gap-2 text-sm font-semibold text-emerald-deep">
-                      <span className="text-base leading-none">{selectedCountryFlag}</span>
-                      <span>{selectedCountry.code}</span>
-                    </span>
-                    <span className="text-xs text-emerald-deep/70">▼</span>
-                  </button>
-                  {countryMenuOpen ? (
-                    <div className="absolute left-0 top-[calc(100%+8px)] z-30 max-h-72 w-[260px] overflow-y-auto rounded-2xl border border-emerald/12 bg-white py-2 shadow-[0_18px_50px_rgba(13,59,46,0.16)]">
-                      {PHONE_COUNTRY_CODES.map((option) => {
-                        const optionFlag = getCountryFlagForOption(option.label, (option as { flag?: string }).flag);
-                        const isSelected = option.code === countryCode;
-                        return (
-                          <button
-                            key={`${option.code}-${option.label}`}
-                            type="button"
-                            onClick={() => handlePhoneChange(option.code, localNumber)}
-                            className={`flex w-full items-center gap-3 px-3 py-2 text-left text-sm transition hover:bg-cream ${isSelected ? "bg-emerald-deep/6 font-semibold text-emerald-deep" : "text-emerald-deep/85"}`}
-                          >
-                            <span className="w-6 text-base leading-none">{optionFlag}</span>
-                            <span className="min-w-[46px] font-semibold">{option.code}</span>
-                            <span className="truncate">{option.label.replace(/\s*\(\+\d+\)\s*$/, "")}</span>
-                          </button>
-                        );
-                      })}
+                  <div>
+                    <label className={labelClassName}>{uiText.whatsapp} *</label>
+                    <div className="flex gap-3">
+                      <div ref={countryMenuRef} className="relative w-[34%] min-w-[140px]">
+                        <button
+                          type="button"
+                          onClick={() => setCountryMenuOpen((openState) => !openState)}
+                          className="flex min-h-12 w-full items-center justify-between rounded-2xl border border-emerald/12 bg-white px-3 py-3 text-left outline-none transition hover:border-gold"
+                        >
+                          <span className="flex items-center gap-2 text-sm font-semibold text-emerald-deep">
+                            <span className="text-base leading-none">{selectedCountryFlag}</span>
+                            <span>{selectedCountry.code}</span>
+                          </span>
+                          <span className="text-xs text-emerald-deep/70">▼</span>
+                        </button>
+                        {countryMenuOpen ? (
+                          <div className="absolute left-0 top-[calc(100%+8px)] z-30 max-h-72 w-[260px] overflow-y-auto rounded-2xl border border-emerald/12 bg-white py-2 shadow-[0_18px_50px_rgba(13,59,46,0.16)]">
+                            {PHONE_COUNTRY_CODES.map((option) => {
+                              const optionFlag = getCountryFlagForOption(option.label, (option as { flag?: string }).flag);
+                              const isSelected = option.code === countryCode;
+                              return (
+                                <button
+                                  key={`${option.code}-${option.label}`}
+                                  type="button"
+                                  onClick={() => handlePhoneChange(option.code, localNumber)}
+                                  className={`flex w-full items-center gap-3 px-3 py-2 text-left text-sm transition hover:bg-cream ${isSelected ? "bg-emerald-deep/6 font-semibold text-emerald-deep" : "text-emerald-deep/85"}`}
+                                >
+                                  <span className="w-6 text-base leading-none">{optionFlag}</span>
+                                  <span className="min-w-[46px] font-semibold">{option.code}</span>
+                                  <span className="truncate">{option.label.replace(/\s*\(\+\d+\)\s*$/, "")}</span>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        ) : null}
+                      </div>
+                      <input
+                        value={localNumber}
+                        onChange={(eventChange) => handlePhoneChange(countryCode, eventChange.target.value)}
+                        placeholder={uiText.enterDigits}
+                        inputMode="numeric"
+                        className="min-h-12 w-[66%] rounded-2xl border border-emerald/12 bg-white px-4 py-3 outline-none transition focus:border-gold"
+                      />
                     </div>
-                  ) : null}
+                    <p className="mt-2 text-sm text-emerald-deep/70">{uiText.remainingDigits}</p>
+                    {errors.whatsapp ? <p className="mt-2 text-sm text-red-700">{errors.whatsapp}</p> : null}
+                  </div>
                 </div>
-                <input
-                  value={localNumber}
-                  onChange={(eventChange) => handlePhoneChange(countryCode, eventChange.target.value)}
-                  placeholder={uiText.enterDigits}
-                  inputMode="numeric"
-                  className="min-h-12 w-[66%] rounded-2xl border border-emerald/12 bg-white px-4 py-3 outline-none transition focus:border-gold"
-                />
+
+                {activeEvent.eventCategory === "general-students" && (
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div>
+                      <label className={labelClassName}>{uiText.schoolName} *</label>
+                      <input
+                        value={form.schoolName || ""}
+                        onChange={(eventChange) => updateField("schoolName", eventChange.target.value)}
+                        placeholder={uiText.schoolNamePlaceholder}
+                        className="min-h-12 w-full rounded-2xl border border-emerald/12 bg-white px-4 py-3 outline-none transition focus:border-gold"
+                      />
+                      {errors.schoolName ? <p className="mt-2 text-sm text-red-700">{errors.schoolName}</p> : null}
+                    </div>
+
+                    <div>
+                      <label className={labelClassName}>{uiText.classInput} *</label>
+                      <input
+                        value={form.classInput || ""}
+                        onChange={(eventChange) => updateField("classInput", eventChange.target.value)}
+                        placeholder={uiText.classInputPlaceholder}
+                        className="min-h-12 w-full rounded-2xl border border-emerald/12 bg-white px-4 py-3 outline-none transition focus:border-gold"
+                      />
+                      {errors.classInput ? <p className="mt-2 text-sm text-red-700">{errors.classInput}</p> : null}
+                    </div>
+                  </div>
+                )}
+
+                <div>
+                  <label className={labelClassName}>{uiText.notes}</label>
+                  <textarea
+                    value={form.notes}
+                    onChange={(eventChange) => updateField("notes", eventChange.target.value)}
+                    placeholder={uiText.notesPlaceholder}
+                    rows={4}
+                    className="w-full rounded-[24px] border border-emerald/12 bg-white px-4 py-3 outline-none transition focus:border-gold"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={Boolean(blockedReason) || submitting}
+                  className="inline-flex min-h-12 w-full items-center justify-center rounded-full bg-emerald-deep px-6 py-3 text-sm font-semibold text-cream transition hover:bg-gold hover:text-emerald-deep disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {submitting ? uiText.submitting : uiText.registerButton}
+                </button>
+              </>
+            ) : (
+              <div className="rounded-[24px] border border-amber-200 bg-amber-50 px-4 py-4 text-sm leading-7 text-amber-900">
+                {uiText.formNotConfigured}
               </div>
-              <p className="mt-2 text-sm text-emerald-deep/70">{uiText.remainingDigits}</p>
-              {errors.whatsapp ? <p className="mt-2 text-sm text-red-700">{errors.whatsapp}</p> : null}
-            </div>
-          </div>
-
-          {activeEvent.eventCategory === "general-students" && (
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div>
-                <label className={labelClassName}>{uiText.schoolName} *</label>
-                <input
-                  value={form.schoolName || ""}
-                  onChange={(eventChange) => updateField("schoolName", eventChange.target.value)}
-                  placeholder={uiText.schoolNamePlaceholder}
-                  className="min-h-12 w-full rounded-2xl border border-emerald/12 bg-white px-4 py-3 outline-none transition focus:border-gold"
-                />
-                {errors.schoolName ? <p className="mt-2 text-sm text-red-700">{errors.schoolName}</p> : null}
-              </div>
-
-              <div>
-                <label className={labelClassName}>{uiText.classInput} *</label>
-                <input
-                  value={form.classInput || ""}
-                  onChange={(eventChange) => updateField("classInput", eventChange.target.value)}
-                  placeholder={uiText.classInputPlaceholder}
-                  className="min-h-12 w-full rounded-2xl border border-emerald/12 bg-white px-4 py-3 outline-none transition focus:border-gold"
-                />
-                {errors.classInput ? <p className="mt-2 text-sm text-red-700">{errors.classInput}</p> : null}
-              </div>
-            </div>
-          )}
-
-          <div>
-            <label className={labelClassName}>{uiText.notes}</label>
-            <textarea
-              value={form.notes}
-              onChange={(eventChange) => updateField("notes", eventChange.target.value)}
-              placeholder={uiText.notesPlaceholder}
-              rows={4}
-              className="w-full rounded-[24px] border border-emerald/12 bg-white px-4 py-3 outline-none transition focus:border-gold"
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={Boolean(blockedReason) || submitting}
-            className="inline-flex min-h-12 w-full items-center justify-center rounded-full bg-emerald-deep px-6 py-3 text-sm font-semibold text-cream transition hover:bg-gold hover:text-emerald-deep disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {submitting ? uiText.submitting : uiText.registerButton}
-          </button>
-            </>
-          ) : (
-            <div className="rounded-[24px] border border-amber-200 bg-amber-50 px-4 py-4 text-sm leading-7 text-amber-900">
-              {uiText.formNotConfigured}
-            </div>
-          )}
-        </form>
+            )}
+          </form>
         ) : null}
       </div>
     </div>,

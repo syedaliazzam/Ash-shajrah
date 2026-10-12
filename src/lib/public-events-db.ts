@@ -20,6 +20,7 @@ type PublicEventRow = {
   image_stored_path: string | null;
   event_category: string | null;
   registration_form_schema?: unknown;
+  schedule_days?: unknown;
 };
 
 type PublicEventRegistrationRow = {
@@ -246,6 +247,21 @@ function toPublicEvent(row: PublicEventRow): PublicEvent {
     lifecycle,
     eventCategory,
     registrationFormSchema: normalizeEventRegistrationFields(row.registration_form_schema),
+    scheduleDays: (() => {
+      const raw = row.schedule_days;
+      if (Array.isArray(raw)) {
+        return raw.map((d) => (typeof d === "string" ? d.trim() : "")).filter(Boolean);
+      }
+      if (typeof raw === "string" && raw.trim()) {
+        try {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed)) {
+            return parsed.map((d) => String(d).trim()).filter(Boolean);
+          }
+        } catch {}
+      }
+      return undefined;
+    })(),
   };
 }
 export const getPublicEventBySlugFromDb = cache(async (slug: string) => {
@@ -271,7 +287,8 @@ export const listPublicEventsFromDb = cache(async () => {
         image_object_path,
         image_stored_path,
         event_category,
-        registration_form_schema
+        registration_form_schema,
+        schedule_days
       from public.public_events
       where publication_status = 'published'
       order by start_at asc
@@ -435,11 +452,22 @@ export async function createPublicEventRegistrationInDb(input: {
         ? value.map((name) => name.trim()).filter(Boolean)
         : [];
 
+      const isMultiple = field.type === "multiple_student_names" || field.type === "checkbox";
+      const arrayValues = Array.isArray(value)
+        ? value.map((v) => String(v || "").trim()).filter(Boolean)
+        : [];
+      const normalizedStringValue = Array.isArray(value)
+        ? arrayValues.join(", ").trim()
+        : String(value || "").trim();
+
       if (field.required) {
         if (field.type === "multiple_student_names" && studentNames.length === 0) {
           throw new Error(`${field.label} is required.`);
         }
-        if (field.type !== "multiple_student_names" && !stringValue) {
+        if (field.type === "checkbox" && arrayValues.length === 0 && !normalizedStringValue) {
+          throw new Error(`${field.label} is required.`);
+        }
+        if (!isMultiple && !normalizedStringValue) {
           throw new Error(`${field.label} is required.`);
         }
       }

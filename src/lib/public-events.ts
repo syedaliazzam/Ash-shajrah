@@ -7,7 +7,10 @@ export type EventRegistrationFieldType =
   | "phone"
   | "number"
   | "date"
-  | "multiple_student_names";
+  | "multiple_student_names"
+  | "radio"
+  | "checkbox"
+  | "select";
 
 export type EventRegistrationField = {
   id: string;
@@ -17,6 +20,7 @@ export type EventRegistrationField = {
   enabled: boolean;
   order: number;
   placeholder?: string;
+  options?: string[];
 };
 
 export type PublicEvent = {
@@ -37,6 +41,7 @@ export type PublicEvent = {
   ctaLabel?: string;
   ctaExternal?: boolean;
   showFacebookIcon?: boolean;
+  scheduleDays?: string[];
 };
 
 export type PublicEventsResponse = {
@@ -165,6 +170,45 @@ function normalizeFieldType(value: unknown): EventRegistrationFieldType | null {
   ) {
     return "multiple_student_names";
   }
+  if (
+    [
+      "radio",
+      "single_choice",
+      "single-choice",
+      "singlechoice",
+      "radios",
+    ].includes(normalized)
+  ) {
+    return "radio";
+  }
+  if (
+    [
+      "checkbox",
+      "checkboxes",
+      "multiple_choice",
+      "multiple-choice",
+      "multiplechoice",
+      "multi_choice",
+      "multichoice",
+      "multi_select",
+      "multiple_select",
+      "multiselect",
+      "multipleselect",
+    ].includes(normalized)
+  ) {
+    return "checkbox";
+  }
+  if (
+    [
+      "select",
+      "dropdown",
+      "drop_down",
+      "choice",
+      "combobox",
+    ].includes(normalized)
+  ) {
+    return "select";
+  }
   return null;
 }
 
@@ -273,6 +317,35 @@ function schemaToArray(value: unknown): unknown[] {
   return [...nestedFields, ...objectFields];
 }
 
+function normalizeFieldOptions(value: unknown): string[] | undefined {
+  if (!value) return undefined;
+  if (Array.isArray(value)) {
+    const list = value
+      .map((item) => {
+        if (typeof item === "string") return item.trim();
+        if (typeof item === "number") return String(item).trim();
+        if (item && typeof item === "object") {
+          const rec = item as Record<string, unknown>;
+          return (
+            pickLocalizedString(getValue(rec, ["label", "value", "title", "text", "name"])) ||
+            pickString(rec.label || rec.value)
+          ).trim();
+        }
+        return "";
+      })
+      .filter(Boolean);
+    return list.length > 0 ? list : undefined;
+  }
+  if (typeof value === "string" && value.trim()) {
+    const list = value
+      .split(/\r?\n|,/)
+      .map((item) => item.trim())
+      .filter(Boolean);
+    return list.length > 0 ? list : undefined;
+  }
+  return undefined;
+}
+
 export function normalizeEventRegistrationFields(value: unknown): EventRegistrationField[] {
   const seenIds = new Map<string, number>();
 
@@ -304,6 +377,9 @@ export function normalizeEventRegistrationFields(value: unknown): EventRegistrat
         ),
         order: pickNumber(getValue(record, ["order", "sortOrder", "sort_order", "position"]), index),
         placeholder: pickLocalizedString(getValue(record, ["placeholder", "helpText", "help_text"])),
+        options: normalizeFieldOptions(
+          getValue(record, ["options", "choices", "items", "values", "optionList", "option_list"])
+        ),
       };
     })
     .filter((field): field is EventRegistrationField => Boolean(field))
@@ -464,4 +540,12 @@ export function hasRegistrationDeadlinePassed(value: string) {
   const deadline = new Date(value);
   if (Number.isNaN(deadline.getTime())) return false;
   return deadline.getTime() < Date.now();
+}
+
+export function formatEventScheduleDays(scheduleDays?: string[] | null) {
+  if (!scheduleDays || scheduleDays.length === 0) return "";
+  return scheduleDays
+    .map((d) => formatEventDate(d))
+    .filter(Boolean)
+    .join(", ");
 }

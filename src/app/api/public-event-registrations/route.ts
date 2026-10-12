@@ -295,9 +295,9 @@ function getStudentNamesFromCustom(customFieldValues: PublicEventCustomFieldValu
   return Array.isArray(value)
     ? value.map((name) => name.trim()).filter(Boolean)
     : String(value || "")
-        .split(",")
-        .map((name) => name.trim())
-        .filter(Boolean);
+      .split(",")
+      .map((name) => name.trim())
+      .filter(Boolean);
 }
 
 function buildCustomFieldDisplayValues(
@@ -421,19 +421,19 @@ export async function POST(request: NextRequest) {
             buildEmailCard(
               "Coordinator Details",
               buildDetailRows([
-                { label: "Name", value: "Shoaib Ul Din" },
+                { label: "Name", value: "Muhammad Adeel Hassan" },
                 { label: "Email", value: "coordinator@ashshajrah.com" },
-                { label: "WhatsApp", value: "+923473547036" },
+                { label: "WhatsApp", value: "+923101734369" },
               ])
             ) +
             (requiresPayment
               ? buildEmailCard(
-                  "Next Step",
-                  `
+                "Next Step",
+                `
                     <p style="margin:0 0 12px;color:#1F2A24;font-size:15px;line-height:24px;font-weight:700;">Send your payment screenshot on WhatsApp</p>
                     <p style="margin:0;color:#5B655F;font-size:15px;line-height:24px;">Share your payment screenshot with the coordinator to confirm your seat and secure your registration.</p>
                   `
-                )
+              )
               : ""),
         });
 
@@ -465,9 +465,9 @@ export async function POST(request: NextRequest) {
             requiresPayment ? paymentText : "",
             "",
             "Coordinator Details:",
-            "Name: Shoaib Ul Din",
+            "Name: Muhammad Adeel Hassan",
             "Email: coordinator@ashshajrah.com",
-            "WhatsApp: +923473547036",
+            "WhatsApp: +923101734369",
             "",
             "Warm regards,",
             "Ash-Shajrah Learning Hub Admissions Team",
