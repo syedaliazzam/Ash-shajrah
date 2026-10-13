@@ -10,6 +10,7 @@ import { EVENT_ITEMS } from "@/data/events";
 import {
   formatEventDate,
   formatEventFee,
+  formatPublicEventDates,
   formatEventTime,
   normalizePublicEventsResponse,
   type PublicEvent,
@@ -135,7 +136,7 @@ function EventSlider({
             </h3>
 
             <div className="mt-6 grid gap-4 rounded-[28px] border border-emerald/10 bg-cream/65 p-5 text-sm text-emerald-deep sm:grid-cols-2">
-              <div><span className="font-semibold">{eventMetaText.startDate}:</span> <span dir="ltr" className="inline-block [unicode-bidi:isolate]">{formatEventDate(events[0].startAt)}</span></div>
+              <div><span className="font-semibold">{eventMetaText.startDate}:</span> <span dir="ltr" className="inline-block [unicode-bidi:isolate]">{formatPublicEventDates(events[0])}</span></div>
               <div><span className="font-semibold">{eventMetaText.startTime}:</span> <span dir="ltr" className="inline-block [unicode-bidi:isolate]">{formatEventTime(events[0].startAt)}</span></div>
               <div><span className="font-semibold">{eventMetaText.endTime}:</span> <span dir="ltr" className="inline-block [unicode-bidi:isolate]">{formatEventTime(events[0].endAt)}</span></div>
               <div><span className="font-semibold">{eventMetaText.fee}:</span> <span dir="ltr" className="inline-block [unicode-bidi:isolate]">{formatEventFee(events[0].fee, "Contact for details")}</span></div>

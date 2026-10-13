@@ -9,7 +9,7 @@ import {
   type PointerEvent as ReactPointerEvent,
   type TouchEvent as ReactTouchEvent,
 } from "react";
-import { formatEventDate, formatEventTime } from "@/lib/public-events";
+import { formatEventDate, formatEventTime, formatPublicEventDates } from "@/lib/public-events";
 import type { CurriculumEvent } from "@/lib/curriculum-events";
 
 type Breakpoint = "mobile" | "tablet" | "desktop";
@@ -307,7 +307,7 @@ function CurriculumEventDetailsModal({
           <div className="mt-5 grid gap-3 rounded-2xl border border-emerald/10 bg-white/55 p-4 text-sm text-emerald-deep sm:grid-cols-2">
             <div>
               <span className="font-semibold">{text.date}:</span>{" "}
-              <span dir="ltr" className="inline-block [unicode-bidi:isolate]">{formatEventDate(event.startAt)}</span>
+              <span dir="ltr" className="inline-block [unicode-bidi:isolate]">{formatPublicEventDates(event)}</span>
             </div>
             <div>
               <span className="font-semibold">{text.startTime}:</span>{" "}
@@ -502,8 +502,8 @@ export function CurriculumEventsSlider({ language }: { language: "en" | "ur" }) 
                       <CurriculumEventFallback />
                     )}
                     <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-emerald-deep/10 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-                    <span className="absolute left-4 top-4 rounded-full border border-white/40 bg-white/90 px-3 py-1 text-xs font-semibold text-emerald-deep shadow-sm">
-                      {formatEventDate(event.startAt)}
+                    <span className="absolute left-4 top-4 max-w-[calc(100%-2rem)] truncate rounded-full border border-white/40 bg-white/90 px-3 py-1 text-xs font-semibold text-emerald-deep shadow-sm" title={formatPublicEventDates(event)}>
+                      {formatPublicEventDates(event)}
                     </span>
                   </div>
 
@@ -517,7 +517,7 @@ export function CurriculumEventsSlider({ language }: { language: "en" | "ur" }) 
                     <div className="mt-3 grid gap-2 rounded-2xl bg-cream/60 p-3 text-xs text-emerald-deep/80">
                       <div>
                         <span className="font-semibold">{text.date}:</span>{" "}
-                        <span dir="ltr" className="inline-block [unicode-bidi:isolate]">{formatEventDate(event.startAt)}</span>
+                        <span dir="ltr" className="inline-block [unicode-bidi:isolate]">{formatPublicEventDates(event)}</span>
                       </div>
                       <div>
                         <span className="font-semibold">{text.startTime}:</span>{" "}

@@ -5,7 +5,7 @@ import {
   listActivePaymentMethods,
   type PublicEventCustomFieldValues,
 } from "@/lib/public-events-db";
-import type { EventRegistrationField } from "@/lib/public-events";
+import { formatPublicEventDates, type EventRegistrationField } from "@/lib/public-events";
 
 export const runtime = "nodejs";
 
@@ -383,7 +383,11 @@ export async function POST(request: NextRequest) {
       try {
         const publicEventsFromEmail = getPublicEventsFromEmail(smtpConfig.auth.user);
         const transporter = nodemailer.createTransport(smtpConfig);
-        const eventStartDate = formatEventDate(registration.eventStartAt);
+        const eventStartDate = formatPublicEventDates({
+          startAt: registration.eventStartAt,
+          endAt: registration.eventEndAt,
+          scheduleDays: (registration as any).scheduleDays,
+        });
         const eventStartTime = formatEventTime(registration.eventStartAt);
         const eventEndTime = formatEventTime(registration.eventEndAt);
         const deadline = formatDateTime(registration.registrationDeadline);

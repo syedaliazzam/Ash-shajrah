@@ -349,6 +349,7 @@ export async function createPublicEventRegistrationInDb(input: {
     event_fee_amount: string | number | null;
     publication_status: string;
     registration_form_schema?: unknown;
+    schedule_days?: unknown;
   };
 
   let eventResult;
@@ -364,7 +365,8 @@ export async function createPublicEventRegistrationInDb(input: {
           registration_deadline,
           event_fee_amount,
           publication_status,
-          registration_form_schema
+          registration_form_schema,
+          schedule_days
         from public.public_events
         where id = $1
         limit 1
@@ -386,7 +388,8 @@ export async function createPublicEventRegistrationInDb(input: {
           end_at,
           registration_deadline,
           event_fee_amount,
-          publication_status
+          publication_status,
+          schedule_days
         from public.public_events
         where id = $1
         limit 1
@@ -587,6 +590,21 @@ export async function createPublicEventRegistrationInDb(input: {
       event.registration_deadline instanceof Date
         ? event.registration_deadline.toISOString()
         : String(event.registration_deadline),
+    scheduleDays: (() => {
+      const raw = event.schedule_days;
+      if (Array.isArray(raw)) {
+        return raw.map((d) => (typeof d === "string" ? d.trim() : "")).filter(Boolean);
+      }
+      if (typeof raw === "string" && raw.trim()) {
+        try {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed)) {
+            return parsed.map((d) => String(d).trim()).filter(Boolean);
+          }
+        } catch {}
+      }
+      return undefined;
+    })(),
     registrationFormSchema: registrationFields,
     customFieldValues,
   };

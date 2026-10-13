@@ -7,6 +7,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import {
   formatEventDate,
   formatEventFee,
+  formatPublicEventDates,
   formatEventTime,
   hasRegistrationDeadlinePassed,
   type PublicEvent,
@@ -91,7 +92,7 @@ export function PublicEventDetailPageContent({ event }: { event: PublicEvent }) 
                 </h1>
 
                 <div className="mt-6 grid gap-4 rounded-[28px] border border-emerald/10 bg-cream/65 p-5 text-sm text-emerald-deep sm:grid-cols-2">
-                  <div><span className="font-semibold">{uiText.startDate}:</span> <span dir="ltr" className="inline-block [unicode-bidi:isolate]">{event.scheduleDays && event.scheduleDays.length > 1 ? event.scheduleDays.map((d: string) => formatEventDate(d)).join(", ") : formatEventDate(event.startAt)}</span></div>
+                  <div><span className="font-semibold">{uiText.startDate}:</span> <span dir="ltr" className="inline-block [unicode-bidi:isolate]">{formatPublicEventDates(event)}</span></div>
                   <div><span className="font-semibold">{uiText.startTime}:</span> <span dir="ltr" className="inline-block [unicode-bidi:isolate]">{formatEventTime(event.startAt)}</span></div>
                   <div><span className="font-semibold">{uiText.endTime}:</span> <span dir="ltr" className="inline-block [unicode-bidi:isolate]">{formatEventTime(event.endAt)}</span></div>
                   <div><span className="font-semibold">{uiText.fee}:</span> <span dir="ltr" className="inline-block [unicode-bidi:isolate]">{formatEventFee(event.fee)}</span></div>

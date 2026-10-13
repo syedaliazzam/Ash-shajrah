@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import {
   formatEventDate,
   formatEventFee,
+  formatPublicEventDates,
   formatEventTime,
   hasRegistrationDeadlinePassed,
   type EventRegistrationField,
@@ -979,7 +980,7 @@ export function PublicEventRegistrationModal({ event, open, onClose }: Props) {
         <div className="mt-6 rounded-[24px] border border-emerald/10 bg-white/80 p-5 text-sm text-emerald-deep/85">
           <h3 className="font-display text-xl font-bold text-emerald-deep">{activeEvent.title}</h3>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
-            <div><span className="font-semibold">{uiText.startDate}:</span> <span dir="ltr" className="inline-block [unicode-bidi:isolate]">{activeEvent.scheduleDays && activeEvent.scheduleDays.length > 1 ? activeEvent.scheduleDays.map((d: string) => formatEventDate(d)).join(", ") : formatEventDate(activeEvent.startAt)}</span></div>
+            <div><span className="font-semibold">{uiText.startDate}:</span> <span dir="ltr" className="inline-block [unicode-bidi:isolate]">{formatPublicEventDates(activeEvent)}</span></div>
             <div><span className="font-semibold">{uiText.startTime}:</span> <span dir="ltr" className="inline-block [unicode-bidi:isolate]">{formatEventTime(activeEvent.startAt)}</span></div>
             <div><span className="font-semibold">{uiText.endTime}:</span> <span dir="ltr" className="inline-block [unicode-bidi:isolate]">{formatEventTime(activeEvent.endAt)}</span></div>
             <div><span className="font-semibold">{uiText.eventFee}:</span> <span dir="ltr" className="inline-block [unicode-bidi:isolate]">{formatEventFee(activeEvent.fee)}</span></div>

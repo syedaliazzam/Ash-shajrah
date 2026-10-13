@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { FacebookIcon } from "@/components/ui/FacebookIcon";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { formatEventDate, formatEventFee, formatEventTime, type PublicEvent } from "@/lib/public-events";
+import { formatEventDate, formatEventFee, formatEventTime, formatPublicEventDates, type PublicEvent } from "@/lib/public-events";
 
 function getLifecycleLabel(value: PublicEvent["lifecycle"], isUrdu: boolean) {
   if (value === "current") return isUrdu ? "موجودہ" : "Current";
@@ -78,8 +78,8 @@ export function PublicEventCard({
           <EventThumbnailFallback />
         )}
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-emerald-deep/15 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-        <span className="absolute left-4 top-4 rounded-full border border-white bg-white px-3 py-1 text-xs font-semibold text-emerald-deep shadow-md">
-          {formatEventDate(event.startAt)}
+        <span className="absolute left-4 top-4 max-w-[calc(100%-2rem)] truncate rounded-full border border-white bg-white px-3 py-1 text-xs font-semibold text-emerald-deep shadow-md" title={formatPublicEventDates(event)}>
+          {formatPublicEventDates(event)}
         </span>
       </div>
 
@@ -103,7 +103,7 @@ export function PublicEventCard({
             <div className="leading-relaxed">
               <span className="font-semibold text-emerald-deep">{eventMetaText.startDate}:</span>{" "}
               <span dir="ltr" className="inline-block text-left [unicode-bidi:isolate]">
-                {formatEventDate(event.startAt)}
+                {formatPublicEventDates(event)}
               </span>
             </div>
             <div className="leading-relaxed">

@@ -462,6 +462,21 @@ export function normalizePublicEvent(
     ctaLabel: pickString(getValue(item, ["ctaLabel", "cta_label"])),
     ctaExternal: Boolean(getValue(item, ["ctaExternal", "cta_external"])),
     showFacebookIcon: Boolean(getValue(item, ["showFacebookIcon", "show_facebook_icon"])),
+    scheduleDays: (() => {
+      const raw = getValue(item, ["scheduleDays", "schedule_days", "schedule", "days"]);
+      if (Array.isArray(raw)) {
+        return raw.map((d) => (typeof d === "string" ? d.trim() : "")).filter(Boolean);
+      }
+      if (typeof raw === "string" && raw.trim()) {
+        try {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed)) {
+            return parsed.map((d) => String(d).trim()).filter(Boolean);
+          }
+        } catch {}
+      }
+      return undefined;
+    })(),
   };
 }
 
@@ -547,5 +562,202 @@ export function formatEventScheduleDays(scheduleDays?: string[] | null) {
   return scheduleDays
     .map((d) => formatEventDate(d))
     .filter(Boolean)
+    .join(", ");
+}
+
+
+const WEEKDAY_MAP: Record<string, number> = {
+  sun: 0, sunday: 0, su: 0,
+  mon: 1, monday: 1, mo: 1,
+  tue: 2, tuesday: 2, tu: 2,
+  wed: 3, wednesday: 3, we: 3,
+  thu: 4, thursday: 4, th: 4,
+  fri: 5, friday: 5, fr: 5,
+  sat: 6, saturday: 6, sa: 6,
+};
+
+function getPKTDateParts(dateInput: Date | string | number) {
+  const d = new Date(dateInput);
+  if (Number.isNaN(d.getTime())) return null;
+  const utcMillis = d.getTime() + d.getTimezoneOffset() * 60000;
+  const pktMillis = utcMillis + 5 * 3600000;
+  const pktDate = new Date(pktMillis);
+  return {
+    year: pktDate.getFullYear(),
+    month: pktDate.getMonth(),
+    date: pktDate.getDate(),
+    day: pktDate.getDay(),
+  };
+}
+
+export function getEventSessionDates(
+  startAt?: string | null,
+  endAt?: string | null,
+  scheduleDays?: string[] | null
+): Date[] {
+  if (!startAt) return [];
+  const startPkt = getPKTDateParts(startAt);
+  if (!startPkt) return [];
+  const endPkt = endAt ? getPKTDateParts(endAt) : startPkt;
+
+  const weekdaySet = new Set<number>();
+  const explicitDates: Date[] = [];
+
+  if (Array.isArray(scheduleDays)) {
+    for (const item of scheduleDays) {
+      if (!item || typeof item !== "string") continue;
+      const clean = item.trim().toLowerCase();
+      if (WEEKDAY_MAP[clean] !== undefined) {
+        weekdaySet.add(WEEKDAY_MAP[clean]);
+      } else {
+        const parsed = new Date(item);
+        if (!Number.isNaN(parsed.getTime())) {
+          explicitDates.push(parsed);
+        }
+      }
+    }
+  }
+
+  if (explicitDates.length > 0 && weekdaySet.size === 0) {
+    return explicitDates.sort((a, b) => a.getTime() - b.getTime());
+  }
+
+  if (weekdaySet.size > 0 && endPkt) {
+    const dates: Date[] = [];
+    const cur = new Date(Date.UTC(startPkt.year, startPkt.month, startPkt.date));
+    const end = new Date(Date.UTC(endPkt.year, endPkt.month, endPkt.date));
+
+    while (cur <= end) {
+      if (weekdaySet.has(cur.getUTCDay())) {
+        dates.push(new Date(cur.getTime()));
+      }
+      cur.setUTCDate(cur.getUTCDate() + 1);
+    }
+    if (dates.length > 0) return dates;
+  }
+
+  if (
+    endPkt &&
+    (startPkt.year !== endPkt.year ||
+      startPkt.month !== endPkt.month ||
+      startPkt.date !== endPkt.date)
+  ) {
+    const cur = new Date(Date.UTC(startPkt.year, startPkt.month, startPkt.date));
+    const end = new Date(Date.UTC(endPkt.year, endPkt.month, endPkt.date));
+    const diffDays = Math.round((end.getTime() - cur.getTime()) / 86400000);
+    if (diffDays <= 4) {
+      const dates: Date[] = [];
+      while (cur <= end) {
+        dates.push(new Date(cur.getTime()));
+        cur.setUTCDate(cur.getUTCDate() + 1);
+      }
+      return dates;
+    }
+    return [
+      new Date(Date.UTC(startPkt.year, startPkt.month, startPkt.date)),
+      new Date(Date.UTC(endPkt.year, endPkt.month, endPkt.date)),
+    ];
+  }
+
+  return [new Date(Date.UTC(startPkt.year, startPkt.month, startPkt.date))];
+}
+
+export function formatPublicEventDates(
+  eventOrStartAt?:
+    | { startAt?: string; endAt?: string; scheduleDays?: string[] }
+    | string
+    | null,
+  endAt?: string | null,
+  scheduleDays?: string[] | null
+): string {
+  if (!eventOrStartAt) return "To be announced";
+
+  let start: string | undefined;
+  let end: string | undefined;
+  let days: string[] | undefined;
+
+  if (typeof eventOrStartAt === "object") {
+    start = eventOrStartAt.startAt;
+    end = eventOrStartAt.endAt;
+    days = eventOrStartAt.scheduleDays;
+  } else {
+    start = eventOrStartAt;
+    end = endAt || undefined;
+    days = scheduleDays || undefined;
+  }
+
+  if (!start) return "To be announced";
+
+  const sessionDates = getEventSessionDates(start, end, days);
+  if (!sessionDates.length) return formatEventDate(start);
+  if (sessionDates.length === 1) {
+    return new Intl.DateTimeFormat("en-PK", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+      timeZone: "UTC",
+    }).format(sessionDates[0]);
+  }
+
+  const firstYear = sessionDates[0].getUTCFullYear();
+  const allSameYear = sessionDates.every((d) => d.getUTCFullYear() === firstYear);
+  const firstMonth = sessionDates[0].getUTCMonth();
+  const allSameMonthAndYear =
+    allSameYear && sessionDates.every((d) => d.getUTCMonth() === firstMonth);
+
+  const monthName = new Intl.DateTimeFormat("en-PK", {
+    month: "short",
+    timeZone: "UTC",
+  }).format(sessionDates[0]);
+
+  if (allSameMonthAndYear) {
+    const dayNumbers = sessionDates.map((d) => d.getUTCDate());
+    if (dayNumbers.length === 2) {
+      return `${dayNumbers[0]} & ${dayNumbers[1]} ${monthName} ${firstYear}`;
+    }
+    const allButLast = dayNumbers.slice(0, -1).join(", ");
+    const last = dayNumbers[dayNumbers.length - 1];
+    return `${allButLast} & ${last} ${monthName} ${firstYear}`;
+  }
+
+  if (allSameYear) {
+    const groups = new Map<number, { monthStr: string; days: number[] }>();
+    for (const d of sessionDates) {
+      const m = d.getUTCMonth();
+      if (!groups.has(m)) {
+        groups.set(m, {
+          monthStr: new Intl.DateTimeFormat("en-PK", {
+            month: "short",
+            timeZone: "UTC",
+          }).format(d),
+          days: [],
+        });
+      }
+      groups.get(m)!.days.push(d.getUTCDate());
+    }
+    const parts: string[] = [];
+    for (const { monthStr, days } of groups.values()) {
+      if (days.length === 1) {
+        parts.push(`${days[0]} ${monthStr}`);
+      } else if (days.length === 2) {
+        parts.push(`${days[0]} & ${days[1]} ${monthStr}`);
+      } else {
+        parts.push(
+          `${days.slice(0, -1).join(", ")} & ${days[days.length - 1]} ${monthStr}`
+        );
+      }
+    }
+    return `${parts.join(" & ")} ${firstYear}`;
+  }
+
+  return sessionDates
+    .map((d) =>
+      new Intl.DateTimeFormat("en-PK", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+        timeZone: "UTC",
+      }).format(d)
+    )
     .join(", ");
 }
