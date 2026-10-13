@@ -343,9 +343,13 @@ export async function POST(request: NextRequest, context: RouteContext) {
       );
     }
 
-    await markInterestedStudentInterviewSubmitted({
-      registrationId: submitted.registrationId,
-    });
+    try {
+      await markInterestedStudentInterviewSubmitted({
+        registrationId: submitted.registrationId,
+      });
+    } catch (statusError) {
+      console.warn("Could not mark student interview submitted in LMS:", statusError);
+    }
 
     const smtpConfig = getSmtpConfig();
     if (smtpConfig) {

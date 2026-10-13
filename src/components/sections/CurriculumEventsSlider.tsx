@@ -9,7 +9,7 @@ import {
   type PointerEvent as ReactPointerEvent,
   type TouchEvent as ReactTouchEvent,
 } from "react";
-import { formatEventDate, formatEventTime, formatPublicEventDates } from "@/lib/public-events";
+import { formatEventTime, formatPublicEventDates } from "@/lib/public-events";
 import type { CurriculumEvent } from "@/lib/curriculum-events";
 
 type Breakpoint = "mobile" | "tablet" | "desktop";

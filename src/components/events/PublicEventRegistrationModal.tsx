@@ -259,6 +259,7 @@ export function PublicEventRegistrationModal({ event, open, onClose }: Props) {
       setSuccess(null);
       resetForm();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
   useEffect(() => {
@@ -518,41 +519,8 @@ export function PublicEventRegistrationModal({ event, open, onClose }: Props) {
     updateDynamicField(fieldId, sanitized ? `${nextCode} ${sanitized}` : "");
   };
 
-  const normalizedFieldLabel = (value: string) =>
-    value.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
 
-  const findCustomStringValue = (
-    fields: Array<{ fieldId?: string; label: string; type: EventRegistrationField["type"]; value: string | string[] }>,
-    type: EventRegistrationField["type"] | null,
-    labelHints: string[],
-    fieldIdHints: string[] = []
-  ) => {
-    const field = fields.find((item) => {
-      const label = normalizedFieldLabel(item.label);
-      const fieldId = "fieldId" in item ? normalizedFieldLabel(String(item.fieldId)) : "";
-      return (
-        (type ? item.type === type : false) ||
-        labelHints.some((hint) => label.includes(hint)) ||
-        fieldIdHints.some((hint) => fieldId.includes(hint))
-      );
-    });
-    if (!field) return "";
-    return Array.isArray(field.value) ? field.value.join(", ").trim() : field.value.trim();
-  };
 
-  const findCustomStudentNames = (
-    fields: Array<{ fieldId?: string; label: string; type: EventRegistrationField["type"]; value: string | string[] }>
-  ) => {
-    const field = fields.find((item) => {
-      const label = normalizedFieldLabel(item.label);
-      const fieldId = normalizedFieldLabel(item.fieldId || "");
-      return item.type === "multiple_student_names" || label.includes("student names") || fieldId.includes("studentnames");
-    });
-    if (!field) return [];
-    return Array.isArray(field.value)
-      ? field.value.map((name) => name.trim()).filter(Boolean)
-      : field.value.split(",").map((name) => name.trim()).filter(Boolean);
-  };
 
   function resetForm() {
     setForm({

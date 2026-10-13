@@ -147,6 +147,7 @@ export function RegistrationForm() {
     return () => {
       cancelled = true;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedCountry]);
 
   const update = (field: keyof RegistrationFormData, value: string) => {

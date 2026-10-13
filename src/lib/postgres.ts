@@ -148,66 +148,65 @@ export async function markInterestedStudentInterviewLinkSent(input: {
   registrationId: string;
   interviewUrl?: string | null;
 }): Promise<void> {
-  await ensureInterestedStudentsRegistrationCode();
   const client = getPgPool();
 
-  await client.query(`
-    ALTER TABLE public.interested_students
-      ADD COLUMN IF NOT EXISTS parent_interview_link_sent_at TIMESTAMPTZ;
-  `);
-  await client.query(`
-    ALTER TABLE public.interested_students
-      ADD COLUMN IF NOT EXISTS parent_interview_url TEXT;
-  `);
-  await client.query(`
-    ALTER TABLE public.interested_students
-      ADD COLUMN IF NOT EXISTS parent_interview_status TEXT;
-  `);
-
-  await client.query(
-    `
-      UPDATE public.interested_students
-      SET
-        parent_interview_status = 'link_sent',
-        parent_interview_link_sent_at = NOW(),
-        parent_interview_url = COALESCE($1, parent_interview_url)
-      WHERE coalesce(registration_code, 'ALHA-' || lpad(id::text, 4, '0')) = $2
-         OR id::text = $2
-    `,
-    [input.interviewUrl || null, input.registrationId]
-  );
+  try {
+    await client.query(
+      `
+        UPDATE public.interested_students
+        SET
+          parent_interview_status = 'link_sent',
+          parent_interview_link_sent_at = NOW(),
+          parent_interview_url = COALESCE($1, parent_interview_url)
+        WHERE coalesce(registration_code, 'ALHA-' || lpad(id::text, 4, '0')) = $2
+           OR id::text = $2
+      `,
+      [input.interviewUrl || null, input.registrationId]
+    );
+  } catch (err) {
+    console.warn("markInterestedStudentInterviewLinkSent warning:", err);
+  }
 }
 
 export async function markInterestedStudentInterviewSubmitted(input: {
   registrationId: string;
 }): Promise<void> {
-  await ensureInterestedStudentsRegistrationCode();
   const client = getPgPool();
 
-  await client.query(`
-    ALTER TABLE public.interested_students
-      ADD COLUMN IF NOT EXISTS parent_interview_submitted_at TIMESTAMPTZ;
-  `);
-  await client.query(`
-    ALTER TABLE public.interested_students
-      ADD COLUMN IF NOT EXISTS parent_interview_status TEXT;
-  `);
-  await client.query(
-    `
-      UPDATE public.interested_students
-      SET
-        parent_interview_status = 'submitted',
-        parent_interview_submitted_at = NOW()
-      WHERE coalesce(registration_code, 'ALHA-' || lpad(id::text, 4, '0')) = $1
-         OR id::text = $1
-    `,
-    [input.registrationId]
-  );
+  try {
+    await client.query(
+      `
+        UPDATE public.interested_students
+        SET
+          parent_interview_status = 'submitted',
+          parent_interview_submitted_at = NOW()
+        WHERE coalesce(registration_code, 'ALHA-' || lpad(id::text, 4, '0')) = $1
+           OR id::text = $1
+      `,
+      [input.registrationId]
+    );
+  } catch (err) {
+    console.warn("markInterestedStudentInterviewSubmitted warning:", err);
+  }
 }
 
 async function ensureInterestedStudentsRegistrationCode(): Promise<void> {
   if (ensuredInterestedStudentsRegistrationCode) return;
   const client = getPgPool();
+
+  try {
+    const check = await client.query(`
+      SELECT 1 FROM information_schema.columns 
+      WHERE table_schema = 'public' AND table_name = 'interested_students' AND column_name = 'registration_code'
+      LIMIT 1
+    `);
+    if (check.rows.length > 0) {
+      ensuredInterestedStudentsRegistrationCode = true;
+      return;
+    }
+  } catch {
+    // continue to fallback DDL below
+  }
 
   await client.query(`
     CREATE SEQUENCE IF NOT EXISTS public.interested_students_registration_code_seq;

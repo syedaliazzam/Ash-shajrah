@@ -1,6 +1,5 @@
 import {
   COUNTRY_LIST,
-  COUNTRY_CITY_OPTIONS,
 } from "@/lib/registration-options";
 
 export type RegistrationFormData = {
@@ -33,10 +32,6 @@ export const PROGRAMME_LEVELS = [
 export const CHILD_AGE_OPTIONS = ["2", "3", "4", "5", "6", "7", "7+"] as const;
 const CHILD_DOB_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 
-function getCitiesForCountry(country: string): readonly string[] | null {
-  const record = COUNTRY_CITY_OPTIONS as Record<string, readonly string[]>;
-  return record[country] ?? null;
-}
 
 export function validateRegistrationForm(data: RegistrationFormData): RegistrationFormErrors {
   const errors: RegistrationFormErrors = {};

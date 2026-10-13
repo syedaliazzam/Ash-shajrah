@@ -9,20 +9,6 @@ export type EducationalDocument = {
   isActive: boolean;
 };
 
-function deriveSupabaseUrlFromDatabaseUrl() {
-  const databaseUrl = process.env.DATABASE_URL || process.env.DIRECT_URL || "";
-  const hostMatch = databaseUrl.match(/postgres\.([a-z0-9]+)\./i);
-  if (hostMatch?.[1]) {
-    return `https://${hostMatch[1]}.supabase.co`;
-  }
-
-  const userMatch = databaseUrl.match(/postgresql:\/\/postgres\.([a-z0-9]+):/i);
-  if (userMatch?.[1]) {
-    return `https://${userMatch[1]}.supabase.co`;
-  }
-
-  return "";
-}
 
 function resolveDocumentUrl(rawPath: string | null | undefined) {
   const value = rawPath?.trim();

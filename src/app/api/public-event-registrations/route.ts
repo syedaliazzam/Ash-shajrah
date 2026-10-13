@@ -39,17 +39,6 @@ function getPublicEventsFromEmail(smtpUser?: string) {
   return process.env.PUBLIC_EVENTS_SMTP_FROM || smtpUser || "admissions@ashshajrah.com";
 }
 
-function formatEventDate(value: string) {
-  if (!value) return "To be announced";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
-  return new Intl.DateTimeFormat("en-PK", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-    timeZone: "Asia/Karachi",
-  }).format(date);
-}
 
 function formatEventTime(value: string) {
   if (!value) return "To be announced";
@@ -386,7 +375,7 @@ export async function POST(request: NextRequest) {
         const eventStartDate = formatPublicEventDates({
           startAt: registration.eventStartAt,
           endAt: registration.eventEndAt,
-          scheduleDays: (registration as any).scheduleDays,
+          scheduleDays: registration.scheduleDays,
         });
         const eventStartTime = formatEventTime(registration.eventStartAt);
         const eventEndTime = formatEventTime(registration.eventEndAt);
