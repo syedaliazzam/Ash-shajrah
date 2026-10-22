@@ -30,10 +30,10 @@ export function AboutSection() {
       <section
         ref={sectionRef}
         id="about"
-        className="relative overflow-hidden px-6 py-24 lg:px-8 lg:py-32"
+        className="relative overflow-hidden bg-white px-6 py-24 lg:px-8 lg:py-32"
       >
         <FloatingIcons />
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-emerald/[0.03] to-transparent" />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-transparent via-emerald/[0.02] to-transparent" />
 
         <div className="relative mx-auto max-w-7xl">
           <div data-about-content className={`text-center ${language === 'ur' ? 'font-urdu' : ''}`}>

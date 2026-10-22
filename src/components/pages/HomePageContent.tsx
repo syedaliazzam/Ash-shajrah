@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect } from "react";
 import { ScrollTrigger, ensurePlugins } from "@/lib/gsap";
@@ -6,6 +6,7 @@ import { ReducedMotionProvider } from "@/components/providers/ReducedMotionProvi
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { HeroSection } from "@/components/sections/HeroSection";
+import { MonthlyPlansSection } from "@/components/sections/MonthlyPlansSection";
 import { AboutSection } from "@/components/sections/AboutSection";
 import { LearningCharacterLeadershipSection } from "@/components/sections/LearningCharacterLeadershipSection";
 import { ParentPartnershipSection } from "@/components/sections/ParentPartnershipSection";
@@ -22,11 +23,14 @@ import { NeedBasedScholarshipSection } from "@/components/sections/NeedBasedScho
 import { LogoPhilosophySection } from "@/components/sections/LogoPhilosophySection";
 import { UpcomingEventAlert } from "@/components/sections/UpcomingEventAlert";
 import type { PublicEvent } from "@/lib/public-events";
+import type { MonthlyPlansData } from "@/lib/monthly-plans";
 
 export function HomePageContent({
   initialUpcomingEvent = null,
+  initialMonthlyPlans = null,
 }: {
   initialUpcomingEvent?: PublicEvent | null;
+  initialMonthlyPlans?: MonthlyPlansData | null;
 }) {
   useEffect(() => {
     ensurePlugins();
@@ -41,6 +45,7 @@ export function HomePageContent({
       <UpcomingEventAlert initialEvent={initialUpcomingEvent} />
       <main>
         <HeroSection />
+        <MonthlyPlansSection initialData={initialMonthlyPlans} />
         <AboutSection />
         <LearningCharacterLeadershipSection />
         <ParentPartnershipSection />

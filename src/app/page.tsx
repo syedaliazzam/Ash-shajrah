@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import { HomePageContent } from "@/components/pages/HomePageContent";
 import { OrganizationJsonLd } from "@/components/seo/OrganizationJsonLd";
 import { listPublicEventsFromDb } from "@/lib/public-events-db";
+import { listMonthlyPlansFromDb } from "@/lib/monthly-plans";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -13,17 +14,27 @@ export const metadata: Metadata = {
 };
 
 export default async function HomePage() {
-  const events = await listPublicEventsFromDb().catch(() => ({
-    currentUpcoming: [],
-    past: [],
-  }));
+  const [events, monthlyPlans] = await Promise.all([
+    listPublicEventsFromDb().catch(() => ({
+      currentUpcoming: [],
+      past: [],
+    })),
+    listMonthlyPlansFromDb().catch((err) => {
+      console.error("Monthly plans fetch error:", err);
+      return null;
+    }),
+  ]);
+
   const nearestUpcoming =
     events.currentUpcoming.find((item) => item.lifecycle === "upcoming") || null;
 
   return (
     <>
       <OrganizationJsonLd />
-      <HomePageContent initialUpcomingEvent={nearestUpcoming} />
+      <HomePageContent
+        initialUpcomingEvent={nearestUpcoming}
+        initialMonthlyPlans={monthlyPlans}
+      />
     </>
   );
 }

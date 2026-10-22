@@ -1,4 +1,5 @@
 export const NAV_ITEMS = [
+  { key: "monthlyPlans", href: "/#monthly-plans" },
   { key: "about", href: "/#about" },
   { key: "programs", href: "/#programs" },
   { key: "values", href: "/#values" },
