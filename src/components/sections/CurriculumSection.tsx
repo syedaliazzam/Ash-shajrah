@@ -5,6 +5,7 @@ import { useGSAP } from "@/lib/gsap";
 import { scrollReveal } from "@/lib/animations";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { CurriculumEventsSlider } from "@/components/sections/CurriculumEventsSlider";
+import type { CurriculumEvent } from "@/lib/curriculum-events";
 
 type CurriculumDocument = {
   id: string;
@@ -24,7 +25,11 @@ const normalizeCurriculumTitle = (value: string) =>
     .replace(/\s+/g, " ")
     .trim();
 
-export function CurriculumSection() {
+export function CurriculumSection({
+  initialCurriculumEvents = [],
+}: {
+  initialCurriculumEvents?: CurriculumEvent[];
+} = {}) {
   const { t, language } = useLanguage();
   const sectionRef = useRef<HTMLElement>(null);
   const tableRef = useRef<HTMLDivElement>(null);
@@ -154,7 +159,10 @@ export function CurriculumSection() {
           </div>
         </div>
 
-        <CurriculumEventsSlider language={language} />
+        <CurriculumEventsSlider
+          language={language}
+          initialEvents={initialCurriculumEvents}
+        />
       </div>
     </section>
   );

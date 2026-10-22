@@ -3,6 +3,7 @@ import { HomePageContent } from "@/components/pages/HomePageContent";
 import { OrganizationJsonLd } from "@/components/seo/OrganizationJsonLd";
 import { listPublicEventsFromDb } from "@/lib/public-events-db";
 import { listMonthlyPlansFromDb } from "@/lib/monthly-plans";
+import { listCurriculumEventsFromDb } from "@/lib/curriculum-events";
 
 export const revalidate = 60;
 
@@ -20,13 +21,13 @@ function withTimeout<T>(promise: Promise<T>, ms: number, fallback: T): Promise<T
 }
 
 export default async function HomePage() {
-  const [events, monthlyPlans] = await Promise.all([
+  const [events, monthlyPlans, curriculumEvents] = await Promise.all([
     withTimeout(
       listPublicEventsFromDb().catch(() => ({
         currentUpcoming: [],
         past: [],
       })),
-      3000,
+      10000,
       { currentUpcoming: [], past: [] }
     ),
     withTimeout(
@@ -34,8 +35,16 @@ export default async function HomePage() {
         console.error("Monthly plans fetch error:", err);
         return null;
       }),
-      3500,
+      10000,
       null
+    ),
+    withTimeout(
+      listCurriculumEventsFromDb().catch((err) => {
+        console.error("Curriculum events fetch error:", err);
+        return [];
+      }),
+      10000,
+      []
     ),
   ]);
 
@@ -47,7 +56,9 @@ export default async function HomePage() {
       <OrganizationJsonLd />
       <HomePageContent
         initialUpcomingEvent={nearestUpcoming}
+        initialPastEvents={events.past}
         initialMonthlyPlans={monthlyPlans}
+        initialCurriculumEvents={curriculumEvents}
       />
     </>
   );

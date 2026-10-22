@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { listEducationalDocumentsFromDb } from "@/lib/educational-documents";
 
 export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
+export const revalidate = 120;
 
 function isTransientDatabaseError(error: unknown) {
   if (!error || typeof error !== "object") return false;
@@ -29,7 +29,7 @@ export async function GET() {
       { data: documents },
       {
         headers: {
-          "Cache-Control": "no-store, max-age=0",
+          "Cache-Control": "public, s-maxage=120, stale-while-revalidate=300",
         },
       }
     );

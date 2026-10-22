@@ -339,10 +339,16 @@ function CurriculumEventDetailsModal({
   );
 }
 
-export function CurriculumEventsSlider({ language }: { language: "en" | "ur" }) {
+export function CurriculumEventsSlider({
+  language,
+  initialEvents = [],
+}: {
+  language: "en" | "ur";
+  initialEvents?: CurriculumEvent[];
+}) {
   const isUrdu = language === "ur";
   const text = getCurriculumEventText(isUrdu);
-  const [events, setEvents] = useState<CurriculumEvent[]>([]);
+  const [events, setEvents] = useState<CurriculumEvent[]>(() => initialEvents || []);
   const [activeIndex, setActiveIndex] = useState(0);
   const [selectedEvent, setSelectedEvent] = useState<CurriculumEvent | null>(null);
   const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
@@ -353,13 +359,14 @@ export function CurriculumEventsSlider({ language }: { language: "en" | "ur" }) 
   const maxVisibleDots = 7;
 
   useEffect(() => {
+    if (initialEvents && initialEvents.length > 0) return;
+
     let cancelled = false;
 
     const loadEvents = async () => {
       try {
         const response = await fetch("/api/curriculum-events", {
           method: "GET",
-          cache: "no-store",
         });
         if (!response.ok) return;
 
@@ -375,7 +382,7 @@ export function CurriculumEventsSlider({ language }: { language: "en" | "ur" }) 
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [initialEvents]);
 
   const goNext = useCallback(() => {
     setActiveIndex((current) => (current + 1) % total);

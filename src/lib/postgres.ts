@@ -43,22 +43,32 @@ export function getDirectDatabaseUrl(): string | null {
   return url;
 }
 
+const globalForPg = globalThis as unknown as { _pgPool?: Pool };
+
 export function getPgPool(): Pool {
-  if (pool) return pool;
+  if (globalForPg._pgPool) return globalForPg._pgPool;
 
   const connectionString = getDatabaseUrl();
   if (!connectionString) {
     throw new Error("DATABASE_URL is not configured.");
   }
 
-  pool = new Pool({
+  const newPool = new Pool({
     connectionString,
     ssl: connectionString.includes("supabase.com")
       ? { rejectUnauthorized: false }
       : undefined,
+    max: 5,
+    idleTimeoutMillis: 20000,
+    connectionTimeoutMillis: 10000,
   });
 
-  return pool;
+  newPool.on("error", (err) => {
+    console.error("Unexpected error on idle pg client:", err);
+  });
+
+  globalForPg._pgPool = newPool;
+  return newPool;
 }
 
 export async function getActiveCoordinatorEmails(): Promise<string[]> {

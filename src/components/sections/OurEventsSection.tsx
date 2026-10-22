@@ -72,20 +72,29 @@ function EventsEmptyState({ message, isUrdu }: { message: string; isUrdu: boolea
   );
 }
 
-export function OurEventsSection() {
+export function OurEventsSection({
+  initialPastEvents = [],
+}: {
+  initialPastEvents?: PublicEvent[];
+} = {}) {
   const { t, language } = useLanguage();
   const sectionRef = useRef<HTMLElement>(null);
   const isUrdu = language === "ur";
-  const [publicPastEvents, setPublicPastEvents] = useState<EventItem[]>([]);
+  const [publicPastEvents, setPublicPastEvents] = useState<EventItem[]>(() =>
+    initialPastEvents && initialPastEvents.length > 0
+      ? initialPastEvents.map(mapPublicEventToEventItem)
+      : []
+  );
 
   useEffect(() => {
+    if (initialPastEvents && initialPastEvents.length > 0) return;
+
     let cancelled = false;
 
     const loadPastPublicEvents = async () => {
       try {
         const response = await fetch("/api/public-events", {
           method: "GET",
-          cache: "no-store",
         });
         if (!response.ok) return;
 
@@ -106,7 +115,7 @@ export function OurEventsSection() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [initialPastEvents]);
 
   const allEvents = useMemo(() => {
     const dynamicIds = new Set(publicPastEvents.map((event) => event.id));

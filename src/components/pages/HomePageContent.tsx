@@ -24,13 +24,18 @@ import { LogoPhilosophySection } from "@/components/sections/LogoPhilosophySecti
 import { UpcomingEventAlert } from "@/components/sections/UpcomingEventAlert";
 import type { PublicEvent } from "@/lib/public-events";
 import type { MonthlyPlansData } from "@/lib/monthly-plans";
+import type { CurriculumEvent } from "@/lib/curriculum-events";
 
 export function HomePageContent({
   initialUpcomingEvent = null,
+  initialPastEvents = [],
   initialMonthlyPlans = null,
+  initialCurriculumEvents = [],
 }: {
   initialUpcomingEvent?: PublicEvent | null;
+  initialPastEvents?: PublicEvent[];
   initialMonthlyPlans?: MonthlyPlansData | null;
+  initialCurriculumEvents?: CurriculumEvent[];
 }) {
   useEffect(() => {
     ensurePlugins();
@@ -64,11 +69,11 @@ export function HomePageContent({
         <ProgramsSection />
         <ValuesSection />
         <LearningSection />
-        <CurriculumSection />
+        <CurriculumSection initialCurriculumEvents={initialCurriculumEvents} />
         <OnlineLearningSection />
         <LeadershipSection />
         <OurWorksSection />
-        <OurEventsSection />
+        <OurEventsSection initialPastEvents={initialPastEvents} />
         <VisionSection />
         <NeedBasedScholarshipSection />
         <LogoPhilosophySection />

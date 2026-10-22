@@ -83,6 +83,9 @@ export function MonthlyPlansSection({ initialData = null }: Props) {
     };
   });
 
+  const [isLoading, setIsLoading] = useState<boolean>(
+    () => !initialData || initialData.allMediaItems.length === 0
+  );
   const [modalIndex, setModalIndex] = useState<number | null>(null);
 
   const [isHovered, setIsHovered] = useState(false);
@@ -100,10 +103,14 @@ export function MonthlyPlansSection({ initialData = null }: Props) {
 
   // Fetch client-side if initialData was not present
   useEffect(() => {
-    if (initialData && initialData.allMediaItems.length > 0) return;
+    if (initialData && initialData.allMediaItems.length > 0) {
+      setIsLoading(false);
+      return;
+    }
 
     let cancelled = false;
     async function load() {
+      setIsLoading(true);
       try {
         const res = await fetch("/api/monthly-plans");
         if (!res.ok) return;
@@ -113,6 +120,10 @@ export function MonthlyPlansSection({ initialData = null }: Props) {
         }
       } catch (err) {
         console.error("Failed to load monthly plans:", err);
+      } finally {
+        if (!cancelled) {
+          setIsLoading(false);
+        }
       }
     }
 
@@ -240,13 +251,56 @@ export function MonthlyPlansSection({ initialData = null }: Props) {
     { scope: sectionRef }
   );
 
-  // If no items are found at all, return null gracefully
-  if (items.length === 0) {
-    return null;
-  }
-
   const sectionCopy = t.monthlyPlansSection;
   const maxVisibleDots = 7;
+
+  // If no items are found:
+  // - If still loading, render skeleton placeholder so layout doesn't vanish/jump
+  // - If finished loading and truly empty, return null
+  if (items.length === 0) {
+    if (!isLoading) {
+      return null;
+    }
+    return (
+      <section
+        id="monthly-plans"
+        className="relative overflow-hidden bg-gradient-to-b from-cream via-white to-cream/60 px-4 py-16 sm:px-6 sm:py-24 lg:px-8 lg:py-28"
+      >
+        <div className="relative mx-auto max-w-7xl">
+          <div className={`text-center ${language === "ur" ? "font-urdu" : ""}`}>
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-gold/40 bg-gold/10 px-4 py-1.5 shadow-sm">
+              <span className="h-2 w-2 rounded-full bg-gold animate-pulse" />
+              <span className="text-xs font-semibold uppercase tracking-widest text-emerald-deep">
+                {sectionCopy.badge}
+              </span>
+            </div>
+            <h2
+              className={`mb-4 text-3xl font-bold tracking-tight text-emerald-deep sm:text-4xl lg:text-5xl ${
+                language === "ur" ? "leading-[1.8]" : "font-display"
+              }`}
+            >
+              {sectionCopy.title}
+            </h2>
+            <p
+              className={`mx-auto max-w-3xl text-emerald-deep/80 sm:text-lg ${
+                language === "ur" ? "leading-[2.2]" : "leading-relaxed"
+              }`}
+            >
+              {sectionCopy.subtitle}
+            </p>
+          </div>
+          <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {[1, 2, 3].map((n) => (
+              <div
+                key={n}
+                className="aspect-[4/3] rounded-2xl bg-emerald-deep/5 animate-pulse border border-emerald/10"
+              />
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section

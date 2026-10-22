@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { listCurriculumEventsFromDb } from "@/lib/curriculum-events";
 
 export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 export async function GET() {
   try {
@@ -11,7 +11,7 @@ export async function GET() {
       { data: events },
       {
         headers: {
-          "Cache-Control": "no-store, max-age=0",
+          "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
         },
       }
     );
