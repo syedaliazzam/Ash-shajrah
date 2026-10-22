@@ -13,18 +13,7 @@ import { useGSAP } from "@/lib/gsap";
 import { scrollReveal } from "@/lib/animations";
 import type { MonthlyPlansData } from "@/lib/monthly-plans";
 
-function PlayIcon({ className = "h-5 w-5" }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      className={className}
-      fill="currentColor"
-      aria-hidden
-    >
-      <polygon points="5 3 19 12 5 21 5 3" />
-    </svg>
-  );
-}
+
 
 function ChevronLeft({ className = "h-5 w-5" }: { className?: string }) {
   return (
@@ -133,7 +122,7 @@ export function MonthlyPlansSection({ initialData = null }: Props) {
     };
   }, [initialData]);
 
-  const items = data.allMediaItems;
+  const items = data.allMediaItems.filter((item) => item.mediaType !== "video");
 
   const [emblaRef, emblaApi] = useEmblaCarousel({
     loop: items.length > 2,
@@ -353,7 +342,6 @@ export function MonthlyPlansSection({ initialData = null }: Props) {
         >
           <div className="-ml-3 flex touch-pan-y sm:-ml-4 items-center">
             {items.map((item, index) => {
-              const isVideo = item.mediaType === "video";
               const shouldLoad = loadedIndices.has(index);
 
               return (
@@ -373,27 +361,7 @@ export function MonthlyPlansSection({ initialData = null }: Props) {
                     }}
                     className="group relative flex aspect-[4/3] w-full cursor-pointer select-none flex-col items-center justify-center overflow-hidden rounded-2xl sm:rounded-3xl border border-emerald/15 bg-[#fff8ea] p-2.5 sm:p-3.5 shadow-md shadow-emerald-deep/5 transition-all duration-300 hover:-translate-y-1 hover:border-emerald/30 hover:shadow-xl focus:outline-none focus-visible:outline-none active:scale-[0.99]"
                   >
-                    {isVideo ? (
-                      <div className="relative h-full w-full overflow-hidden rounded-xl bg-black/10 flex items-center justify-center">
-                        {shouldLoad ? (
-                          <video
-                            src={item.url}
-                            preload="none"
-                            muted
-                            playsInline
-                            className="h-full w-full object-contain rounded-xl transition-transform duration-500 group-hover:scale-[1.02]"
-                          />
-                        ) : (
-                          <div className="h-full w-full bg-emerald-950/20" />
-                        )}
-                        {/* Centered Golden Play Button */}
-                        <div className="absolute inset-0 flex items-center justify-center bg-black/20 transition-all group-hover:bg-black/30">
-                          <div className="flex h-13 w-13 sm:h-14 sm:w-14 items-center justify-center rounded-full bg-gold text-white shadow-xl shadow-gold/40 transition-transform duration-300 group-hover:scale-110">
-                            <PlayIcon className="h-6 w-6 ml-0.5 fill-white" />
-                          </div>
-                        </div>
-                      </div>
-                    ) : shouldLoad ? (
+                    {shouldLoad ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
                         src={item.url}
@@ -556,24 +524,14 @@ export function MonthlyPlansSection({ initialData = null }: Props) {
               </button>
             </div>
 
-            {/* Media Body: ONLY the pure image/video, no text details */}
+            {/* Media Body: ONLY the pure image, no text details */}
             <div className="relative flex flex-1 items-center justify-center overflow-auto p-3 sm:p-5 bg-[#fff8ea]">
-              {activeModalItem.mediaType === "video" ? (
-                <video
-                  src={activeModalItem.url}
-                  controls
-                  autoPlay
-                  playsInline
-                  className="max-h-[78vh] w-auto max-w-full rounded-xl shadow-lg"
-                />
-              ) : (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={activeModalItem.url}
-                  alt=""
-                  className="max-h-[78vh] w-auto max-w-full object-contain rounded-xl shadow-lg"
-                />
-              )}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={activeModalItem.url}
+                alt=""
+                className="max-h-[78vh] w-auto max-w-full object-contain rounded-xl shadow-lg"
+              />
             </div>
           </div>
         </div>

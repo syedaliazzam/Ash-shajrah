@@ -243,6 +243,9 @@ export async function listMonthlyPlansFromDb(): Promise<MonthlyPlansData> {
       if (!cleanPath) return;
 
       const mediaType = detectMediaType(cleanPath);
+      // Skip videos: monthly plans slider shows only images
+      if (mediaType === "video") return;
+
       const url = resolveStorageUrl(cleanPath);
       const title = cleanTitleFromFileName(cleanPath, mediaType);
       const segments = cleanPath.split("/");

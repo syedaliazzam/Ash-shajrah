@@ -25,17 +25,20 @@ import { UpcomingEventAlert } from "@/components/sections/UpcomingEventAlert";
 import type { PublicEvent } from "@/lib/public-events";
 import type { MonthlyPlansData } from "@/lib/monthly-plans";
 import type { CurriculumEvent } from "@/lib/curriculum-events";
+import type { EducationalDocument } from "@/lib/educational-documents";
 
 export function HomePageContent({
   initialUpcomingEvent = null,
   initialPastEvents = [],
   initialMonthlyPlans = null,
   initialCurriculumEvents = [],
+  initialEducationalDocuments = [],
 }: {
   initialUpcomingEvent?: PublicEvent | null;
   initialPastEvents?: PublicEvent[];
   initialMonthlyPlans?: MonthlyPlansData | null;
   initialCurriculumEvents?: CurriculumEvent[];
+  initialEducationalDocuments?: EducationalDocument[];
 }) {
   useEffect(() => {
     ensurePlugins();
@@ -69,7 +72,10 @@ export function HomePageContent({
         <ProgramsSection />
         <ValuesSection />
         <LearningSection />
-        <CurriculumSection initialCurriculumEvents={initialCurriculumEvents} />
+        <CurriculumSection
+          initialCurriculumEvents={initialCurriculumEvents}
+          initialEducationalDocuments={initialEducationalDocuments}
+        />
         <OnlineLearningSection />
         <LeadershipSection />
         <OurWorksSection />
