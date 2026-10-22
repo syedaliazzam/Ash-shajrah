@@ -119,7 +119,11 @@ export function OurEventsSection({
 
   const allEvents = useMemo(() => {
     const dynamicIds = new Set(publicPastEvents.map((event) => event.id));
-    return [...EVENT_ITEMS.filter((event) => !dynamicIds.has(event.id)), ...publicPastEvents];
+    // Include both curated static events and live database events
+    return [
+      ...EVENT_ITEMS.filter((event) => !dynamicIds.has(event.id)),
+      ...publicPastEvents,
+    ];
   }, [publicPastEvents]);
 
   const hasEvents = allEvents.length > 0;

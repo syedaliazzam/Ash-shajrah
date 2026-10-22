@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import { listMonthlyPlansFromDb } from "@/lib/monthly-plans";
 
 export const runtime = "nodejs";
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export async function GET() {
   try {
@@ -11,7 +12,7 @@ export async function GET() {
       { data },
       {
         headers: {
-          "Cache-Control": "public, s-maxage=120, stale-while-revalidate=300",
+          "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
         },
       }
     );

@@ -5,7 +5,8 @@ import { listPublicEventsFromDb } from "@/lib/public-events-db";
 import { listMonthlyPlansFromDb } from "@/lib/monthly-plans";
 import { listCurriculumEventsFromDb } from "@/lib/curriculum-events";
 
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export const metadata: Metadata = {
   title: "Ash-Shajrah Learning Hub (ALH) | Online Learning, Character & Leadership",

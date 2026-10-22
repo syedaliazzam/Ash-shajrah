@@ -2,14 +2,15 @@ import { NextResponse } from "next/server";
 import { listPublicEventsFromDb } from "@/lib/public-events-db";
 
 export const runtime = "nodejs";
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export async function GET() {
   try {
     const events = await listPublicEventsFromDb();
     return NextResponse.json(events, {
       headers: {
-        "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
+        "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
       },
     });
   } catch (error) {
