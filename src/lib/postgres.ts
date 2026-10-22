@@ -1,6 +1,5 @@
 import { Pool } from "pg";
 
-let pool: Pool | null = null;
 let ensuredInterestedStudentsRegistrationCode = false;
 
 /**
