@@ -18,7 +18,7 @@ export function AboutSection() {
 
       scrollReveal("[data-about-content]", {
         trigger: sectionRef.current,
-        start: "top 75%",
+        start: "top 85%",
         stagger: 0.15,
       });
     },

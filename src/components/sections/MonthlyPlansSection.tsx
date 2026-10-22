@@ -93,6 +93,11 @@ export function MonthlyPlansSection({ initialData = null }: Props) {
   const [canScrollPrev, setCanScrollPrev] = useState(false);
   const [canScrollNext, setCanScrollNext] = useState(false);
 
+  // Lazy-load media indices: initially only load first 5 slides, expanding as user slides
+  const [loadedIndices, setLoadedIndices] = useState<Set<number>>(
+    () => new Set([0, 1, 2, 3, 4, 5])
+  );
+
   // Fetch client-side if initialData was not present
   useEffect(() => {
     if (initialData && initialData.allMediaItems.length > 0) return;
@@ -156,6 +161,19 @@ export function MonthlyPlansSection({ initialData = null }: Props) {
       emblaApi.off("reInit", onSelect);
     };
   }, [emblaApi, onSelect]);
+
+  // Expand loadedIndices as user scrolls to load media on-demand
+  useEffect(() => {
+    if (items.length === 0) return;
+    setLoadedIndices((prev) => {
+      const next = new Set(prev);
+      for (let offset = -4; offset <= 4; offset++) {
+        const idx = (selectedIndex + offset + items.length) % items.length;
+        next.add(idx);
+      }
+      return next;
+    });
+  }, [selectedIndex, items.length]);
 
   // Auto-run carousel timer (matching other carousels on the site)
   useEffect(() => {
@@ -282,6 +300,7 @@ export function MonthlyPlansSection({ initialData = null }: Props) {
           <div className="-ml-3 flex touch-pan-y sm:-ml-4 items-center">
             {items.map((item, index) => {
               const isVideo = item.mediaType === "video";
+              const shouldLoad = loadedIndices.has(index);
 
               return (
                 <div
@@ -302,13 +321,17 @@ export function MonthlyPlansSection({ initialData = null }: Props) {
                   >
                     {isVideo ? (
                       <div className="relative h-full w-full overflow-hidden rounded-xl bg-black/10 flex items-center justify-center">
-                        <video
-                          src={item.url}
-                          preload="metadata"
-                          muted
-                          playsInline
-                          className="h-full w-full object-contain rounded-xl transition-transform duration-500 group-hover:scale-[1.02]"
-                        />
+                        {shouldLoad ? (
+                          <video
+                            src={item.url}
+                            preload="none"
+                            muted
+                            playsInline
+                            className="h-full w-full object-contain rounded-xl transition-transform duration-500 group-hover:scale-[1.02]"
+                          />
+                        ) : (
+                          <div className="h-full w-full bg-emerald-950/20" />
+                        )}
                         {/* Centered Golden Play Button */}
                         <div className="absolute inset-0 flex items-center justify-center bg-black/20 transition-all group-hover:bg-black/30">
                           <div className="flex h-13 w-13 sm:h-14 sm:w-14 items-center justify-center rounded-full bg-gold text-white shadow-xl shadow-gold/40 transition-transform duration-300 group-hover:scale-110">
@@ -316,14 +339,19 @@ export function MonthlyPlansSection({ initialData = null }: Props) {
                           </div>
                         </div>
                       </div>
-                    ) : (
+                    ) : shouldLoad ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
                         src={item.url}
                         alt=""
-                        loading="lazy"
+                        loading={index < 3 ? "eager" : "lazy"}
+                        decoding="async"
                         className="h-full w-full object-contain rounded-xl transition-transform duration-500 group-hover:scale-[1.02]"
                       />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center rounded-xl bg-emerald/[0.04]">
+                        <div className="h-6 w-6 rounded-full border-2 border-emerald/20 border-t-emerald animate-spin" />
+                      </div>
                     )}
                   </div>
                 </div>

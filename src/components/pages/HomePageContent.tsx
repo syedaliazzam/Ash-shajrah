@@ -34,9 +34,21 @@ export function HomePageContent({
 }) {
   useEffect(() => {
     ensurePlugins();
+    // Refresh ScrollTrigger immediately and after short intervals
+    // so sections below render right away without waiting for all remote media
+    ScrollTrigger.refresh();
+    const t1 = window.setTimeout(() => ScrollTrigger.refresh(), 300);
+    const t2 = window.setTimeout(() => ScrollTrigger.refresh(), 1000);
+    const t3 = window.setTimeout(() => ScrollTrigger.refresh(), 2500);
+
     const refresh = () => ScrollTrigger.refresh();
     window.addEventListener("load", refresh);
-    return () => window.removeEventListener("load", refresh);
+    return () => {
+      window.clearTimeout(t1);
+      window.clearTimeout(t2);
+      window.clearTimeout(t3);
+      window.removeEventListener("load", refresh);
+    };
   }, []);
 
   return (
