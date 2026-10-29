@@ -13,7 +13,12 @@ export const EDI_FACEBOOK_URL =
 
 /** Official Ash-Shajrah Learning Hub Facebook page (footer social link). */
 export const DEFAULT_ASH_SHAJRAH_FACEBOOK_URL =
-  "https://www.facebook.com/profile.php?id=61591189181962";
+  "https://www.facebook.com/share/14nDxLKbAzj/";
+
+/** Official Ash-Shajrah Learning Hub YouTube channel. */
+export const ASH_SHAJRAH_YOUTUBE_URL =
+  process.env.NEXT_PUBLIC_ASH_SHAJRAH_YOUTUBE_URL ||
+  "https://youtube.com/@ashajrahlearninghub?si=HHE-UlAJyK3dbivZ";
 
 const FACEBOOK_ENV_KEY_PREFIX = "NEXT_PUBLIC_ASH_SHAJRAH_FACEBOOK_URL=";
 

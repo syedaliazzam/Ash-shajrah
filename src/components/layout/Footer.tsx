@@ -2,8 +2,9 @@
 
 import { BrandLogo } from "@/components/ui/BrandLogo";
 import { FacebookIcon } from "@/components/ui/FacebookIcon";
+import { YouTubeIcon } from "@/components/ui/YouTubeIcon";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { ASH_SHAJRAH_FACEBOOK_URL } from "@/lib/constants";
+import { ASH_SHAJRAH_FACEBOOK_URL, ASH_SHAJRAH_YOUTUBE_URL } from "@/lib/constants";
 
 function ContactRow({
   label,
@@ -175,6 +176,17 @@ export function Footer() {
                   className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-gold/35 bg-gold/15 text-cream transition-all duration-300 hover:border-gold/55 hover:bg-gold/25 hover:text-gold-soft"
                 >
                   <FacebookIcon />
+                </a>
+              )}
+              {ASH_SHAJRAH_YOUTUBE_URL && (
+                <a
+                  href={ASH_SHAJRAH_YOUTUBE_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="YouTube"
+                  className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-gold/35 bg-gold/15 text-cream transition-all duration-300 hover:border-gold/55 hover:bg-gold/25 hover:text-gold-soft"
+                >
+                  <YouTubeIcon className="h-5 w-5" />
                 </a>
               )}
             </div>
