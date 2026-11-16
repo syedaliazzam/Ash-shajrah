@@ -5,6 +5,7 @@ import { listPublicEventsFromDb } from "@/lib/public-events-db";
 import { listMonthlyPlansFromDb } from "@/lib/monthly-plans";
 import { listCurriculumEventsFromDb } from "@/lib/curriculum-events";
 import { listEducationalDocumentsFromDb } from "@/lib/educational-documents";
+import { listTrainingSessionVideosFromDb } from "@/lib/training-sessions";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -23,7 +24,7 @@ function withTimeout<T>(promise: Promise<T>, ms: number, fallback: T): Promise<T
 }
 
 export default async function HomePage() {
-  const [events, monthlyPlans, curriculumEvents, educationalDocuments] =
+  const [events, monthlyPlans, curriculumEvents, educationalDocuments, trainingSessions] =
     await Promise.all([
       withTimeout(
         listPublicEventsFromDb().catch(() => ({
@@ -57,6 +58,14 @@ export default async function HomePage() {
         10000,
         []
       ),
+      withTimeout(
+        listTrainingSessionVideosFromDb().catch((err) => {
+          console.error("Training sessions fetch error:", err);
+          return [];
+        }),
+        10000,
+        []
+      ),
     ]);
 
   const nearestUpcoming =
@@ -71,6 +80,7 @@ export default async function HomePage() {
         initialMonthlyPlans={monthlyPlans}
         initialCurriculumEvents={curriculumEvents}
         initialEducationalDocuments={educationalDocuments}
+        initialTrainingSessions={trainingSessions}
       />
     </>
   );

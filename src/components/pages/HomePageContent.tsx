@@ -14,6 +14,7 @@ import { ProgramsSection } from "@/components/sections/ProgramsSection";
 import { ValuesSection } from "@/components/sections/ValuesSection";
 import { LearningSection } from "@/components/sections/LearningSection";
 import { CurriculumSection } from "@/components/sections/CurriculumSection";
+import { TrainingSessionsSection } from "@/components/sections/TrainingSessionsSection";
 import { OnlineLearningSection } from "@/components/sections/OnlineLearningSection";
 import { LeadershipSection } from "@/components/sections/LeadershipSection";
 import { OurWorksSection } from "@/components/sections/OurWorksSection";
@@ -26,6 +27,7 @@ import type { PublicEvent } from "@/lib/public-events";
 import type { MonthlyPlansData } from "@/lib/monthly-plans";
 import type { CurriculumEvent } from "@/lib/curriculum-events";
 import type { EducationalDocument } from "@/lib/educational-documents";
+import type { TrainingSessionVideo } from "@/lib/training-sessions";
 
 export function HomePageContent({
   initialUpcomingEvent = null,
@@ -33,12 +35,14 @@ export function HomePageContent({
   initialMonthlyPlans = null,
   initialCurriculumEvents = [],
   initialEducationalDocuments = [],
+  initialTrainingSessions = [],
 }: {
   initialUpcomingEvent?: PublicEvent | null;
   initialPastEvents?: PublicEvent[];
   initialMonthlyPlans?: MonthlyPlansData | null;
   initialCurriculumEvents?: CurriculumEvent[];
   initialEducationalDocuments?: EducationalDocument[];
+  initialTrainingSessions?: TrainingSessionVideo[];
 }) {
   useEffect(() => {
     ensurePlugins();
@@ -76,6 +80,7 @@ export function HomePageContent({
           initialCurriculumEvents={initialCurriculumEvents}
           initialEducationalDocuments={initialEducationalDocuments}
         />
+        <TrainingSessionsSection initialVideos={initialTrainingSessions} />
         <OnlineLearningSection />
         <LeadershipSection />
         <OurWorksSection />
