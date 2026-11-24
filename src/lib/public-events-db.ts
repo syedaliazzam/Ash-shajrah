@@ -21,6 +21,8 @@ type PublicEventRow = {
   event_category: string | null;
   registration_form_schema?: unknown;
   schedule_days?: unknown;
+  event_type?: string | null;
+  location?: string | null;
 };
 
 type PublicEventRegistrationRow = {
@@ -246,6 +248,11 @@ function toPublicEvent(row: PublicEventRow): PublicEvent {
       : registrationDeadline.toISOString(),
     lifecycle,
     eventCategory,
+    eventType:
+      (row.event_type || "online").toLowerCase().trim() === "physical"
+        ? "physical"
+        : "online",
+    location: (row.location || "").trim(),
     registrationFormSchema: normalizeEventRegistrationFields(row.registration_form_schema),
     scheduleDays: (() => {
       const raw = row.schedule_days;
@@ -288,7 +295,9 @@ export const listPublicEventsFromDb = cache(async () => {
         image_stored_path,
         event_category,
         registration_form_schema,
-        schedule_days
+        schedule_days,
+        event_type,
+        location
       from public.public_events
       where publication_status = 'published'
       order by start_at asc
@@ -311,7 +320,9 @@ export const listPublicEventsFromDb = cache(async () => {
         image_bucket,
         image_object_path,
         image_stored_path,
-        event_category
+        event_category,
+        event_type,
+        location
       from public.public_events
       where publication_status = 'published'
       order by start_at asc
@@ -350,6 +361,7 @@ export async function createPublicEventRegistrationInDb(input: {
     publication_status: string;
     registration_form_schema?: unknown;
     schedule_days?: unknown;
+    event_type?: string | null;
   };
 
   let eventResult;
@@ -366,7 +378,8 @@ export async function createPublicEventRegistrationInDb(input: {
           event_fee_amount,
           publication_status,
           registration_form_schema,
-          schedule_days
+          schedule_days,
+          event_type
         from public.public_events
         where id = $1
         limit 1
@@ -389,7 +402,8 @@ export async function createPublicEventRegistrationInDb(input: {
           registration_deadline,
           event_fee_amount,
           publication_status,
-          schedule_days
+          schedule_days,
+          event_type
         from public.public_events
         where id = $1
         limit 1
@@ -406,6 +420,9 @@ export async function createPublicEventRegistrationInDb(input: {
   const deadlineAt = toDate(event.registration_deadline);
   if (event.publication_status !== "published") {
     throw new Error("This event is not available for registration.");
+  }
+  if ((event.event_type || "").toLowerCase().trim() === "physical") {
+    throw new Error("Online registration is not available for physical events.");
   }
   if (!Number.isNaN(eventEndAt.getTime()) && eventEndAt.getTime() < Date.now()) {
     throw new Error("Registration is closed for past events.");

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
@@ -302,7 +302,7 @@ export function PublicEventRegistrationModal({ event, open, onClose }: Props) {
     };
   }, [event.id, open]);
 
-  if (!open || !mounted) return null;
+  if (!open || !mounted || event.eventType === "physical" || liveEvent?.eventType === "physical") return null;
 
   function buildInitialDynamicValues() {
     return configuredFields.reduce<Record<string, string | string[]>>((nextValues, field) => {

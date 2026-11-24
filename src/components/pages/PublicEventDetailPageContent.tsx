@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { useState } from "react";
@@ -21,6 +21,7 @@ export function PublicEventDetailPageContent({ event }: { event: PublicEvent }) 
   const deadlinePassed = hasRegistrationDeadlinePassed(event.registrationDeadline);
   const isPast = event.lifecycle === "past";
   const joinDisabled = isPast || deadlinePassed;
+  const isPhysical = event.eventType === "physical";
 
   const uiText = {
     backToEvents: isUrdu ? "تمام ایونٹس" : "All Events",
@@ -34,6 +35,11 @@ export function PublicEventDetailPageContent({ event }: { event: PublicEvent }) 
     endDate: isUrdu ? "اختتام کی تاریخ" : "End Date",
     endTime: isUrdu ? "اختتام کا وقت" : "End Time",
     fee: isUrdu ? "فیس" : "Fee",
+    eventType: isUrdu ? "نوعیت" : "Event Type",
+    physicalEvent: isUrdu ? "فزیکل ایونٹ (حضوری)" : "Physical Event (In-Person)",
+    onlineEvent: isUrdu ? "آن لائن ایونٹ" : "Online Event",
+    location: isUrdu ? "مقام / پتہ" : "Venue / Location",
+    deadlineToBeAnnounced: isUrdu ? "جلد اعلان کیا جائے گا" : "To be announced",
     deadlineDate: isUrdu ? "رجسٹریشن کی آخری تاریخ" : "Registration Deadline Date",
     deadlineTime: isUrdu ? "رجسٹریشن کا آخری وقت" : "Registration Deadline Time",
     description: isUrdu ? "تفصیل" : "Description",
@@ -96,8 +102,16 @@ export function PublicEventDetailPageContent({ event }: { event: PublicEvent }) 
                   <div><span className="font-semibold">{uiText.startTime}:</span> <span dir="ltr" className="inline-block [unicode-bidi:isolate]">{formatEventTime(event.startAt)}</span></div>
                   <div><span className="font-semibold">{uiText.endTime}:</span> <span dir="ltr" className="inline-block [unicode-bidi:isolate]">{formatEventTime(event.endAt)}</span></div>
                   <div><span className="font-semibold">{uiText.fee}:</span> <span dir="ltr" className="inline-block [unicode-bidi:isolate]">{formatEventFee(event.fee)}</span></div>
-                  <div><span className="font-semibold">{uiText.deadlineDate}:</span> <span dir="ltr" className="inline-block [unicode-bidi:isolate]">{formatEventDate(event.registrationDeadline)}</span></div>
-                  <div><span className="font-semibold">{uiText.deadlineTime}:</span> <span dir="ltr" className="inline-block [unicode-bidi:isolate]">{formatEventTime(event.registrationDeadline)}</span></div>
+                  <div><span className="font-semibold">{uiText.eventType}:</span> <span>{isPhysical ? uiText.physicalEvent : uiText.onlineEvent}</span></div>
+                  {event.location ? (
+                    <div className="sm:col-span-2"><span className="font-semibold">{uiText.location}:</span> <span>{event.location}</span></div>
+                  ) : null}
+                  {!isPhysical ? (
+                    <>
+                      <div><span className="font-semibold">{uiText.deadlineDate}:</span> <span dir="ltr" className="inline-block [unicode-bidi:isolate]">{formatEventDate(event.registrationDeadline)}</span></div>
+                      <div><span className="font-semibold">{uiText.deadlineTime}:</span> <span dir="ltr" className="inline-block [unicode-bidi:isolate]">{formatEventTime(event.registrationDeadline)}</span></div>
+                    </>
+                  ) : null}
                 </div>
 
                 <div className="mt-6 min-w-0 rounded-[28px] border border-emerald/10 bg-white/80 p-5">
@@ -109,7 +123,7 @@ export function PublicEventDetailPageContent({ event }: { event: PublicEvent }) 
                   </div>
                 </div>
 
-                {!isPast ? (
+                {!isPast && !isPhysical ? (
                   <div className="mt-8">
                     <button
                       type="button"
@@ -127,11 +141,13 @@ export function PublicEventDetailPageContent({ event }: { event: PublicEvent }) 
         </section>
       </main>
 
-      <PublicEventRegistrationModal
-        event={event}
-        open={modalOpen}
-        onClose={() => setModalOpen(false)}
-      />
+      {!isPhysical ? (
+        <PublicEventRegistrationModal
+          event={event}
+          open={modalOpen}
+          onClose={() => setModalOpen(false)}
+        />
+      ) : null}
     </>
   );
 }

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { useState } from "react";
@@ -44,6 +44,7 @@ export function PublicEventCard({
   const { language } = useLanguage();
   const isUrdu = language === "ur";
   const [imageFailed, setImageFailed] = useState(false);
+  const isPhysical = event.eventType === "physical";
   const resolvedLabel = event.ctaLabel || ctaLabel;
   const resolvedHref = event.ctaHref || ctaHref;
   const isExternal = event.ctaExternal === true;
@@ -54,6 +55,7 @@ export function PublicEventCard({
     startTime: isUrdu ? "آغاز کا وقت" : "Start Time",
     endTime: isUrdu ? "اختتامی وقت" : "End Time",
     fee: isUrdu ? "فیس" : "Fee",
+    location: isUrdu ? "مقام" : "Location",
     registrationDeadlineDate: isUrdu ? "رجسٹریشن کی آخری تاریخ" : "Registration Deadline Date",
     registrationDeadlineTime: isUrdu ? "رجسٹریشن کا آخری وقت" : "Registration Deadline Time",
   };
@@ -84,13 +86,20 @@ export function PublicEventCard({
       </div>
 
       <div className="flex flex-1 select-none flex-col p-5 sm:p-6">
-        <span
-          className={`inline-flex w-fit rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-wider ${getLifecycleClasses(
-            event.lifecycle
-          )}`}
-        >
-          {getLifecycleLabel(event.lifecycle, isUrdu)}
-        </span>
+        <div className="flex flex-wrap items-center gap-2">
+          <span
+            className={`inline-flex w-fit rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-wider ${getLifecycleClasses(
+              event.lifecycle
+            )}`}
+          >
+            {getLifecycleLabel(event.lifecycle, isUrdu)}
+          </span>
+          {isPhysical ? (
+            <span className="inline-flex w-fit rounded-full border border-emerald-deep/20 bg-emerald-deep/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-emerald-deep">
+              {isUrdu ? "فزیکل ایونٹ" : "Physical Event"}
+            </span>
+          ) : null}
+        </div>
         <h3 className="mt-3 line-clamp-2 font-display text-lg leading-snug text-emerald-deep sm:text-xl">
           {event.title || "Untitled Event"}
         </h3>
@@ -124,18 +133,28 @@ export function PublicEventCard({
                 {formatEventFee(event.fee, "Contact for details")}
               </span>
             </div>
-            <div className="leading-relaxed">
-              <span className="font-semibold text-emerald-deep">{eventMetaText.registrationDeadlineDate}:</span>{" "}
-              <span dir="ltr" className="inline-block text-left [unicode-bidi:isolate]">
-                {formatEventDate(event.registrationDeadline)}
-              </span>
-            </div>
-            <div className="leading-relaxed">
-              <span className="font-semibold text-emerald-deep">{eventMetaText.registrationDeadlineTime}:</span>{" "}
-              <span dir="ltr" className="inline-block text-left [unicode-bidi:isolate]">
-                {formatEventTime(event.registrationDeadline)}
-              </span>
-            </div>
+            {event.location ? (
+              <div className="leading-relaxed">
+                <span className="font-semibold text-emerald-deep">{eventMetaText.location}:</span>{" "}
+                <span>{event.location}</span>
+              </div>
+            ) : null}
+            {!isPhysical ? (
+              <>
+                <div className="leading-relaxed">
+                  <span className="font-semibold text-emerald-deep">{eventMetaText.registrationDeadlineDate}:</span>{" "}
+                  <span dir="ltr" className="inline-block text-left [unicode-bidi:isolate]">
+                    {formatEventDate(event.registrationDeadline)}
+                  </span>
+                </div>
+                <div className="leading-relaxed">
+                  <span className="font-semibold text-emerald-deep">{eventMetaText.registrationDeadlineTime}:</span>{" "}
+                  <span dir="ltr" className="inline-block text-left [unicode-bidi:isolate]">
+                    {formatEventTime(event.registrationDeadline)}
+                  </span>
+                </div>
+              </>
+            ) : null}
           </div>
         ) : null}
 

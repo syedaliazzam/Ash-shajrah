@@ -1,4 +1,4 @@
-﻿export type RawPublicEvent = Record<string, unknown>;
+export type RawPublicEvent = Record<string, unknown>;
 
 export type EventRegistrationFieldType =
   | "text"
@@ -36,6 +36,8 @@ export type PublicEvent = {
   registrationDeadline: string;
   lifecycle: "current" | "upcoming" | "past";
   eventCategory?: "alh-students" | "alh-parents" | "general-students" | "general-parents";
+  eventType?: "online" | "physical" | string;
+  location?: string;
   registrationFormSchema?: EventRegistrationField[];
   ctaHref?: string;
   ctaLabel?: string;
@@ -455,6 +457,11 @@ export function normalizePublicEvent(
     ),
     lifecycle,
     eventCategory,
+    eventType:
+      pickString(getValue(item, ["eventType", "event_type", "type"])).toLowerCase().trim() === "physical"
+        ? "physical"
+        : "online",
+    location: pickString(getValue(item, ["location", "venue", "event_location", "place"])),
     registrationFormSchema: normalizeEventRegistrationFields(
       getValue(item, ["registrationFormSchema", "registration_form_schema"])
     ),

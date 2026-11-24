@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
@@ -80,6 +80,7 @@ function EventSlider({
   const { language } = useLanguage();
   const isUrdu = language === "ur";
   const isSingleCurrentUpcoming = title.toLowerCase().includes("current") || title.toLowerCase().includes("موجودہ");
+  const isPhysical = events[0]?.eventType === "physical";
   const eventMetaText = {
     current: isUrdu ? "موجودہ" : "Current",
     upcoming: isUrdu ? "آنے والا" : "Upcoming",
@@ -87,6 +88,7 @@ function EventSlider({
     startTime: isUrdu ? "آغاز کا وقت" : "Start Time",
     endTime: isUrdu ? "اختتامی وقت" : "End Time",
     fee: isUrdu ? "فیس" : "Fee",
+    location: isUrdu ? "مقام" : "Location",
     registrationDeadlineDate: isUrdu ? "رجسٹریشن کی آخری تاریخ" : "Registration Deadline Date",
     registrationDeadlineTime: isUrdu ? "رجسٹریشن کا آخری وقت" : "Registration Deadline Time",
     description: isUrdu ? "تفصیل" : "Description",
@@ -140,8 +142,15 @@ function EventSlider({
               <div><span className="font-semibold">{eventMetaText.startTime}:</span> <span dir="ltr" className="inline-block [unicode-bidi:isolate]">{formatEventTime(events[0].startAt)}</span></div>
               <div><span className="font-semibold">{eventMetaText.endTime}:</span> <span dir="ltr" className="inline-block [unicode-bidi:isolate]">{formatEventTime(events[0].endAt)}</span></div>
               <div><span className="font-semibold">{eventMetaText.fee}:</span> <span dir="ltr" className="inline-block [unicode-bidi:isolate]">{formatEventFee(events[0].fee, "Contact for details")}</span></div>
-              <div><span className="font-semibold">{eventMetaText.registrationDeadlineDate}:</span> <span dir="ltr" className="inline-block [unicode-bidi:isolate]">{formatEventDate(events[0].registrationDeadline)}</span></div>
-              <div><span className="font-semibold">{eventMetaText.registrationDeadlineTime}:</span> <span dir="ltr" className="inline-block [unicode-bidi:isolate]">{formatEventTime(events[0].registrationDeadline)}</span></div>
+              {events[0].location ? (
+                <div className="sm:col-span-2"><span className="font-semibold">{eventMetaText.location}:</span> <span>{events[0].location}</span></div>
+              ) : null}
+              {!isPhysical ? (
+                <>
+                  <div><span className="font-semibold">{eventMetaText.registrationDeadlineDate}:</span> <span dir="ltr" className="inline-block [unicode-bidi:isolate]">{formatEventDate(events[0].registrationDeadline)}</span></div>
+                  <div><span className="font-semibold">{eventMetaText.registrationDeadlineTime}:</span> <span dir="ltr" className="inline-block [unicode-bidi:isolate]">{formatEventTime(events[0].registrationDeadline)}</span></div>
+                </>
+              ) : null}
             </div>
 
             <div className="mt-6 min-w-0 rounded-[28px] border border-emerald/10 bg-white/80 p-5">
@@ -154,7 +163,7 @@ function EventSlider({
             </div>
 
             <div className="mt-8">
-              {onSingleEventAction ? (
+              {onSingleEventAction && !isPhysical ? (
                 <button
                   type="button"
                   onClick={() => onSingleEventAction(events[0])}
@@ -167,7 +176,7 @@ function EventSlider({
                   href={`/events/${events[0].slug}`}
                   className="inline-flex min-h-12 items-center justify-center rounded-full bg-emerald-deep px-6 py-3 text-sm font-semibold text-cream transition hover:bg-gold hover:text-emerald-deep"
                 >
-                  {singleEventActionLabel}
+                  {viewDetailsLabel}
                 </Link>
               )}
             </div>
