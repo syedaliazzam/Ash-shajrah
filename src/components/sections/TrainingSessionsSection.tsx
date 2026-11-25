@@ -26,6 +26,25 @@ function PlayIcon({ className = "h-5 w-5" }: { className?: string }) {
   );
 }
 
+function ExpandIcon({ className = "h-5 w-5" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className={className}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.2"
+      aria-hidden
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15"
+      />
+    </svg>
+  );
+}
+
 function ChevronLeft({ className = "h-5 w-5" }: { className?: string }) {
   return (
     <svg
@@ -66,17 +85,17 @@ function ChevronRight({ className = "h-5 w-5" }: { className?: string }) {
 
 function getCopy(isUrdu: boolean) {
   return {
-    badge: isUrdu ? "ویڈیو سیشنز" : "Video Sessions",
+    badge: isUrdu ? "ٹریننگ سیشنز" : "Training Sessions",
     title: isUrdu ? "ٹریننگ سیشنز" : "Training Sessions",
     subtitle: isUrdu
-      ? "اساتذہ کی تربیت، بچوں کی رہنمائی اور تعلیمی تدریس کے معلوماتی ویڈیو سیشنز ملاحظہ فرمائیں۔"
+      ? "اساتذہ کی تربیت، بچوں کی رہنمائی اور تعلیمی تدریس کے معلوماتی سیشنز ملاحظہ فرمائیں۔"
       : "Watch our exclusive training sessions, teacher guidance workshops, and developmental learning demonstrations.",
-    videoBadge: isUrdu ? "ٹریننگ ویڈیو" : "Training Video",
-    watchVideo: isUrdu ? "ویڈیو دیکھیں" : "Watch Session",
+    videoBadge: isUrdu ? "ٹریننگ سیشن" : "Training Session",
+    watchVideo: isUrdu ? "دیکھیں" : "View Session",
     closeModal: isUrdu ? "بند کریں" : "Close",
     previous: isUrdu ? "پچھلا" : "Previous",
     next: isUrdu ? "اگلا" : "Next",
-    counter: isUrdu ? "ویڈیو" : "Video",
+    counter: isUrdu ? "آئٹم" : "Item",
     of: isUrdu ? "از" : "of",
   };
 }
@@ -342,24 +361,46 @@ export function TrainingSessionsSection({ initialVideos = [] }: Props) {
                     className="group relative flex aspect-[4/3] w-full cursor-pointer select-none flex-col items-center justify-center overflow-hidden rounded-2xl sm:rounded-3xl border border-emerald/15 bg-[#fff8ea] p-2.5 sm:p-3.5 shadow-md shadow-emerald-deep/5 transition-all duration-300 hover:-translate-y-1 hover:border-emerald/30 hover:shadow-xl focus:outline-none focus-visible:outline-none active:scale-[0.99]"
                   >
                     <div className="relative h-full w-full overflow-hidden rounded-xl bg-gradient-to-br from-emerald-950/20 via-black/20 to-emerald-950/30 flex items-center justify-center">
-                      {shouldLoad ? (
-                        <video
-                          src={`${item.url}#t=0.1`}
-                          preload="metadata"
-                          muted
-                          playsInline
-                          className="h-full w-full object-cover rounded-xl transition-transform duration-500 group-hover:scale-[1.03]"
-                        />
+                      {item.mediaType === "image" ? (
+                        shouldLoad ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={item.url}
+                            alt=""
+                            loading="lazy"
+                            className="h-full w-full object-cover rounded-xl transition-transform duration-500 group-hover:scale-[1.03]"
+                          />
+                        ) : (
+                          <div className="h-full w-full bg-emerald-950/10" />
+                        )
                       ) : (
-                        <div className="h-full w-full bg-emerald-950/10" />
+                        shouldLoad ? (
+                          <video
+                            src={`${item.url}#t=0.1`}
+                            preload="metadata"
+                            muted
+                            playsInline
+                            className="h-full w-full object-cover rounded-xl transition-transform duration-500 group-hover:scale-[1.03]"
+                          />
+                        ) : (
+                          <div className="h-full w-full bg-emerald-950/10" />
+                        )
                       )}
 
-                      {/* Centered Golden Pulsing Play Button */}
-                      <div className="absolute inset-0 flex items-center justify-center bg-black/25 transition-all duration-300 group-hover:bg-black/35">
-                        <div className="flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full bg-gold text-white shadow-xl shadow-gold/40 transition-transform duration-300 group-hover:scale-110">
-                          <PlayIcon className="h-6 w-6 ml-0.5 fill-white text-white" />
+                      {/* Centered Action Button */}
+                      {item.mediaType === "image" ? (
+                        <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/15 opacity-0 transition-all duration-300 group-hover:opacity-100 group-hover:bg-black/30">
+                          <div className="flex h-11 w-11 sm:h-12 sm:w-12 items-center justify-center rounded-full bg-white/95 text-emerald-deep shadow-xl backdrop-blur-xs transition-transform duration-300 group-hover:scale-110">
+                            <ExpandIcon className="h-5 w-5" />
+                          </div>
                         </div>
-                      </div>
+                      ) : (
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/25 transition-all duration-300 group-hover:bg-black/35">
+                          <div className="flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full bg-gold text-white shadow-xl shadow-gold/40 transition-transform duration-300 group-hover:scale-110">
+                            <PlayIcon className="h-6 w-6 ml-0.5 fill-white text-white" />
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -489,33 +530,45 @@ export function TrainingSessionsSection({ initialVideos = [] }: Props) {
               </button>
             </div>
 
-            {/* Modal Video Player with Stream Buffering Indicator */}
-            <div className="relative flex flex-1 items-center justify-center overflow-hidden bg-gradient-to-b from-[#fff8ea] to-[#f4ede0] p-3 sm:p-5">
-              <video
-                key={activeVideo.id}
-                src={activeVideo.url}
-                controls
-                autoPlay
-                playsInline
-                preload="auto"
-                onLoadStart={() => setIsVideoLoading(true)}
-                onLoadedData={() => setIsVideoLoading(false)}
-                onCanPlay={() => setIsVideoLoading(false)}
-                onWaiting={() => setIsVideoLoading(true)}
-                onPlaying={() => setIsVideoLoading(false)}
-                className="max-h-[78vh] w-auto max-w-full rounded-xl border border-emerald/15 shadow-xl bg-black"
-              />
+            {/* Modal Media Player / Image Lightbox */}
+            {activeVideo.mediaType === "image" ? (
+              <div className="relative flex flex-1 items-center justify-center overflow-hidden bg-gradient-to-b from-[#fff8ea] to-[#f4ede0] p-3 sm:p-5">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  key={activeVideo.id}
+                  src={activeVideo.url}
+                  alt=""
+                  className="max-h-[78vh] w-auto max-w-full rounded-xl border border-emerald/15 shadow-xl object-contain bg-white"
+                />
+              </div>
+            ) : (
+              <div className="relative flex flex-1 items-center justify-center overflow-hidden bg-gradient-to-b from-[#fff8ea] to-[#f4ede0] p-3 sm:p-5">
+                <video
+                  key={activeVideo.id}
+                  src={activeVideo.url}
+                  controls
+                  autoPlay
+                  playsInline
+                  preload="auto"
+                  onLoadStart={() => setIsVideoLoading(true)}
+                  onLoadedData={() => setIsVideoLoading(false)}
+                  onCanPlay={() => setIsVideoLoading(false)}
+                  onWaiting={() => setIsVideoLoading(true)}
+                  onPlaying={() => setIsVideoLoading(false)}
+                  className="max-h-[78vh] w-auto max-w-full rounded-xl border border-emerald/15 shadow-xl bg-black"
+                />
 
-              {/* Buffer / Loading Spinner for large video files */}
-              {isVideoLoading && (
-                <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-3 bg-emerald-deep/20 backdrop-blur-xs">
-                  <div className="h-10 w-10 rounded-full border-3 border-gold/30 border-t-gold animate-spin" />
-                  <span className="rounded-full bg-emerald-deep/85 px-3 py-1 text-xs font-medium text-cream shadow-md">
-                    {isUrdu ? "ویڈیو لوڈ ہو رہی ہے..." : "Loading video..."}
-                  </span>
-                </div>
-              )}
-            </div>
+                {/* Buffer / Loading Spinner for large video files */}
+                {isVideoLoading && (
+                  <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-3 bg-emerald-deep/20 backdrop-blur-xs">
+                    <div className="h-10 w-10 rounded-full border-3 border-gold/30 border-t-gold animate-spin" />
+                    <span className="rounded-full bg-emerald-deep/85 px-3 py-1 text-xs font-medium text-cream shadow-md">
+                      {isUrdu ? "ویڈیو لوڈ ہو رہی ہے..." : "Loading video..."}
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       )}

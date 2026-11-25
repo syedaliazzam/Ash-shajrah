@@ -10,6 +10,7 @@ export type TrainingSessionVideo = {
   rawUrl: string;
   url: string;
   originalName: string | null;
+  mediaType: "video" | "image";
 };
 
 function deriveSupabaseUrl(): string {
@@ -62,6 +63,18 @@ export function cleanVideoTitle(originalName: string | null, rawPath: string, do
   return docTitle || "Training Session";
 }
 
+export function isImageFile(
+  fileType: string | null,
+  fileUrl: string,
+  originalName: string | null
+): boolean {
+  const normType = (fileType || "").toLowerCase().trim();
+  if (["image", "img", "photo", "picture"].includes(normType)) return true;
+
+  const path = (originalName || fileUrl || "").toLowerCase().trim();
+  return /\.(jpe?g|png|webp|gif|svg|avif|bmp|tiff?)($|\?)/i.test(path);
+}
+
 export async function listTrainingSessionVideosFromDb(): Promise<TrainingSessionVideo[]> {
   const client = getPgPool();
 
@@ -85,12 +98,23 @@ export async function listTrainingSessionVideosFromDb(): Promise<TrainingSession
         OR lower(trim(d.title)) LIKE '%traning%'
       )
       AND (
-        f.file_type = 'video'
+        f.file_type IN ('video', 'image')
         OR lower(f.file_url) LIKE '%.mp4'
         OR lower(f.file_url) LIKE '%.webm'
         OR lower(f.file_url) LIKE '%.mov'
         OR lower(f.file_url) LIKE '%.m4v'
+        OR lower(f.file_url) LIKE '%.jpg'
+        OR lower(f.file_url) LIKE '%.jpeg'
+        OR lower(f.file_url) LIKE '%.png'
+        OR lower(f.file_url) LIKE '%.webp'
+        OR lower(f.file_url) LIKE '%.gif'
         OR lower(coalesce(f.original_name, '')) LIKE '%.mp4'
+        OR lower(coalesce(f.original_name, '')) LIKE '%.webm'
+        OR lower(coalesce(f.original_name, '')) LIKE '%.mov'
+        OR lower(coalesce(f.original_name, '')) LIKE '%.jpg'
+        OR lower(coalesce(f.original_name, '')) LIKE '%.jpeg'
+        OR lower(coalesce(f.original_name, '')) LIKE '%.png'
+        OR lower(coalesce(f.original_name, '')) LIKE '%.webp'
       )
     ORDER BY d.doc_date DESC, f.created_at DESC
   `;
@@ -115,6 +139,9 @@ export async function listTrainingSessionVideosFromDb(): Promise<TrainingSession
       const docTitle = row.document_title?.trim() || "Training Sessions";
       const resolvedUrl = resolveStorageUrl(rawUrl);
       const title = cleanVideoTitle(row.original_name, rawUrl, docTitle);
+      const mediaType: "video" | "image" = isImageFile(row.file_type, rawUrl, row.original_name)
+        ? "image"
+        : "video";
 
       const d = row.doc_date ? new Date(row.doc_date) : new Date();
       const docDateStr = !isNaN(d.getTime()) ? d.toISOString().split("T")[0] : "";
@@ -129,6 +156,7 @@ export async function listTrainingSessionVideosFromDb(): Promise<TrainingSession
         rawUrl,
         url: resolvedUrl,
         originalName: row.original_name?.trim() || null,
+        mediaType,
       };
     })
     .filter((v): v is TrainingSessionVideo => Boolean(v));
