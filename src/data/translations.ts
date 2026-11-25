@@ -124,6 +124,24 @@ export const translations = {
         body: "The August 2026 learning plan provides a structured overview of educational goals, key learning milestones, study activities, and progress tracking. It is designed to support consistent learning, skill development, knowledge building, and measurable academic progress throughout the month.",
         image: "/images/ourprograms/august-13.jpeg",
         buttonLabel: "View Monthly Plan",
+      },
+      monthlyPlan2: {
+        title: "Monthly Plan for September 2026",
+        body: "The September 2026 learning plan provides a structured overview of educational goals, key learning milestones, study activities, and progress tracking. It is designed to support consistent learning, skill development, knowledge building, and measurable academic progress throughout the month.",
+        image: "/images/ourprograms/september.jpeg",
+        buttonLabel: "View Monthly Plan",
+      },
+      monthlyPlan3: {
+        title: "Monthly Plan for October 2026",
+        body: "The October 2026 learning plan provides a structured overview of educational goals, key learning milestones, study activities, and progress tracking. It is designed to support consistent learning, skill development, knowledge building, and measurable academic progress throughout the month.",
+        image: "/images/ourprograms/october.jpeg",
+        buttonLabel: "View Monthly Plan",
+      },
+      monthlyPlan4: {
+        title: "Monthly Plan for November 2026",
+        body: "The November 2026 learning plan provides a structured overview of educational goals, key learning milestones, study activities, and progress tracking. It is designed to support consistent learning, skill development, knowledge building, and measurable academic progress throughout the month.",
+        image: "/images/ourprograms/november.jpeg",
+        buttonLabel: "View Monthly Plan",
       }
     },
     curriculumTable: {
@@ -604,6 +622,24 @@ export const translations = {
         title: "اگست 2026 کا ماہانہ منصوبہ",
         body: "اگست 2026 کا تعلیمی ماہانہ منصوبہ تعلیمی اہداف، اہم تعلیمی سنگ میل، مطالعہ کی سرگرمیاں اور پیش رفت کے جائزے کا منظم خلاصہ فراہم کرتا ہے۔ یہ منصوبہ مسلسل سیکھنے، مہارتوں کی نشوونما، علم کی ترقی اور ماہ کے دوران قابلِ پیمائش تعلیمی پیش رفت کو مضبوط بنانے کے لیے ڈیزائن کیا گیا ہے۔",
         image: "/images/ourprograms/august-13.jpeg",
+        buttonLabel: "ماہانہ منصوبہ دیکھیں",
+      },
+      monthlyPlan2: {
+        title: "ستمبر 2026 کا ماہانہ منصوبہ",
+        body: "ستمبر 2026 کا تعلیمی ماہانہ منصوبہ تعلیمی اہداف، اہم تعلیمی سنگ میل، مطالعہ کی سرگرمیاں اور پیش رفت کے جائزے کا منظم خلاصہ فراہم کرتا ہے۔ یہ منصوبہ مسلسل سیکھنے، مہارتوں کی نشوونما، علم کی ترقی اور ماہ کے دوران قابلِ پیمائش تعلیمی پیش رفت کو مضبوط بنانے کے لیے ڈیزائن کیا گیا ہے۔",
+        image: "/images/ourprograms/september.jpeg",
+        buttonLabel: "ماہانہ منصوبہ دیکھیں",
+      },
+      monthlyPlan3: {
+        title: "اکتوبر 2026 کا ماہانہ منصوبہ",
+        body: "اکتوبر 2026 کا تعلیمی ماہانہ منصوبہ تعلیمی اہداف، اہم تعلیمی سنگ میل، مطالعہ کی سرگرمیاں اور پیش رفت کے جائزے کا منظم خلاصہ فراہم کرتا ہے۔ یہ منصوبہ مسلسل سیکھنے، مہارتوں کی نشوونما، علم کی ترقی اور ماہ کے دوران قابلِ پیمائش تعلیمی پیش رفت کو مضبوط بنانے کے لیے ڈیزائن کیا گیا ہے۔",
+        image: "/images/ourprograms/october.jpeg",
+        buttonLabel: "ماہانہ منصوبہ دیکھیں",
+      },
+      monthlyPlan4: {
+        title: "نومبر 2026 کا ماہانہ منصوبہ",
+        body: "نومبر 2026 کا تعلیمی ماہانہ منصوبہ تعلیمی اہداف، اہم تعلیمی سنگ میل، مطالعہ کی سرگرمیاں اور پیش رفت کے جائزے کا منظم خلاصہ فراہم کرتا ہے۔ یہ منصوبہ مسلسل سیکھنے، مہارتوں کی نشوونما، علم کی ترقی اور ماہ کے دوران قابلِ پیمائش تعلیمی پیش رفت کو مضبوط بنانے کے لیے ڈیزائن کیا گیا ہے۔",
+        image: "/images/ourprograms/november.jpeg",
         buttonLabel: "ماہانہ منصوبہ دیکھیں",
       }
     },

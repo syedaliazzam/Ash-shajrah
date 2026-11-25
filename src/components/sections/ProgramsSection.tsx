@@ -57,6 +57,9 @@ export function ProgramsSection() {
     { ...t.programs.prepII, image: undefined as string | undefined, buttonLabel: undefined as string | undefined },
     { ...t.programs.parentPartnership, image: undefined as string | undefined, buttonLabel: undefined as string | undefined },
     { ...t.programs.monthlyPlan },
+    ...(t.programs.monthlyPlan2 ? [{ ...t.programs.monthlyPlan2 }] : []),
+    ...(t.programs.monthlyPlan3 ? [{ ...t.programs.monthlyPlan3 }] : []),
+    ...(t.programs.monthlyPlan4 ? [{ ...t.programs.monthlyPlan4 }] : []),
   ];
 
   return (
