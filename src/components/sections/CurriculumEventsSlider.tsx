@@ -3,13 +3,22 @@
 import {
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
   type CSSProperties,
   type PointerEvent as ReactPointerEvent,
   type TouchEvent as ReactTouchEvent,
 } from "react";
-import { formatEventTime, formatPublicEventDates } from "@/lib/public-events";
+import Link from "next/link";
+import { FacebookIcon } from "@/components/ui/FacebookIcon";
+import { EVENT_ITEMS } from "@/data/events";
+import {
+  formatEventTime,
+  formatPublicEventDates,
+  normalizePublicEventsResponse,
+  type PublicEvent,
+} from "@/lib/public-events";
 import type { CurriculumEvent } from "@/lib/curriculum-events";
 
 type Breakpoint = "mobile" | "tablet" | "desktop";
@@ -183,10 +192,10 @@ function normalizeCurriculumEvents(payload: unknown): CurriculumEvent[] {
 
 function getCurriculumEventText(isUrdu: boolean) {
   return {
-    badge: isUrdu ? "نصاب کے ایونٹس" : "Curriculum Events",
+    badge: isUrdu ? "نصاب کے ایونٹس اور سرگرمیاں" : "Curriculum & Learning Events",
     title: isUrdu
-      ? "نصاب سے متعلق سیشنز اور سرگرمیاں"
-      : "Curriculum events, sessions, and learning activities",
+      ? "نصاب سے متعلق سیشنز، ورکشاپس اور ہماری سرگرمیاں"
+      : "Curriculum events, workshops, and learning sessions",
     upcoming: isUrdu ? "آنے والا" : "Upcoming",
     live: isUrdu ? "جاری" : "Live",
     ended: isUrdu ? "ختم ہو چکا" : "Ended",
@@ -199,11 +208,28 @@ function getCurriculumEventText(isUrdu: boolean) {
     fallbackDetails: isUrdu ? "تفصیل جلد شیئر کی جائے گی۔" : "Details will be shared soon.",
     close: isUrdu ? "بند کریں" : "Close",
     closeDetails: isUrdu ? "تفصیل بند کریں" : "Close details",
-    previous: isUrdu ? "پچھلا نصابی ایونٹ" : "Previous curriculum event",
-    next: isUrdu ? "اگلا نصابی ایونٹ" : "Next curriculum event",
-    goTo: (index: number) => (isUrdu ? `نصابی ایونٹ ${index + 1}` : `Go to curriculum event ${index + 1}`),
+    previous: isUrdu ? "پچھلا ایونٹ" : "Previous event",
+    next: isUrdu ? "اگلا ایونٹ" : "Next event",
+    goTo: (index: number) => (isUrdu ? `ایونٹ ${index + 1}` : `Go to event ${index + 1}`),
   };
 }
+
+type SliderEventItem = {
+  id: string;
+  title: string;
+  description: string;
+  imageUrl: string;
+  dateBadge?: string;
+  categoryLabel?: string;
+  date?: string;
+  startTime?: string;
+  buttonHref?: string;
+  buttonLabel?: string;
+  buttonExternal?: boolean;
+  showFacebookIcon?: boolean;
+  fit?: "cover" | "contain";
+  rawCurriculumEvent?: CurriculumEvent;
+};
 
 function getEventLifecycleLabel(event: CurriculumEvent, text: ReturnType<typeof getCurriculumEventText>) {
   if (event.status === "cancelled") return text.cancelled;
@@ -342,18 +368,20 @@ function CurriculumEventDetailsModal({
 export function CurriculumEventsSlider({
   language,
   initialEvents = [],
+  initialPastEvents = [],
 }: {
   language: "en" | "ur";
   initialEvents?: CurriculumEvent[];
+  initialPastEvents?: PublicEvent[];
 }) {
   const isUrdu = language === "ur";
   const text = getCurriculumEventText(isUrdu);
-  const [events, setEvents] = useState<CurriculumEvent[]>(() => initialEvents || []);
+  const [curriculumEvents, setCurriculumEvents] = useState<CurriculumEvent[]>(() => initialEvents || []);
+  const [publicPastEvents, setPublicPastEvents] = useState<PublicEvent[]>(() => initialPastEvents || []);
   const [activeIndex, setActiveIndex] = useState(0);
   const [selectedEvent, setSelectedEvent] = useState<CurriculumEvent | null>(null);
   const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
   const breakpoint = useBreakpoint();
-  const total = events.length;
   const dragStartXRef = useRef<number | null>(null);
   const dragMovedRef = useRef(false);
   const maxVisibleDots = 7;
@@ -371,9 +399,9 @@ export function CurriculumEventsSlider({
         if (!response.ok) return;
 
         const payload = await response.json().catch(() => ({}));
-        if (!cancelled) setEvents(normalizeCurriculumEvents(payload));
+        if (!cancelled) setCurriculumEvents(normalizeCurriculumEvents(payload));
       } catch {
-        if (!cancelled) setEvents([]);
+        if (!cancelled) setCurriculumEvents([]);
       }
     };
 
@@ -383,6 +411,108 @@ export function CurriculumEventsSlider({
       cancelled = true;
     };
   }, [initialEvents]);
+
+  useEffect(() => {
+    if (initialPastEvents && initialPastEvents.length > 0) return;
+
+    let cancelled = false;
+
+    const loadPastPublicEvents = async () => {
+      try {
+        const response = await fetch("/api/public-events", {
+          method: "GET",
+        });
+        if (!response.ok) return;
+
+        const payload = await response.json().catch(() => ({}));
+        const normalized = normalizePublicEventsResponse(payload);
+        if (!cancelled) setPublicPastEvents(normalized.past);
+      } catch {
+        if (!cancelled) setPublicPastEvents([]);
+      }
+    };
+
+    void loadPastPublicEvents();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [initialPastEvents]);
+
+  const events = useMemo<SliderEventItem[]>(() => {
+    const list: SliderEventItem[] = [];
+    const seenIds = new Set<string>();
+
+    // 1. Add curriculum events
+    curriculumEvents.forEach((ev) => {
+      if (!seenIds.has(ev.id)) {
+        seenIds.add(ev.id);
+        list.push({
+          id: ev.id,
+          title: ev.title,
+          description: ev.description,
+          imageUrl: ev.imageUrl,
+          dateBadge: formatPublicEventDates(ev),
+          categoryLabel: getEventLifecycleLabel(ev, text),
+          date: formatPublicEventDates(ev),
+          startTime: formatEventTime(ev.startAt),
+          rawCurriculumEvent: ev,
+          buttonLabel: text.details,
+          fit: "contain",
+        });
+      }
+    });
+
+    // 2. Add public events from database (past events)
+    publicPastEvents.forEach((ev) => {
+      const id = `public-event-${ev.id}`;
+      if (!seenIds.has(id)) {
+        seenIds.add(id);
+        list.push({
+          id,
+          title: ev.title || "Public Event",
+          description: ev.description || "Public event details are available on the events page.",
+          imageUrl: ev.imageUrl || "/images/events/facebook-event-fallback.jpg",
+          dateBadge: formatPublicEventDates(ev),
+          categoryLabel: isUrdu ? "عوامی ایونٹ" : "Public Event",
+          date: formatPublicEventDates(ev),
+          startTime: formatEventTime(ev.startAt),
+          buttonHref: `/events/${ev.slug}`,
+          buttonLabel: isUrdu ? "ویو ڈیٹیلز" : "View Details",
+          buttonExternal: false,
+          showFacebookIcon: false,
+          fit: "cover",
+        });
+      }
+    });
+
+    // 3. Add curated static events from EVENT_ITEMS (Our Events)
+    EVENT_ITEMS.forEach((item) => {
+      if (!seenIds.has(item.id)) {
+        seenIds.add(item.id);
+        const itemDate = item.date || "";
+        list.push({
+          id: item.id,
+          title: item.title[language] || item.title.en,
+          description: item.description[language] || item.description.en,
+          imageUrl: item.thumbnail || "/images/events/facebook-event-fallback.jpg",
+          dateBadge: itemDate,
+          categoryLabel: item.category[language] || item.category.en,
+          date: itemDate,
+          buttonHref: item.buttonHref || item.facebookUrl,
+          buttonLabel:
+            item.buttonLabel?.[language] || (isUrdu ? "فیس بک پر دیکھیں" : "View on Facebook"),
+          buttonExternal: item.buttonExternal !== false && !item.buttonHref,
+          showFacebookIcon: item.showFacebookIcon !== false,
+          fit: item.fit || "cover",
+        });
+      }
+    });
+
+    return list;
+  }, [curriculumEvents, publicPastEvents, language, isUrdu, text]);
+
+  const total = events.length;
 
   const goNext = useCallback(() => {
     setActiveIndex((current) => (current + 1) % total);
@@ -448,7 +578,7 @@ export function CurriculumEventsSlider({
   };
 
   return (
-    <div className={`mt-14 ${isUrdu ? "font-urdu text-right" : "text-left"}`}>
+    <div id="events" className={`mt-14 scroll-mt-24 ${isUrdu ? "font-urdu text-right" : "text-left"}`}>
       <div className="mx-auto max-w-3xl text-center">
         <span className="inline-flex rounded-full border border-gold/25 bg-gold/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.22em] text-emerald-deep">
           {text.badge}
@@ -501,7 +631,7 @@ export function CurriculumEventsSlider({
                       <img
                         src={event.imageUrl}
                         alt={event.title}
-                        className="h-full w-full object-contain p-3 transition-transform duration-500 group-hover:scale-[1.03]"
+                        className={`h-full w-full ${event.fit === "contain" ? "object-contain p-3" : "object-cover object-top"} transition-transform duration-500 group-hover:scale-[1.03]`}
                         draggable={false}
                         onError={() => setImageErrors((current) => ({ ...current, [event.id]: true }))}
                       />
@@ -509,40 +639,79 @@ export function CurriculumEventsSlider({
                       <CurriculumEventFallback />
                     )}
                     <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-emerald-deep/10 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-                    <span className="absolute left-4 top-4 max-w-[calc(100%-2rem)] truncate rounded-full border border-white/40 bg-white/90 px-3 py-1 text-xs font-semibold text-emerald-deep shadow-sm" title={formatPublicEventDates(event)}>
-                      {formatPublicEventDates(event)}
-                    </span>
+                    {event.dateBadge ? (
+                      <span className="absolute left-4 top-4 max-w-[calc(100%-2rem)] truncate rounded-full border border-white/40 bg-white/90 px-3 py-1 text-xs font-semibold text-emerald-deep shadow-sm" title={event.dateBadge}>
+                        {event.dateBadge}
+                      </span>
+                    ) : null}
                   </div>
 
                   <div className="flex flex-1 select-none flex-col p-5 sm:p-6">
                     <span className="inline-flex w-fit rounded-full border border-gold/30 bg-gold/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-emerald-deep">
-                      {getEventLifecycleLabel(event, text)}
+                      {event.categoryLabel}
                     </span>
                     <h4 className={`mt-3 line-clamp-2 text-xl font-bold leading-snug text-emerald-deep sm:text-2xl ${isUrdu ? "leading-[1.8]" : "font-display"}`}>
                       {event.title}
                     </h4>
-                    <div className="mt-3 grid gap-2 rounded-2xl bg-cream/60 p-3 text-xs text-emerald-deep/80">
-                      <div>
-                        <span className="font-semibold">{text.date}:</span>{" "}
-                        <span dir="ltr" className="inline-block [unicode-bidi:isolate]">{formatPublicEventDates(event)}</span>
+                    {event.date || event.startTime ? (
+                      <div className="mt-3 grid gap-2 rounded-2xl bg-cream/60 p-3 text-xs text-emerald-deep/80">
+                        {event.date ? (
+                          <div>
+                            <span className="font-semibold">{text.date}:</span>{" "}
+                            <span dir="ltr" className="inline-block [unicode-bidi:isolate]">{event.date}</span>
+                          </div>
+                        ) : null}
+                        {event.startTime ? (
+                          <div>
+                            <span className="font-semibold">{text.startTime}:</span>{" "}
+                            <span dir="ltr" className="inline-block [unicode-bidi:isolate]">{event.startTime}</span>
+                          </div>
+                        ) : null}
                       </div>
-                      <div>
-                        <span className="font-semibold">{text.startTime}:</span>{" "}
-                        <span dir="ltr" className="inline-block [unicode-bidi:isolate]">{formatEventTime(event.startAt)}</span>
-                      </div>
-                    </div>
+                    ) : null}
                     <p className={`mt-3 line-clamp-3 flex-1 text-sm leading-7 text-emerald-deep/75 sm:text-base ${isUrdu ? "leading-[2]" : ""}`}>
                       {event.description || text.fallbackDetails}
                     </p>
-                    <button
-                      type="button"
-                      onClick={() => setSelectedEvent(event)}
-                      className={`mt-5 inline-flex min-h-11 w-full select-auto items-center justify-center rounded-full bg-emerald px-5 py-3 text-sm font-semibold text-cream transition-all duration-300 hover:bg-emerald-light sm:w-auto ${
-                        isUrdu ? "sm:self-end" : "sm:self-start"
-                      }`}
-                    >
-                      {text.details}
-                    </button>
+
+                    {event.buttonHref ? (
+                      event.buttonExternal ? (
+                        <a
+                          href={event.buttonHref}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={`mt-5 inline-flex min-h-11 w-full select-auto items-center justify-center gap-2 rounded-full border border-emerald/20 bg-emerald px-5 py-2.5 text-sm font-semibold text-cream transition-all duration-300 hover:border-gold/40 hover:bg-emerald-light sm:w-auto ${
+                            isUrdu ? "sm:self-end font-urdu" : "sm:self-start"
+                          }`}
+                        >
+                          {event.showFacebookIcon ? <FacebookIcon className="h-4 w-4 shrink-0" /> : null}
+                          {event.buttonLabel}
+                        </a>
+                      ) : (
+                        <Link
+                          href={event.buttonHref}
+                          className={`mt-5 inline-flex min-h-11 w-full select-auto items-center justify-center gap-2 rounded-full border border-emerald/20 bg-emerald px-5 py-2.5 text-sm font-semibold text-cream transition-all duration-300 hover:border-gold/40 hover:bg-emerald-light sm:w-auto ${
+                            isUrdu ? "sm:self-end font-urdu" : "sm:self-start"
+                          }`}
+                        >
+                          {event.showFacebookIcon ? <FacebookIcon className="h-4 w-4 shrink-0" /> : null}
+                          {event.buttonLabel}
+                        </Link>
+                      )
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (event.rawCurriculumEvent) {
+                            setSelectedEvent(event.rawCurriculumEvent);
+                          }
+                        }}
+                        className={`mt-5 inline-flex min-h-11 w-full select-auto items-center justify-center rounded-full bg-emerald px-5 py-3 text-sm font-semibold text-cream transition-all duration-300 hover:bg-emerald-light sm:w-auto ${
+                          isUrdu ? "sm:self-end" : "sm:self-start"
+                        }`}
+                      >
+                        {event.buttonLabel || text.details}
+                      </button>
+                    )}
                   </div>
                 </article>
               </div>

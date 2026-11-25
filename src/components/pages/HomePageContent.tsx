@@ -18,7 +18,6 @@ import { TrainingSessionsSection } from "@/components/sections/TrainingSessionsS
 import { OnlineLearningSection } from "@/components/sections/OnlineLearningSection";
 import { LeadershipSection } from "@/components/sections/LeadershipSection";
 import { OurWorksSection } from "@/components/sections/OurWorksSection";
-import { OurEventsSection } from "@/components/sections/OurEventsSection";
 import { VisionSection } from "@/components/sections/VisionSection";
 import { NeedBasedScholarshipSection } from "@/components/sections/NeedBasedScholarshipSection";
 import { LogoPhilosophySection } from "@/components/sections/LogoPhilosophySection";
@@ -79,12 +78,12 @@ export function HomePageContent({
         <CurriculumSection
           initialCurriculumEvents={initialCurriculumEvents}
           initialEducationalDocuments={initialEducationalDocuments}
+          initialPastEvents={initialPastEvents}
         />
         <TrainingSessionsSection initialVideos={initialTrainingSessions} />
         <OnlineLearningSection />
         <LeadershipSection />
         <OurWorksSection />
-        <OurEventsSection initialPastEvents={initialPastEvents} />
         <VisionSection />
         <NeedBasedScholarshipSection />
         <LogoPhilosophySection />

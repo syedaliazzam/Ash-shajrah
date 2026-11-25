@@ -7,6 +7,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { CurriculumEventsSlider } from "@/components/sections/CurriculumEventsSlider";
 import type { CurriculumEvent } from "@/lib/curriculum-events";
 import type { EducationalDocument } from "@/lib/educational-documents";
+import type { PublicEvent } from "@/lib/public-events";
 
 function DocumentFileIcon({ className = "h-4 w-4" }: { className?: string }) {
   return (
@@ -68,9 +69,11 @@ type TableRowItem = {
 export function CurriculumSection({
   initialCurriculumEvents = [],
   initialEducationalDocuments = [],
+  initialPastEvents = [],
 }: {
   initialCurriculumEvents?: CurriculumEvent[];
   initialEducationalDocuments?: EducationalDocument[];
+  initialPastEvents?: PublicEvent[];
 } = {}) {
   const { t, language } = useLanguage();
   const isUrdu = language === "ur";
@@ -442,6 +445,7 @@ export function CurriculumSection({
         <CurriculumEventsSlider
           language={language}
           initialEvents={initialCurriculumEvents}
+          initialPastEvents={initialPastEvents}
         />
       </div>
     </section>
